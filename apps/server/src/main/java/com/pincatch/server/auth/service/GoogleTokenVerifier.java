@@ -8,7 +8,7 @@ import com.nimbusds.jose.proc.SecurityContext;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 import com.pincatch.server.auth.domain.GoogleUserInfo;
-import com.pincatch.server.auth.domain.InvalidGoogleTokenException;
+import com.pincatch.server.auth.exception.InvalidGoogleTokenException;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;

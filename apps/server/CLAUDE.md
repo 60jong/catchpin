@@ -1,49 +1,36 @@
 # CLAUDE.md — pincatch server
 
-Spring Boot backend for pincatch. Java 21, Gradle (Groovy DSL), JPA, PostgreSQL.
+Spring Boot 백엔드. Java 21, Gradle(Groovy DSL), JPA, PostgreSQL.
 
-## Package structure
+## 패키지 규칙
 
-Package-by-domain (feature), not by layer. Each domain gets its own top-level package under `com.pincatch.server.<domain>`, with the same fixed set of sub-packages:
+- 레이어별이 아니라 **도메인(기능)별**로 최상위 패키지를 나눈다 (`com.pincatch.server.<domain>`).
+- 각 도메인 패키지 하위 구조는 고정:
+  - `<domain>.domain.entity` — JPA 엔티티, 엔티티 컬럼에 쓰이는 enum
+  - `<domain>.domain` — 엔티티 아닌 것 전부 (서비스 반환 DTO, API 요청/응답 DTO). API DTO도 여기 같이 둔다 — 따로 안 나눔
+  - `<domain>.repository` — Repository 인터페이스
+  - `<domain>.service` — 서비스 클래스. **인터페이스 안 만든다** (구현체 안 바뀌므로 불필요한 껍데기)
+  - `<domain>.controller` — `@RestController`
+  - `<domain>.exception` — 이 도메인 전용 예외
+- 여러 도메인이 공유하는 것(`BaseEntity`, 공통 예외 처리)은 `common` 패키지에 둔다.
 
-- `<domain>.domain.entity` — JPA `@Entity` classes for this domain, plus enums that belong to an entity's column (e.g. `AuthProviderType`).
-- `<domain>.domain` — everything else that isn't an entity but belongs to the domain's vocabulary: service-layer return types (e.g. `AuthResult`), API request/response DTOs (e.g. `GoogleLoginRequest`, `AuthResponse`), and domain exceptions (e.g. `InvalidGoogleTokenException`). API DTOs live here too — no separate `dto`/`web` split.
-- `<domain>.repository` — `JpaRepository` (or other) repository interfaces.
-- `<domain>.service` — service classes. **No interface + impl split** — service implementations essentially never get swapped out, so an interface would just be ceremony. Skip it.
-- `<domain>.controller` — `@RestController` classes and any `@RestControllerAdvice` exception handlers for this domain.
+## 도메인 간 접근 규칙
 
-Cross-cutting infrastructure that isn't owned by one domain (e.g. `BaseEntity`) goes in `com.pincatch.server.common`.
+- 다른 도메인의 **기능(비즈니스 로직)**은 그 도메인의 Service를 통해서만 쓴다. 다른 도메인의 Repository를 직접 주입하거나 로직을 복제하지 않는다.
+  - 예: 회원가입/로그인 로직은 `auth.service.AuthService`에 있고, `AuthService`가 `member.service.MemberService`를 호출한다. `MemberRepository`를 직접 쓰지 않는다.
+- 단, **엔티티 참조(FK)는 예외** — `@ManyToOne` 등으로 다른 도메인 엔티티를 참조하는 건 정상적인 데이터 모델링이라 규칙 대상 아님.
 
-## Cross-domain rule
+## 엔티티
 
-A domain may only use another domain's **behavior** through that domain's Service — never by injecting another domain's Repository directly, and never by re-implementing its logic locally.
+- 모든 엔티티는 `BaseEntity`(`common`)를 상속 — `createdAt`/`modifiedAt` 자동 관리.
+- Lombok `@Getter` 사용, setter는 안 만들고 필요한 동작만 메서드로 노출.
 
-- Example: signup/login logic needs to look up or create a `Member`. That logic lives in `auth.service.AuthService`, and `AuthService` calls `member.service.MemberService` (which wraps `MemberRepository`) — it does not inject `MemberRepository` itself. Login/signup is an `auth`-domain concern even though it touches `Member`, so it does not belong inside `MemberService`.
+## 응답
 
-This does **not** apply to entity references. A `@ManyToOne`/`@OneToMany` from one domain's entity to another domain's entity (e.g. `auth.domain.entity.AuthProvider` holding a `Member`) is normal data modeling, not a "using another domain's functionality" — only orchestration/business-logic calls need to go through the other domain's Service.
+- 성공 응답은 컨트롤러가 도메인 DTO를 그대로 반환하지 않고 `common.response.ApiResponse<T>`로 감싼다 (`ApiResponse.success(data)`) — `{ "success": true, "data": {...} }` 형태.
+- 에러 응답은 감싸지 않는다 — 아래 예외 처리 규칙(`ProblemDetail`)을 그대로 따른다.
 
-## Reference example (`auth` + `member`)
+## 예외 처리
 
-```
-member/
-  domain/entity/Member.java
-  repository/MemberRepository.java
-  service/MemberService.java        # findOrCreateByEmail(email), etc.
-
-auth/
-  domain/entity/AuthProvider.java   # @ManyToOne Member — fine, it's just a FK
-  domain/entity/RefreshToken.java
-  domain/entity/AuthProviderType.java
-  domain/AuthResult.java            # service-layer return DTO
-  domain/GoogleLoginRequest.java    # API request DTO — same package as above
-  domain/AuthResponse.java          # API response DTO
-  domain/InvalidGoogleTokenException.java
-  repository/AuthProviderRepository.java
-  repository/RefreshTokenRepository.java
-  service/AuthService.java          # calls member.service.MemberService, not MemberRepository
-  service/GoogleTokenVerifier.java
-  service/JwtProvider.java
-  service/RefreshTokenService.java
-  controller/AuthController.java
-  controller/AuthExceptionHandler.java
-```
+- 모든 예외는 `common.exception.PinCatchException`(추상 클래스)을 상속하고, 생성자에서 `HttpStatus`를 넘긴다.
+- 예외 → HTTP 응답 변환은 `common.exception.GlobalExceptionHandler` 하나가 전담 (`ProblemDetail`, RFC 7807 형식). 도메인별로 따로 예외 핸들러를 만들지 않는다.

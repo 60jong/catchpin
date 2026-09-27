@@ -1,6 +1,6 @@
 import * as Device from 'expo-device';
-import { Link } from 'expo-router';
-import { Platform, Pressable, StyleSheet } from 'react-native';
+import { router } from 'expo-router';
+import { Button, Platform, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AnimatedIcon } from '@/components/animated-icon';
@@ -56,11 +56,15 @@ export default function HomeScreen() {
           />
         </ThemedView>
 
-        <Link href="/login" asChild>
-          <Pressable>
-            <ThemedText type="linkPrimary">test: google login →</ThemedText>
-          </Pressable>
-        </Link>
+        <Button title="DIAG: tap test" onPress={() => console.log('DIAG: tap test pressed')} />
+
+        <Button
+          title="test: google login"
+          onPress={() => {
+            console.log('DIAG: google login button pressed, navigating');
+            router.push('/login');
+          }}
+        />
 
         {Platform.OS === 'web' && <WebBadge />}
       </SafeAreaView>
