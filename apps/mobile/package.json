@@ -56,6 +56,10 @@
   },
   "jest": {
     "preset": "jest-expo",
+    "resolver": "react-native-worklets/jest/resolver",
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest-setup.js"
+    ],
     "moduleNameMapper": {
       "\\.css$": "<rootDir>/src/utils/testMocks/styleMock.js"
     }

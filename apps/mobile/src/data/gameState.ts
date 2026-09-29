@@ -2,6 +2,16 @@ import { useSyncExternalStore } from 'react';
 
 const FREE_TICKET_INTERVAL_MS = 60 * 60 * 1000;
 const DAILY_AD_REFILLS = 5;
+/** 기록이 무한히 쌓이지 않도록 두는 상한선 */
+const MAX_CLAIM_HISTORY = 50;
+
+export type ClaimHistoryEntry = {
+  id: string;
+  type: 'success' | 'failure';
+  message: string;
+  points: number;
+  createdAt: number;
+};
 
 type GameState = {
   points: number;
@@ -10,6 +20,7 @@ type GameState = {
   todayEarned: number;
   todayAdRefillsLeft: number;
   nextFreeTicketAt: number | null;
+  claimHistory: ClaimHistoryEntry[];
 };
 
 function createInitialState(): GameState {
@@ -20,6 +31,7 @@ function createInitialState(): GameState {
     todayEarned: 3,
     todayAdRefillsLeft: DAILY_AD_REFILLS,
     nextFreeTicketAt: Date.now() + FREE_TICKET_INTERVAL_MS,
+    claimHistory: [],
   };
 }
 
@@ -88,6 +100,16 @@ export function consumeAdRefillQuota(): boolean {
   if (state.todayAdRefillsLeft <= 0) return false;
   setState({ todayAdRefillsLeft: state.todayAdRefillsLeft - 1 });
   return true;
+}
+
+/** 핀 탭 결과 하나를 기록에 추가한다 (최신순, 최대 MAX_CLAIM_HISTORY개까지만 보관). */
+export function recordClaim(entry: Omit<ClaimHistoryEntry, 'id' | 'createdAt'>) {
+  const newEntry: ClaimHistoryEntry = {
+    ...entry,
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    createdAt: Date.now(),
+  };
+  setState({ claimHistory: [newEntry, ...state.claimHistory].slice(0, MAX_CLAIM_HISTORY) });
 }
 
 /** 테스트 전용 — 다음 테스트가 이전 테스트의 상태를 물려받지 않도록 초기 상태로 되돌린다. */

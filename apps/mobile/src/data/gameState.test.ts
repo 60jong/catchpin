@@ -4,6 +4,7 @@ import {
   consumeAdRefillQuota,
   getGameState,
   incrementTodayEarned,
+  recordClaim,
   resetGameStateForTests,
   spendTicket,
   tickFreeTicketClock,
@@ -84,6 +85,34 @@ describe('tickFreeTicketClock', () => {
 
     expect(getGameState().tickets).toBe(before + 1);
     jest.restoreAllMocks();
+  });
+});
+
+describe('recordClaim', () => {
+  test('가장 최근 기록이 맨 앞에 온다', () => {
+    recordClaim({ type: 'success', message: '+10P 획득!', points: 10 });
+    recordClaim({ type: 'failure', message: '한 발 늦었어요', points: 0 });
+
+    const [latest, previous] = getGameState().claimHistory;
+    expect(latest.message).toBe('한 발 늦었어요');
+    expect(previous.message).toBe('+10P 획득!');
+  });
+
+  test('기록마다 고유한 id와 시각이 붙는다', () => {
+    recordClaim({ type: 'success', message: 'a', points: 1 });
+    recordClaim({ type: 'success', message: 'b', points: 1 });
+
+    const [second, first] = getGameState().claimHistory;
+    expect(second.id).not.toBe(first.id);
+    expect(typeof first.createdAt).toBe('number');
+  });
+
+  test('너무 많이 쌓이면 오래된 것부터 잘라낸다', () => {
+    for (let i = 0; i < 60; i++) {
+      recordClaim({ type: 'success', message: `#${i}`, points: 1 });
+    }
+    expect(getGameState().claimHistory.length).toBe(50);
+    expect(getGameState().claimHistory[0].message).toBe('#59'); // 가장 최근
   });
 });
 

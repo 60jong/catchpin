@@ -5,23 +5,40 @@ import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BottomSheet } from '@/components/home/BottomSheet';
+import { ClaimResultBanner, type ClaimResult } from '@/components/home/ClaimResultBanner';
 import { MyMarker } from '@/components/home/MyMarker';
 import { PinButton } from '@/components/home/PinButton';
 import { Radar } from '@/components/home/Radar';
 import { TopBar } from '@/components/home/TopBar';
 import { Brand } from '@/constants/theme';
-import { addPoints, incrementTodayEarned, spendTicket, tickFreeTicketClock, useGameState } from '@/data/gameState';
+import {
+  addPoints,
+  incrementTodayEarned,
+  recordClaim,
+  spendTicket,
+  tickFreeTicketClock,
+  useGameState,
+} from '@/data/gameState';
 import { mockPinsRepository, type Pin } from '@/data/pins';
 import { getMarkerPlacement, getPinPlacement, getRadarVisualSize } from '@/utils/radarLayout';
 
 const MARKER_SIZE = 56;
+const CLAIM_RESULT_VISIBLE_MS = 2200;
 
 export default function HomeScreen() {
   const game = useGameState();
   const [pins, setPins] = useState<Pin[]>(() => mockPinsRepository.getNearbyPins());
   const [claimingId, setClaimingId] = useState<string | null>(null);
+  const [claimResult, setClaimResult] = useState<ClaimResult | null>(null);
   const [radarArea, setRadarArea] = useState({ width: 0, height: 0 });
   const [bottomSheetHeight, setBottomSheetHeight] = useState(0);
+
+  // 배너는 일정 시간 뒤 스스로 사라진다. claimResult가 바뀔 때마다 타이머를 새로 건다.
+  useEffect(() => {
+    if (!claimResult) return;
+    const id = setTimeout(() => setClaimResult(null), CLAIM_RESULT_VISIBLE_MS);
+    return () => clearTimeout(id);
+  }, [claimResult]);
 
   useEffect(() => {
     const id = setInterval(tickFreeTicketClock, 1000);
@@ -47,8 +64,14 @@ export default function HomeScreen() {
         addPoints(pin.points);
         incrementTodayEarned();
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        const result: ClaimResult = { type: 'success', message: `+${pin.points}P 획득!` };
+        setClaimResult(result);
+        recordClaim({ ...result, points: pin.points });
       } else {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        const result: ClaimResult = { type: 'failure', message: '앗, 한 발 늦었어요' };
+        setClaimResult(result);
+        recordClaim({ ...result, points: 0 });
       }
       // 실패 시 탭권 미차감 (선점당해도 잃는 게 없음)
       setPins((prev) => prev.filter((p) => p.id !== pin.id));
@@ -108,6 +131,8 @@ export default function HomeScreen() {
         feedText="누군가 방금 +40P를 가져갔어요 · 12초 전"
         onLayout={onBottomSheetLayout}
       />
+
+      <ClaimResultBanner result={claimResult} onDismiss={() => setClaimResult(null)} />
     </View>
   );
 }
