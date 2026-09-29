@@ -43,8 +43,13 @@ public class AuthProvider extends BaseEntity {
 	private String passwordHash;
 
 	public AuthProvider(Member member, AuthProviderType provider, String providerUserId) {
+		this(member, provider, providerUserId, null);
+	}
+
+	public AuthProvider(Member member, AuthProviderType provider, String providerUserId, String passwordHash) {
 		this.member = member;
 		this.provider = provider;
 		this.providerUserId = providerUserId;
+		this.passwordHash = passwordHash;
 	}
 }
