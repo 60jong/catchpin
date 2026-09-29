@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>catch pin · 내 주변 지도</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@500;700;900&amp;family=Sora:wght@600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#E8EEF6}
+a{color:#1F2233;text-decoration:none}a:hover{color:#1F2233}
+@keyframes ph-sweep{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes ph-breathe{0%,100%{transform:scale(0.85);opacity:0.7}50%{transform:scale(1.1);opacity:1}}
+.ph-sweep{animation:ph-sweep 6s linear infinite}
+.ph-glow{animation:ph-breathe 3.2s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){.ph-sweep,.ph-glow{animation:none}}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #E8EEF6; font-family: 'Gothic A1', system-ui, sans-serif; color: #1F2233">
+<svg width="390" height="844" viewBox="0 0 390 844" style="position: absolute; left: 0; top: 0" aria-hidden="true">
+<rect x="0" y="0" width="390" height="844" fill="#E8EEF6"></rect>
+<rect x="16" y="110" width="120" height="104" rx="14" fill="#D6DDEA"></rect><rect x="16" y="104" width="120" height="104" rx="14" fill="#FFFFFF"></rect>
+<rect x="160" y="102" width="104" height="100" rx="14" fill="#D6DDEA"></rect><rect x="160" y="96" width="104" height="100" rx="14" fill="#FFFFFF"></rect>
+<rect x="288" y="114" width="110" height="92" rx="14" fill="#D6DDEA"></rect><rect x="288" y="108" width="110" height="92" rx="14" fill="#FFFFFF"></rect>
+<rect x="16" y="242" width="60" height="160" rx="14" fill="#D6DDEA"></rect><rect x="16" y="236" width="60" height="160" rx="14" fill="#FFFFFF"></rect>
+<rect x="98" y="242" width="76" height="118" rx="14" fill="#D6DDEA"></rect><rect x="98" y="236" width="76" height="118" rx="14" fill="#FFFFFF"></rect>
+<rect x="198" y="242" width="72" height="60" rx="14" fill="#D6DDEA"></rect><rect x="198" y="236" width="72" height="60" rx="14" fill="#FFFFFF"></rect>
+<rect x="324" y="246" width="80" height="80" rx="14" fill="#D6DDEA"></rect><rect x="324" y="240" width="80" height="80" rx="14" fill="#FFFFFF"></rect>
+<rect x="198" y="324" width="104" height="70" rx="14" fill="#D6DDEA"></rect><rect x="198" y="318" width="104" height="70" rx="14" fill="#FFFFFF"></rect>
+<rect x="16" y="430" width="104" height="140" rx="14" fill="#D6DDEA"></rect><rect x="16" y="424" width="104" height="140" rx="14" fill="#FFFFFF"></rect>
+<rect x="150" y="426" width="180" height="124" rx="14" fill="#9EDDB0"></rect><rect x="150" y="420" width="180" height="124" rx="14" fill="#C8F0D2"></rect>
+<rect x="352" y="356" width="60" height="190" rx="14" fill="#D6DDEA"></rect><rect x="352" y="350" width="60" height="190" rx="14" fill="#FFFFFF"></rect>
+<rect x="16" y="596" width="150" height="150" rx="14" fill="#D6DDEA"></rect><rect x="16" y="590" width="150" height="150" rx="14" fill="#FFFFFF"></rect>
+<rect x="190" y="586" width="220" height="160" rx="14" fill="#D6DDEA"></rect><rect x="190" y="580" width="220" height="160" rx="14" fill="#FFFFFF"></rect>
+<circle cx="184" cy="456" r="13" fill="#2E9E55"></circle><circle cx="184" cy="452" r="13" fill="#3FBF6B"></circle>
+<circle cx="300" cy="474" r="16" fill="#2E9E55"></circle><circle cx="300" cy="470" r="16" fill="#3FBF6B"></circle>
+<circle cx="205" cy="526" r="10" fill="#2E9E55"></circle><circle cx="205" cy="522" r="10" fill="#3FBF6B"></circle>
+<circle cx="195" cy="412" r="96" fill="none" stroke="#1F2233" stroke-opacity="0.07" stroke-width="1"></circle>
+<circle cx="195" cy="412" r="192" fill="none" stroke="#1F2233" stroke-opacity="0.055" stroke-width="1"></circle>
+<circle cx="195" cy="412" r="288" fill="none" stroke="#1F2233" stroke-opacity="0.04" stroke-width="1"></circle>
+<circle cx="195" cy="412" r="384" fill="none" stroke="#1F2233" stroke-opacity="0.03" stroke-width="1"></circle>
+<ellipse cx="195" cy="444" rx="24" ry="5" fill="rgba(31,34,51,0.14)"></ellipse>
+</svg>
+<div aria-hidden="true" style="position: absolute; left: -405px; top: -188px; width: 1200px; height: 1200px; pointer-events: none; -webkit-mask-image: radial-gradient(circle, #000 0%, #000 18%, rgba(0,0,0,0.35) 40%, transparent 62%); mask-image: radial-gradient(circle, #000 0%, #000 18%, rgba(0,0,0,0.35) 40%, transparent 62%)">
+<div class="ph-sweep" style="position: absolute; inset: 0; border-radius: 50%; background: conic-gradient(from 90deg, rgba({{accentRgb}},0) 0deg, rgba({{accentRgb}},0) 280deg, rgba({{accentRgb}},0.025) 310deg, rgba({{accentRgb}},0.07) 338deg, rgba({{accentRgb}},0.14) 356deg, rgba({{accentRgb}},0.2) 359.6deg, rgba({{accentRgb}},0) 360deg)">
+<div style="position: absolute; left: 50%; top: calc(50% - 0.5px); width: 50%; height: 1px; background: linear-gradient(90deg, rgba({{accentRgb}},0.55) 0%, rgba({{accentRgb}},0.18) 35%, rgba({{accentRgb}},0) 70%)"></div>
+</div>
+</div>
+<div aria-hidden="true" class="ph-glow" style="position: absolute; left: 125px; top: 342px; width: 140px; height: 140px; border-radius: 50%; pointer-events: none; background: radial-gradient(circle, rgba({{accentRgb}},0.20) 0%, rgba({{accentRgb}},0.06) 45%, rgba({{accentRgb}},0) 70%)"></div>
+<a href="Won.dc.html" aria-label="30포인트 핀, 탭해서 잡기" style="position: absolute; left: 78px; top: 270px; width: 64px; height: 70px; display: block">
+<svg width="64" height="70" viewBox="0 0 64 70" aria-hidden="true" style="position: absolute; left: 0; top: 0; overflow: visible">
+<circle cx="32" cy="30" r="26" fill="none" stroke="{{accent}}" stroke-width="1.5" opacity="0"><animate attributeName="r" values="27;42;42" keyTimes="0;0.2;1" calcMode="spline" keySplines="0.2 0.7 0.3 1;0 0 1 1" dur="6s" begin="3.88s" repeatCount="indefinite"></animate><animate attributeName="opacity" values="0.5;0;0" keyTimes="0;0.2;1" dur="6s" begin="3.88s" repeatCount="indefinite"></animate></circle>
+<ellipse cx="32" cy="64" rx="20" ry="4.5" fill="rgba(31,34,51,0.12)"></ellipse>
+<circle cx="32" cy="36" r="26" fill="{{accentDark}}"></circle>
+<circle cx="32" cy="30" r="26" fill="{{accent}}"></circle>
+<rect x="14" y="13" width="12" height="6" rx="3" fill="#FFFFFF" fill-opacity="0.4" transform="rotate(-35 20 16)"></rect>
+<text x="32" y="36" text-anchor="middle" font-family="Sora, sans-serif" font-weight="800" font-size="17" fill="#FFFFFF">+30</text>
+</svg>
+</a>
+<a href="Lost.dc.html" aria-label="50포인트 핀, 탭해서 잡기" style="position: absolute; left: 248px; top: 250px; width: 64px; height: 70px; display: block">
+<svg width="64" height="70" viewBox="0 0 64 70" aria-hidden="true" style="position: absolute; left: 0; top: 0; overflow: visible">
+<circle cx="32" cy="30" r="26" fill="none" stroke="{{accent}}" stroke-width="1.5" opacity="0"><animate attributeName="r" values="27;42;42" keyTimes="0;0.2;1" calcMode="spline" keySplines="0.2 0.7 0.3 1;0 0 1 1" dur="6s" begin="5.05s" repeatCount="indefinite"></animate><animate attributeName="opacity" values="0.5;0;0" keyTimes="0;0.2;1" dur="6s" begin="5.05s" repeatCount="indefinite"></animate></circle>
+<ellipse cx="32" cy="64" rx="20" ry="4.5" fill="rgba(31,34,51,0.12)"></ellipse>
+<circle cx="32" cy="36" r="26" fill="{{accentDark}}"></circle>
+<circle cx="32" cy="30" r="26" fill="{{accent}}"></circle>
+<rect x="14" y="13" width="12" height="6" rx="3" fill="#FFFFFF" fill-opacity="0.4" transform="rotate(-35 20 16)"></rect>
+<text x="32" y="36" text-anchor="middle" font-family="Sora, sans-serif" font-weight="800" font-size="17" fill="#FFFFFF">+50</text>
+</svg>
+</a>
+<a href="Won.dc.html" aria-label="10포인트 핀, 탭해서 잡기" style="position: absolute; left: 273px; top: 360px; width: 64px; height: 70px; display: block">
+<svg width="64" height="70" viewBox="0 0 64 70" aria-hidden="true" style="position: absolute; left: 0; top: 0; overflow: visible">
+<circle cx="32" cy="30" r="26" fill="none" stroke="{{accent}}" stroke-width="1.5" opacity="0"><animate attributeName="r" values="27;42;42" keyTimes="0;0.2;1" calcMode="spline" keySplines="0.2 0.7 0.3 1;0 0 1 1" dur="6s" begin="5.81s" repeatCount="indefinite"></animate><animate attributeName="opacity" values="0.5;0;0" keyTimes="0;0.2;1" dur="6s" begin="5.81s" repeatCount="indefinite"></animate></circle>
+<ellipse cx="32" cy="64" rx="20" ry="4.5" fill="rgba(31,34,51,0.12)"></ellipse>
+<circle cx="32" cy="36" r="26" fill="{{accentDark}}"></circle>
+<circle cx="32" cy="30" r="26" fill="{{accent}}"></circle>
+<rect x="14" y="13" width="12" height="6" rx="3" fill="#FFFFFF" fill-opacity="0.4" transform="rotate(-35 20 16)"></rect>
+<text x="32" y="36" text-anchor="middle" font-family="Sora, sans-serif" font-weight="800" font-size="17" fill="#FFFFFF">+10</text>
+</svg>
+</a>
+<a href="Won.dc.html" aria-label="20포인트 핀, 탭해서 잡기" style="position: absolute; left: 230px; top: 442px; width: 64px; height: 70px; display: block">
+<svg width="64" height="70" viewBox="0 0 64 70" aria-hidden="true" style="position: absolute; left: 0; top: 0; overflow: visible">
+<circle cx="32" cy="30" r="26" fill="none" stroke="{{accent}}" stroke-width="1.5" opacity="0"><animate attributeName="r" values="27;42;42" keyTimes="0;0.2;1" calcMode="spline" keySplines="0.2 0.7 0.3 1;0 0 1 1" dur="6s" begin="0.70s" repeatCount="indefinite"></animate><animate attributeName="opacity" values="0.5;0;0" keyTimes="0;0.2;1" dur="6s" begin="0.70s" repeatCount="indefinite"></animate></circle>
+<ellipse cx="32" cy="64" rx="20" ry="4.5" fill="rgba(31,34,51,0.12)"></ellipse>
+<circle cx="32" cy="36" r="26" fill="{{accentDark}}"></circle>
+<circle cx="32" cy="30" r="26" fill="{{accent}}"></circle>
+<rect x="14" y="13" width="12" height="6" rx="3" fill="#FFFFFF" fill-opacity="0.4" transform="rotate(-35 20 16)"></rect>
+<text x="32" y="36" text-anchor="middle" font-family="Sora, sans-serif" font-weight="800" font-size="17" fill="#FFFFFF">+20</text>
+</svg>
+</a>
+<a href="Won.dc.html" aria-label="골드 핀, 100포인트, 탭해서 잡기" style="position: absolute; left: 103px; top: 458px; width: 64px; height: 70px; display: block">
+<svg width="64" height="70" viewBox="0 0 64 70" aria-hidden="true" style="position: absolute; left: 0; top: 0; overflow: visible">
+<circle cx="32" cy="30" r="26" fill="none" stroke="#D99A00" stroke-width="1.5" opacity="0"><animate attributeName="r" values="27;42;42" keyTimes="0;0.2;1" calcMode="spline" keySplines="0.2 0.7 0.3 1;0 0 1 1" dur="6s" begin="2.14s" repeatCount="indefinite"></animate><animate attributeName="opacity" values="0.5;0;0" keyTimes="0;0.2;1" dur="6s" begin="2.14s" repeatCount="indefinite"></animate></circle>
+<ellipse cx="32" cy="64" rx="20" ry="4.5" fill="rgba(31,34,51,0.12)"></ellipse>
+<circle cx="32" cy="36" r="26" fill="#D99A00"></circle>
+<circle cx="32" cy="30" r="26" fill="#FFC21A"></circle>
+<rect x="14" y="13" width="12" height="6" rx="3" fill="#FFFFFF" fill-opacity="0.4" transform="rotate(-35 20 16)"></rect>
+<text x="32" y="36" text-anchor="middle" font-family="Sora, sans-serif" font-weight="800" font-size="15" fill="#3A2A00">+100</text>
+</svg>
+</a>
+<div aria-label="내 위치" style="position: absolute; left: 167px; top: 384px; width: 56px; height: 56px; border-radius: 50%; border: 4px solid #1F2233; box-shadow: 0 4px 0 #000000; box-sizing: border-box; overflow: hidden; background: #FFFFFF">
+<div style="width: 100%; height: 100%; border-radius: 50%; border: 2px solid #FFFFFF; box-sizing: border-box; overflow: hidden; background: #D7E6FA">
+<svg width="100%" height="100%" viewBox="0 0 48 48" aria-hidden="true" style="display: block">
+<rect width="48" height="48" fill="#D7E6FA"></rect>
+<circle cx="24" cy="19" r="9" fill="#8FA9CF"></circle>
+<path d="M6 48c1-10 8-16 18-16s17 6 18 16z" fill="#8FA9CF"></path>
+</svg>
+</div>
+</div>
+
+<div style="position: absolute; left: 14px; right: 14px; top: 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px">
+<div style="background: #FFFFFF; border: 2px solid #E3E7EF; border-bottom-width: 4px; border-radius: 20px; border-radius: 16px; padding: 6px 14px 6px 8px; display: flex; align-items: center; gap: 8px">
+<svg width="30" height="32" viewBox="0 0 30 32" aria-hidden="true"><circle cx="15" cy="17" r="13" fill="#D99A00"></circle><circle cx="15" cy="14" r="13" fill="#FFC21A"></circle><circle cx="15" cy="14" r="8.5" fill="none" stroke="#FFE07A" stroke-width="2"></circle><text x="15" y="18.5" text-anchor="middle" font-family="Sora, sans-serif" font-weight="800" font-size="11" fill="#8A6200">P</text></svg>
+<div style="font-family: 'Sora', sans-serif; font-weight: 800; font-size: 19px; letter-spacing: -0.3px">12,480</div>
+</div>
+<a href="Refill.dc.html" aria-label="핀 탭권 5장 중 3장 남음, 충전하기" style="background: #FFFFFF; border: 2px solid #E3E7EF; border-bottom-width: 4px; border-radius: 20px; border-radius: 16px; padding: 6px 6px 6px 12px; display: flex; align-items: center; gap: 10px">
+<svg width="30" height="24" viewBox="0 0 30 24" aria-hidden="true"><rect x="1" y="5" width="28" height="17" rx="4" fill="{{accentDark}}"></rect><rect x="1" y="2" width="28" height="17" rx="4" fill="{{accent}}"></rect><circle cx="1" cy="10.5" r="3" fill="#FFFFFF"></circle><circle cx="29" cy="10.5" r="3" fill="#FFFFFF"></circle><line x1="20" y1="5" x2="20" y2="16" stroke="#FFFFFF" stroke-width="2" stroke-dasharray="2 2"></line></svg>
+<div style="font-family: 'Sora', sans-serif; font-weight: 800; font-size: 18px">3<span style="color: #5B6078; font-size: 13px; font-weight: 700"> /5</span></div>
+<div style="width: 32px; height: 32px; border-radius: 10px; background: {{accent}}; box-shadow: 0 3px 0 {{accentDark}}; display: flex; align-items: center; justify-content: center">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+</div>
+</a>
+</div>
+
+<div style="position: absolute; left: 12px; right: 12px; bottom: 92px; background: #FFFFFF; border: 2px solid #E3E7EF; border-bottom-width: 4px; border-radius: 20px; border-radius: 24px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h1 style="margin: 0; font-size: 21px; font-weight: 900; letter-spacing: -0.5px">근처에 핀 5개</h1>
+<div style="font-size: 13px; color: #5B6078; font-weight: 700">먼저 누른 사람이 가져가요</div>
+</div>
+<div style="border: 2px solid #FFC21A; border-bottom-width: 4px; border-radius: 14px; padding: 4px 12px; display: flex; flex-direction: column; align-items: center; background: #FFF8E1">
+<div style="font-family: 'Sora', sans-serif; font-weight: 800; font-size: 18px; color: #8A6200">3</div>
+<div style="font-size: 11px; font-weight: 900; color: #8A6200">오늘 획득</div>
+</div>
+</div>
+<div style="background: #F4F6FB; border-radius: 14px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700">
+<div style="width: 10px; height: 10px; border-radius: 50%; background: #FFC21A; flex-shrink: 0"></div>
+<div style="flex-grow: 1">누군가 방금 <b style="font-weight: 900">+40P</b>를 가져갔어요</div>
+<div style="color: #5B6078; font-size: 12px">12초 전</div>
+</div>
+</div>
+
+<nav style="position: absolute; left: 0; right: 0; bottom: 0; height: 80px; background: #FFFFFF; border-top: 2px solid #E3E7EF; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: center; padding: 0 8px; box-sizing: border-box">
+<a href="#" aria-current="page" aria-label="지도" style="display: flex; justify-content: center; align-items: center; min-height: 48px"><div style="width: 60px; height: 44px; border-radius: 14px; border: 2px solid {{accent}}; background: {{accentSoft}}; box-sizing: border-box; display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s-7.5-6.5-7.5-12.5a7.5 7.5 0 0 1 15 0C19.5 15.5 12 22 12 22z" fill="{{accent}}"></path><circle cx="12" cy="9.5" r="3" fill="#FFFFFF"></circle></svg></div></a>
+<a href="#" aria-label="기록" style="display: flex; justify-content: center; align-items: center; min-height: 48px"><div style="width: 60px; height: 44px; display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v6a6 6 0 0 1-12 0z" fill="#FFC21A"></path><rect x="10" y="14" width="4" height="4" fill="#D99A00"></rect><rect x="6" y="18" width="12" height="3" rx="1.5" fill="#D99A00"></rect></svg></div></a>
+<a href="#" aria-label="지갑" style="display: flex; justify-content: center; align-items: center; min-height: 48px"><div style="width: 60px; height: 44px; display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="4" fill="#2E9E55"></rect><rect x="2" y="5" width="20" height="14" rx="4" fill="#3FBF6B"></rect><circle cx="16.5" cy="12" r="2" fill="#FFFFFF"></circle></svg></div></a>
+<a href="#" aria-label="내 정보" style="display: flex; justify-content: center; align-items: center; min-height: 48px"><div style="width: 60px; height: 44px; display: flex; align-items: center; justify-content: center"><svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4.5" fill="#2E90FA"></circle><path d="M3 21a9 9 0 0 1 18 0z" fill="#2E90FA"></path></svg></div></a>
+</nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"enum","default":"cobalt","options":["cobalt","teal","coral","ink"]},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const themes = {
+      cobalt: ['#2F6FE8', '#1D52B8', '#E6EEFF', '47,111,232'],
+      teal: ['#0E9E88', '#087563', '#E0F6F2', '14,158,136'],
+      coral: ['#F0533A', '#C23A24', '#FFEAE5', '240,83,58'],
+      ink: ['#1F2233', '#000000', '#ECEEF3', '31,34,51']
+    };
+    const t = themes[this.props.accent ?? 'cobalt'] || themes.cobalt;
+    return { accent: t[0], accentDark: t[1], accentSoft: t[2], accentRgb: t[3] };
+  }
+}
+</script>
+</body>
+</html>
