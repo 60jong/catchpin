@@ -152,15 +152,15 @@ export default function LoginScreen() {
 
         <Text style={styles.terms}>
           계속하면{' '}
-          <Text style={styles.termsLink} onPress={() => Linking.openURL('https://pincatch.app/terms')}>
+          <Text style={styles.termsLink} onPress={() => Linking.openURL('https://catchpin.app/terms')}>
             이용약관
           </Text>
           ,{' '}
-          <Text style={styles.termsLink} onPress={() => Linking.openURL('https://pincatch.app/privacy')}>
+          <Text style={styles.termsLink} onPress={() => Linking.openURL('https://catchpin.app/privacy')}>
             개인정보처리방침
           </Text>
           {',\n'}
-          <Text style={styles.termsLink} onPress={() => Linking.openURL('https://pincatch.app/location')}>
+          <Text style={styles.termsLink} onPress={() => Linking.openURL('https://catchpin.app/location')}>
             위치기반서비스 이용약관
           </Text>
           에 동의하게 돼요

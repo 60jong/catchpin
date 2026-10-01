@@ -1,10 +1,10 @@
-# CLAUDE.md — pincatch server
+# CLAUDE.md — catchpin server
 
 Spring Boot 백엔드. Java 21, Gradle(Groovy DSL), JPA, PostgreSQL.
 
 ## 패키지 규칙
 
-- 레이어별이 아니라 **도메인(기능)별**로 최상위 패키지를 나눈다 (`com.pincatch.server.<domain>`).
+- 레이어별이 아니라 **도메인(기능)별**로 최상위 패키지를 나눈다 (`com.catchpin.server.<domain>`).
 - 각 도메인 패키지 하위 구조는 고정:
   - `<domain>.domain.entity` — JPA 엔티티, 엔티티 컬럼에 쓰이는 enum
   - `<domain>.domain` — 엔티티 아닌 것 전부 (서비스 반환 DTO, API 요청/응답 DTO). API DTO도 여기 같이 둔다 — 따로 안 나눔
@@ -32,5 +32,5 @@ Spring Boot 백엔드. Java 21, Gradle(Groovy DSL), JPA, PostgreSQL.
 
 ## 예외 처리
 
-- 모든 예외는 `common.exception.PinCatchException`(추상 클래스)을 상속하고, 생성자에서 `HttpStatus`를 넘긴다.
+- 모든 예외는 `common.exception.CatchPinException`(추상 클래스)을 상속하고, 생성자에서 `HttpStatus`를 넘긴다.
 - 예외 → HTTP 응답 변환은 `common.exception.GlobalExceptionHandler` 하나가 전담 (`ProblemDetail`, RFC 7807 형식). 도메인별로 따로 예외 핸들러를 만들지 않는다.

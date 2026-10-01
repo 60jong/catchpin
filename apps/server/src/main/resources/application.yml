@@ -2,9 +2,9 @@ spring:
   application:
     name: server
   datasource:
-    url: jdbc:postgresql://localhost:5432/pincatch
-    username: ${DB_USERNAME:pincatch}
-    password: ${DB_PASSWORD:pincatch}
+    url: jdbc:postgresql://localhost:5432/catchpin
+    username: ${DB_USERNAME:catchpin}
+    password: ${DB_PASSWORD:catchpin}
   jpa:
     hibernate:
       ddl-auto: update

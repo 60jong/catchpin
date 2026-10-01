@@ -1,4 +1,4 @@
-# pincatch
+# catchpin
 
 ## Structure
 

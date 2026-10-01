@@ -66,12 +66,12 @@ describe('loginWithEmail', () => {
   test('올바른 엔드포인트로 email/password를 보낸다', async () => {
     mockFetchOnce(200, { data: { accessToken: 'a', refreshToken: 'r', profileComplete: true } });
 
-    await loginWithEmail('me@pincatch.dev', 'password1234');
+    await loginWithEmail('me@catchpin.dev', 'password1234');
 
     expect(globalThis.fetch).toHaveBeenCalledWith(
       expect.stringContaining('/api/v1/auth/login'),
       expect.objectContaining({
-        body: JSON.stringify({ email: 'me@pincatch.dev', password: 'password1234' }),
+        body: JSON.stringify({ email: 'me@catchpin.dev', password: 'password1234' }),
       }),
     );
   });
@@ -81,12 +81,12 @@ describe('signup', () => {
   test('올바른 엔드포인트로 email/password/nickname을 보낸다', async () => {
     mockFetchOnce(200, { data: { accessToken: 'a', refreshToken: 'r', profileComplete: true } });
 
-    await signup('me@pincatch.dev', 'password1234', 'tester');
+    await signup('me@catchpin.dev', 'password1234', 'tester');
 
     expect(globalThis.fetch).toHaveBeenCalledWith(
       expect.stringContaining('/api/v1/auth/signup'),
       expect.objectContaining({
-        body: JSON.stringify({ email: 'me@pincatch.dev', password: 'password1234', nickname: 'tester', avatarId: null }),
+        body: JSON.stringify({ email: 'me@catchpin.dev', password: 'password1234', nickname: 'tester', avatarId: null }),
       }),
     );
   });

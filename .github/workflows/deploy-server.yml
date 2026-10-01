@@ -1,0 +1,50 @@
+name: Deploy server
+
+# main에 서버 관련 파일이 바뀌어 푸시될 때만 돈다 (모바일만 고친 푸시는 건드리지 않음).
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/server/**'
+      - '.github/workflows/deploy-server.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Build jar
+        working-directory: apps/server
+        run: ./gradlew bootJar --no-daemon
+
+      # 빌드된 jar을 EC2의 /opt/catchpin/ 로 올린다 (파일명은 다음 단계에서 고정된 이름으로 바꿔치기)
+      - name: Copy jar to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: 'apps/server/build/libs/*.jar'
+          target: '/opt/catchpin/incoming'
+          strip_components: 4
+
+      # 새 jar로 교체하고 systemd 서비스를 재시작한다 (서비스 파일은 EC2에 미리 설정돼 있어야 함)
+      - name: Restart service
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            set -e
+            sudo mv /opt/catchpin/incoming/*.jar /opt/catchpin/server.jar
+            sudo systemctl restart catchpin
+            sleep 3
+            sudo systemctl is-active --quiet catchpin

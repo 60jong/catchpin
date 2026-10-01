@@ -65,7 +65,7 @@ export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 export const MaxContentWidth = 800;
 
 /**
- * pincatch 브랜드 토큰 (design/DESIGN_SPEC.md 기준). 아직 다크 모드 버전이 없어서
+ * catchpin 브랜드 토큰 (design/DESIGN_SPEC.md 기준). 아직 다크 모드 버전이 없어서
  * 라이트 전용 — 위 Colors/Fonts(템플릿 기본값)와는 별개로 새 화면에서 이걸 씀.
  */
 export const Brand = {
