@@ -43,7 +43,7 @@
       "reactCompiler": true
     },
     "extra": {
-      "apiBaseUrl": "http://172.30.1.57:8080",
+      "apiBaseUrl": "http://192.168.0.46:8080",
       "googleWebClientId": "534259490222-u8921g1s80eheung7a29hiu67aqi0jkq.apps.googleusercontent.com",
       "googleIosClientId": "534259490222-j0ro68i7a706dsstjho20dnuteel3irk.apps.googleusercontent.com",
       "router": {},

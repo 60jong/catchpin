@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
   },
   navBar: {
     flexDirection: 'row',
-    height: 80,
+    height: 88, // 디자인 업데이트로 80 → 88 (숨쉴 공간 확보)
     backgroundColor: '#FFFFFF',
     borderTopWidth: 2,
     borderTopColor: Brand.border,

@@ -23,4 +23,21 @@ describe('<TopBar />', () => {
 
     expect(onRefillPress).toHaveBeenCalledTimes(1);
   });
+
+  test('알림 버튼을 누르면 onNotificationsPress가 호출된다', async () => {
+    const onNotificationsPress = jest.fn();
+    const { getByTestId } = await render(
+      <TopBar
+        points={0}
+        tickets={0}
+        maxTickets={5}
+        onRefillPress={() => {}}
+        onNotificationsPress={onNotificationsPress}
+      />,
+    );
+
+    fireEvent.press(getByTestId('topbar-notifications-button'));
+
+    expect(onNotificationsPress).toHaveBeenCalledTimes(1);
+  });
 });

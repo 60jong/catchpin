@@ -53,7 +53,7 @@ describe('loginWithGoogle', () => {
     await loginWithGoogle('token-123');
 
     expect(globalThis.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('/api/auth/google'),
+      expect.stringContaining('/api/v1/auth/google'),
       expect.objectContaining({
         method: 'POST',
         body: JSON.stringify({ idToken: 'token-123' }),
@@ -69,7 +69,7 @@ describe('loginWithEmail', () => {
     await loginWithEmail('me@pincatch.dev', 'password1234');
 
     expect(globalThis.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('/api/auth/login'),
+      expect.stringContaining('/api/v1/auth/login'),
       expect.objectContaining({
         body: JSON.stringify({ email: 'me@pincatch.dev', password: 'password1234' }),
       }),
@@ -84,7 +84,7 @@ describe('signup', () => {
     await signup('me@pincatch.dev', 'password1234', 'tester');
 
     expect(globalThis.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('/api/auth/signup'),
+      expect.stringContaining('/api/v1/auth/signup'),
       expect.objectContaining({
         body: JSON.stringify({ email: 'me@pincatch.dev', password: 'password1234', nickname: 'tester', avatarId: null }),
       }),

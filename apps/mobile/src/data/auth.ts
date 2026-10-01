@@ -33,13 +33,13 @@ async function postAuth(path: string, body: unknown): Promise<AuthOutcome> {
 }
 
 export function loginWithGoogle(idToken: string): Promise<AuthOutcome> {
-  return postAuth('/api/auth/google', { idToken });
+  return postAuth('/api/v1/auth/google', { idToken });
 }
 
 export function loginWithEmail(email: string, password: string): Promise<AuthOutcome> {
-  return postAuth('/api/auth/login', { email, password });
+  return postAuth('/api/v1/auth/login', { email, password });
 }
 
 export function signup(email: string, password: string, nickname: string): Promise<AuthOutcome> {
-  return postAuth('/api/auth/signup', { email, password, nickname, avatarId: null });
+  return postAuth('/api/v1/auth/signup', { email, password, nickname, avatarId: null });
 }

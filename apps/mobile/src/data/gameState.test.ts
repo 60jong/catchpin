@@ -2,10 +2,15 @@ import {
   addPoints,
   addTickets,
   consumeAdRefillQuota,
+  deleteNotification,
   getGameState,
   incrementTodayEarned,
+  markAllNotificationsRead,
+  markNotificationRead,
   recordClaim,
+  recordNotification,
   resetGameStateForTests,
+  setSimpleNotificationsOnly,
   spendTicket,
   tickFreeTicketClock,
 } from './gameState';
@@ -113,6 +118,61 @@ describe('recordClaim', () => {
     }
     expect(getGameState().claimHistory.length).toBe(50);
     expect(getGameState().claimHistory[0].message).toBe('#59'); // 가장 최근
+  });
+});
+
+describe('notifications', () => {
+  test('앱 시작 시 예시 알림들로 채워져 있다', () => {
+    expect(getGameState().notifications.length).toBeGreaterThan(0);
+  });
+
+  test('recordNotification은 맨 앞에 안 읽음 상태로 추가된다', () => {
+    recordNotification({ type: 'win', title: '+10P 획득', body: 'body' });
+
+    const [latest] = getGameState().notifications;
+    expect(latest.title).toBe('+10P 획득');
+    expect(latest.read).toBe(false);
+  });
+
+  test('markNotificationRead는 해당 알림만 읽음 처리한다', () => {
+    recordNotification({ type: 'win', title: 'a', body: 'a' });
+    const [target] = getGameState().notifications;
+
+    markNotificationRead(target.id);
+
+    expect(getGameState().notifications.find((n) => n.id === target.id)?.read).toBe(true);
+  });
+
+  test('markAllNotificationsRead는 전부 읽음 처리한다', () => {
+    recordNotification({ type: 'win', title: 'a', body: 'a' });
+    recordNotification({ type: 'lose', title: 'b', body: 'b' });
+
+    markAllNotificationsRead();
+
+    expect(getGameState().notifications.every((n) => n.read)).toBe(true);
+  });
+
+  test('deleteNotification은 해당 알림을 목록에서 제거한다', () => {
+    recordNotification({ type: 'win', title: 'a', body: 'a' });
+    const [target] = getGameState().notifications;
+    const beforeCount = getGameState().notifications.length;
+
+    deleteNotification(target.id);
+
+    expect(getGameState().notifications.length).toBe(beforeCount - 1);
+    expect(getGameState().notifications.find((n) => n.id === target.id)).toBeUndefined();
+  });
+});
+
+describe('setSimpleNotificationsOnly', () => {
+  test('기본값은 false이고, 켜고 끌 수 있다', () => {
+    expect(getGameState().simpleNotificationsOnly).toBe(false);
+
+    setSimpleNotificationsOnly(true);
+    expect(getGameState().simpleNotificationsOnly).toBe(true);
+
+    setSimpleNotificationsOnly(false);
+    expect(getGameState().simpleNotificationsOnly).toBe(false);
   });
 });
 
