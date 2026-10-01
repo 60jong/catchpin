@@ -3,6 +3,7 @@ package com.pincatch.server.auth.controller;
 import com.pincatch.server.auth.domain.AuthResponse;
 import com.pincatch.server.auth.domain.GoogleLoginRequest;
 import com.pincatch.server.auth.domain.LoginRequest;
+import com.pincatch.server.auth.domain.RefreshTokenRequest;
 import com.pincatch.server.auth.domain.SignupRequest;
 import com.pincatch.server.auth.service.AuthService;
 import com.pincatch.server.common.response.ApiResponse;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/auth")
 public class AuthController {
 
 	private final AuthService authService;
@@ -21,6 +22,7 @@ public class AuthController {
 		this.authService = authService;
 	}
 
+	// 프론트가 구글 SDK로 받은 idToken만 넘기면, 서버가 검증하고 우리 토큰을 발급한다.
 	@PostMapping("/google")
 	public ApiResponse<AuthResponse> google(@RequestBody GoogleLoginRequest request) {
 		return ApiResponse.success(AuthResponse.from(authService.loginWithGoogle(request.idToken())));
@@ -36,5 +38,18 @@ public class AuthController {
 	@PostMapping("/login")
 	public ApiResponse<AuthResponse> login(@RequestBody LoginRequest request) {
 		return ApiResponse.success(AuthResponse.from(authService.loginWithEmail(request.email(), request.password())));
+	}
+
+	// 액세스 토큰이 만료됐을 때 프론트가 호출 — 리프레시 토큰을 새 걸로 교체하면서 액세스 토큰도 새로 받는다.
+	@PostMapping("/refresh")
+	public ApiResponse<AuthResponse> refresh(@RequestBody RefreshTokenRequest request) {
+		return ApiResponse.success(AuthResponse.from(authService.refresh(request.refreshToken())));
+	}
+
+	// 로그아웃 — 성공 응답만 주고 별도 데이터는 없음(data: null).
+	@PostMapping("/logout")
+	public ApiResponse<Void> logout(@RequestBody RefreshTokenRequest request) {
+		authService.logout(request.refreshToken());
+		return ApiResponse.success(null);
 	}
 }
