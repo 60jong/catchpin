@@ -1,3 +1,9 @@
+server:
+  # 외부 요청은 Caddy(443)가 받아서 127.0.0.1:8080으로 넘긴다. Spring은 외부에서 직접 못 받게 루프백에만 바인딩.
+  address: 127.0.0.1
+  # Caddy가 붙여주는 X-Forwarded-Proto/Host를 신뢰해서, 생성 URL(Swagger 등)이 https://catchpin.60jong.dev 로 잡히게 한다.
+  forward-headers-strategy: framework
+
 spring:
   datasource:
     url: jdbc:postgresql://${DB_HOST}:${DB_PORT:5432}/${DB_NAME}?sslmode=verify-full&sslrootcert=${DB_SSL_ROOT_CERT}
