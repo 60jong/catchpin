@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<!-- Boot 기본 콘솔 로그 그대로 사용 (journald로 감) -->
+	<include resource="org/springframework/boot/logging/logback/base.xml"/>
+
+	<!-- 운영에서만 로그를 Grafana Cloud(Loki)로도 보낸다. 전송 설정은 application-prod.yml -->
+	<springProfile name="prod">
+		<appender name="OTEL" class="io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender"/>
+		<root level="INFO">
+			<appender-ref ref="OTEL"/>
+		</root>
+	</springProfile>
+</configuration>
