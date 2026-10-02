@@ -19,6 +19,10 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.boot:spring-boot-starter-opentelemetry'
+	// logback 로그를 OTel SDK로 넘겨 Grafana Cloud(Loki)로 보낸다. 버전은 Boot가 관리하는 opentelemetry-api(1.62.0)에 맞춘 것
+	implementation 'io.opentelemetry.instrumentation:opentelemetry-logback-appender-1.0:2.28.1-alpha'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1'
 	runtimeOnly 'org.postgresql:postgresql'

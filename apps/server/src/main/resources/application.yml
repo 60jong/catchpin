@@ -20,3 +20,26 @@ jwt:
   secret: ${JWT_SECRET:dev-only-secret-change-me-please-0123456789}
   access-token-ttl-minutes: 60
   refresh-token-ttl-days: 30
+
+management:
+  endpoints:
+    web:
+      exposure:
+        # 외부(Caddy 경유)에 열리는 actuator는 health 하나뿐 — Grafana Synthetic Monitoring이 이걸 찌른다
+        include: health
+  opentelemetry:
+    resource-attributes:
+      service.name: catchpin-server
+  metrics:
+    distribution:
+      # 응답시간 히스토그램 전체 대신 SLO 버킷 3개만 — series 수 절약 + "500ms 넘는 요청 비율" 알림용
+      slo:
+        http.server.requests: 100ms,500ms,1s
+  # 로컬에선 Grafana로 안 보낸다 (기본값이 localhost:4318로 계속 push 시도함). 운영 설정은 application-prod.yml
+  otlp:
+    metrics:
+      export:
+        enabled: false
+  tracing:
+    export:
+      enabled: false
