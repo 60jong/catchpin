@@ -30,6 +30,7 @@ public class MemberController {
 	}
 
 	// 프로필 편집(닉네임/아바타) — 바디에 없는(null) 필드는 그대로 둔다.
+	// 소셜 로그인 온보딩(닉네임 화면)에서 프로필을 처음 완성시킬 때도 이 엔드포인트를 쓴다 (MemberService 참고).
 	@PatchMapping("/me")
 	public ApiResponse<MemberMeResponse> updateProfile(
 			@CurrentMemberId Long memberId, @RequestBody UpdateProfileRequest request) {

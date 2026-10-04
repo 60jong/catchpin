@@ -36,10 +36,17 @@ public class MemberService {
 		return member;
 	}
 
+	// 소셜 로그인 온보딩(닉네임 화면)과 가입 이후 "프로필 편집"이 같은 PATCH /me를 쓴다 —
+	// 아직 프로필이 안 끝났으면(온보딩 중) completeProfile로 profileComplete를 true로 바꾸고,
+	// 이미 끝난 회원이면 updateProfile로 부분 수정만 한다.
 	@Transactional
 	public Member updateProfile(Long memberId, String nickname, String avatarId) {
 		Member member = getById(memberId);
-		member.updateProfile(nickname, avatarId);
+		if (!member.isProfileComplete()) {
+			member.completeProfile(nickname, avatarId);
+		} else {
+			member.updateProfile(nickname, avatarId);
+		}
 		return member;
 	}
 
