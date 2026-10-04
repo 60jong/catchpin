@@ -3,7 +3,41 @@ import Svg, { Circle, Path, Rect } from 'react-native-svg';
 
 const SIZE = 56;
 
-export function MyMarker() {
+type MyMarkerProps = {
+  /** noLocation: 위치 권한이 꺼진 상태 — 사람 아이콘 대신 회색 위치-꺼짐 아이콘을 보여준다. */
+  variant?: 'normal' | 'noLocation';
+};
+
+export function MyMarker({ variant = 'normal' }: MyMarkerProps) {
+  if (variant === 'noLocation') {
+    return (
+      <View style={styles.wrap} pointerEvents="none">
+        <View style={styles.shadow} />
+        <View style={[styles.container, styles.containerOff]}>
+          <Svg width={26} height={26} viewBox="0 0 24 24">
+            <Path
+              d="M12 21.5s-7-6-7-11.5a7 7 0 0 1 10.5-6"
+              fill="none"
+              stroke="#8C93A8"
+              strokeWidth={2.6}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <Path
+              d="M18.6 8a7 7 0 0 1 .4 2c0 5.5-7 11.5-7 11.5"
+              fill="none"
+              stroke="#8C93A8"
+              strokeWidth={2.6}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <Path d="M3 3l18 18" fill="none" stroke="#8C93A8" strokeWidth={2.6} strokeLinecap="round" />
+          </Svg>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.wrap} pointerEvents="none">
       <View style={styles.shadow} />
@@ -42,10 +76,16 @@ const styles = StyleSheet.create({
     borderColor: '#1F2233',
     backgroundColor: '#FFFFFF',
     overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 1,
     shadowRadius: 0,
+  },
+  containerOff: {
+    borderColor: '#AEB4C6',
+    shadowColor: '#8C93A8',
   },
   inner: {
     flex: 1,

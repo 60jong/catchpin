@@ -1,36 +1,20 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { Brand, BrandFonts } from '@/constants/theme';
-import { signup } from '@/data/auth';
+import { startEmailOnboarding } from '@/data/onboarding';
 
 export default function SignupScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [nickname, setNickname] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const canSubmit = email && password.length >= 8 && nickname;
+  const canSubmit = email && password.length >= 8;
 
-  const handleSignup = async () => {
-    setLoading(true);
-    setError(null);
-    const outcome = await signup(email, password, nickname);
-    if (!outcome.ok) {
-      setError(outcome.message);
-    } else {
-      router.replace('/(tabs)');
-    }
-    setLoading(false);
+  // 여기서는 계정을 만들지 않는다 — 약관 동의/권한/닉네임까지 마친 뒤 닉네임 화면에서 한 번에 가입을 호출한다.
+  const handleNext = () => {
+    startEmailOnboarding(email, password);
+    router.push('/terms');
   };
 
   return (
@@ -41,7 +25,7 @@ export default function SignupScreen() {
 
       <View style={styles.headerText}>
         <Text style={styles.title}>회원가입</Text>
-        <Text style={styles.subtitle}>이메일, 비밀번호, 닉네임을 입력해 주세요</Text>
+        <Text style={styles.subtitle}>이메일, 비밀번호를 입력해 주세요</Text>
       </View>
 
       <View style={styles.fields}>
@@ -74,28 +58,14 @@ export default function SignupScreen() {
           </View>
         </View>
 
-        <View style={styles.field}>
-          <Text style={styles.label}>닉네임</Text>
-          <View style={styles.inputBox}>
-            <TextInput
-              value={nickname}
-              onChangeText={setNickname}
-              placeholder="게임에서 보일 이름"
-              placeholderTextColor="#8A8FA3"
-              style={styles.input}
-            />
-          </View>
-        </View>
-
-        {error && <Text style={styles.error}>{error}</Text>}
       </View>
 
       <View style={styles.footer}>
         <Pressable
-          style={[styles.submitButton, (!canSubmit || loading) && styles.buttonDisabled]}
-          onPress={handleSignup}
-          disabled={!canSubmit || loading}>
-          {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.submitButtonText}>가입하기</Text>}
+          style={[styles.submitButton, !canSubmit && styles.buttonDisabled]}
+          onPress={handleNext}
+          disabled={!canSubmit}>
+          <Text style={styles.submitButtonText}>다음</Text>
         </Pressable>
       </View>
     </View>
@@ -164,11 +134,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Brand.ink,
     padding: 0,
-  },
-  error: {
-    fontFamily: BrandFonts.gothicBold,
-    fontSize: 13,
-    color: '#D14343',
   },
   footer: {
     marginTop: 'auto',

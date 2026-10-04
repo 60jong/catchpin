@@ -43,3 +43,28 @@ export function loginWithEmail(email: string, password: string): Promise<AuthOut
 export function signup(email: string, password: string, nickname: string): Promise<AuthOutcome> {
   return postAuth('/api/v1/auth/signup', { email, password, nickname, avatarId: null });
 }
+
+export type ProfileOutcome = { ok: true } | { ok: false; message: string };
+
+/** 소셜 로그인으로 이미 발급받은 토큰으로, 온보딩 마지막 단계(닉네임)에서 프로필을 완성시킨다. */
+export async function completeProfile(accessToken: string, nickname: string): Promise<ProfileOutcome> {
+  try {
+    const response = await fetch(`${apiBaseUrl}/api/v1/members/me`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ nickname, avatarId: null }),
+    });
+
+    if (!response.ok) {
+      const problem = await response.json().catch(() => null);
+      return { ok: false, message: problem?.detail ?? '요청에 실패했어요.' };
+    }
+
+    return { ok: true };
+  } catch (error: any) {
+    return { ok: false, message: String(error?.message ?? error) };
+  }
+}

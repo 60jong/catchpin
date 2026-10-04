@@ -1,12 +1,17 @@
 import * as Haptics from 'expo-haptics';
+import * as Location from 'expo-location';
+import { getNetworkStateAsync, useNetworkState } from 'expo-network';
+import * as Notifications from 'expo-notifications';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
+import { Alert, AppState, LayoutChangeEvent, Linking, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BottomSheet } from '@/components/home/BottomSheet';
 import { ClaimResultBanner } from '@/components/home/ClaimResultBanner';
+import { HomeStatusPanel } from '@/components/home/HomeStatusPanel';
 import { MyMarker } from '@/components/home/MyMarker';
+import { OfflineBanner } from '@/components/home/OfflineBanner';
 import { PinButton } from '@/components/home/PinButton';
 import { Radar } from '@/components/home/Radar';
 import type { ToastItem } from '@/components/home/ResultToast';
@@ -49,10 +54,31 @@ export default function HomeScreen() {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const [radarArea, setRadarArea] = useState({ width: 0, height: 0 });
   const [bottomSheetHeight, setBottomSheetHeight] = useState(0);
+  // null = 아직 확인 전(그 사이엔 평소 화면으로 둔다 — 깜빡임 방지)
+  const [locationGranted, setLocationGranted] = useState<boolean | null>(null);
+  const network = useNetworkState();
+  // 처음 로딩 중엔 isConnected가 undefined라 "오프라인"으로 오판하지 않게, 확실히 false일 때만 오프라인으로 본다.
+  const isOffline = network.isConnected === false;
 
   const dismissToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
+
+  const checkLocationPermission = useCallback(async () => {
+    const { status } = await Location.getForegroundPermissionsAsync();
+    setLocationGranted(status === Location.PermissionStatus.GRANTED);
+  }, []);
+
+  useEffect(() => {
+    Location.getForegroundPermissionsAsync().then(({ status }) => {
+      setLocationGranted(status === Location.PermissionStatus.GRANTED);
+    });
+    // "설정에서 위치 켜기"로 OS 설정에 다녀온 뒤 돌아왔을 때도 다시 확인한다.
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') checkLocationPermission();
+    });
+    return () => subscription.remove();
+  }, [checkLocationPermission]);
 
   useEffect(() => {
     const id = setInterval(tickFreeTicketClock, 1000);
@@ -67,6 +93,33 @@ export default function HomeScreen() {
   const onBottomSheetLayout = useCallback((event: LayoutChangeEvent) => {
     setBottomSheetHeight(event.nativeEvent.layout.height);
   }, []);
+
+  // "주변에 핀 없음" 패널의 "새 핀이 나타나면 알림 받기" — 실제 알림 권한을 요청한다.
+  const handleRequestPinAlerts = async () => {
+    const { status } = await Notifications.requestPermissionsAsync();
+    Alert.alert(
+      status === 'granted' ? '알림을 받을 수 있어요' : '알림이 꺼져 있어요',
+      status === 'granted' ? '새 핀이 나타나면 알려드릴게요.' : '설정에서 알림을 켜면 새 핀 소식을 받을 수 있어요.',
+    );
+  };
+
+  // "위치 꺼짐" 패널의 "설정에서 위치 켜기" — 앱의 OS 설정 화면을 바로 연다.
+  const handleOpenLocationSettings = () => Linking.openSettings();
+
+  // "위치 꺼짐" 패널의 "위치는 어떻게 쓰이나요?" — 온보딩 때 보여준 설명을 다시 보여준다.
+  const handleExplainLocationUsage = () =>
+    Alert.alert(
+      '위치는 이렇게 쓰여요',
+      '앱을 쓰는 동안에만 확인하고, 앱을 닫으면 쓰지 않아요. 정확한 위치는 공개되지 않고, 다른 사람에게는 이름 없는 핀으로만 보여요.',
+    );
+
+  // 오프라인 배너의 "다시 시도" — 지금 바로 연결 상태를 다시 확인하고, 됐으면 핀 목록을 새로 받아온다.
+  const handleRetryConnection = async () => {
+    const state = await getNetworkStateAsync();
+    if (state.isConnected) {
+      setPins(mockPinsRepository.getNearbyPins());
+    }
+  };
 
   // 핀 탭 처리 — 판정 결과에 따라 보상을 주고, 사용자 설정에 맞는 방식(토스트 or 초접전 연출)으로 보여준다.
   const handleClaim = async (pin: Pin) => {
@@ -126,6 +179,20 @@ export default function HomeScreen() {
   const visualSize = getRadarVisualSize(radarArea);
   const marker = getMarkerPlacement(radarArea, MARKER_SIZE);
 
+  // 위치 권한이 없으면 "주변 핀"이라는 개념이 성립하지 않아 핀을 아예 안 보여준다.
+  const visiblePins = locationGranted === false ? [] : pins;
+  const radarState = locationGranted === false ? 'hidden' : isOffline ? 'paused' : 'active';
+  const markerVariant = locationGranted === false ? 'noLocation' : 'normal';
+
+  // 바텀 패널 분기 — 오프라인(연결 자체가 문제)이 가장 우선, 그다음 위치 꺼짐, 그다음 핀 없음.
+  const panelVariant = isOffline
+    ? 'offline'
+    : locationGranted === false
+      ? 'noLocation'
+      : visiblePins.length === 0
+        ? 'empty'
+        : null;
+
   return (
     <View style={styles.container}>
       <SafeAreaView edges={['top']}>
@@ -144,14 +211,14 @@ export default function HomeScreen() {
         {hasMeasuredArea && (
           <>
             <View style={{ width: visualSize, height: visualSize }}>
-              <Radar size={visualSize} />
+              <Radar size={visualSize} state={radarState} />
             </View>
 
             <View style={[styles.absolute, { left: marker.x, top: marker.y }]}>
-              <MyMarker />
+              <MyMarker variant={markerVariant} />
             </View>
 
-            {pins.map((pin) => {
+            {visiblePins.map((pin) => {
               const placement = getPinPlacement({
                 angleDeg: pin.angle,
                 distanceFraction: pin.distance,
@@ -160,7 +227,11 @@ export default function HomeScreen() {
               });
               return (
                 <View key={pin.id} style={[styles.absolute, { left: placement.x, top: placement.y }]}>
-                  <PinButton pin={pin} onPress={() => handleClaim(pin)} disabled={claimingId === pin.id} />
+                  <PinButton
+                    pin={pin}
+                    onPress={() => handleClaim(pin)}
+                    disabled={claimingId === pin.id || isOffline}
+                  />
                 </View>
               );
             })}
@@ -168,13 +239,29 @@ export default function HomeScreen() {
         )}
       </View>
 
-      <BottomSheet
-        nearbyPinCount={pins.length}
-        todayEarnedCount={game.todayEarned}
-        feedText="누군가 방금 +40P를 가져갔어요 · 12초 전"
-        onLayout={onBottomSheetLayout}
-      />
+      {panelVariant ? (
+        <HomeStatusPanel
+          variant={panelVariant}
+          onPrimaryAction={
+            panelVariant === 'empty'
+              ? handleRequestPinAlerts
+              : panelVariant === 'noLocation'
+                ? handleOpenLocationSettings
+                : undefined
+          }
+          onSecondaryAction={panelVariant === 'noLocation' ? handleExplainLocationUsage : undefined}
+          onLayout={onBottomSheetLayout}
+        />
+      ) : (
+        <BottomSheet
+          nearbyPinCount={visiblePins.length}
+          todayEarnedCount={game.todayEarned}
+          feedText="누군가 방금 +40P를 가져갔어요 · 12초 전"
+          onLayout={onBottomSheetLayout}
+        />
+      )}
 
+      {isOffline && <OfflineBanner onRetry={handleRetryConnection} />}
       <ClaimResultBanner toasts={toasts} onDismiss={dismissToast} />
     </View>
   );

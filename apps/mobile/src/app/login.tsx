@@ -8,6 +8,7 @@ import { useState } from 'react';
 import {
   ActivityIndicator,
   Linking,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -18,13 +19,17 @@ import { Logo } from '@/components/brand/Logo';
 import { Wordmark } from '@/components/brand/Wordmark';
 import { Brand, BrandFonts } from '@/constants/theme';
 import { loginWithGoogle } from '@/data/auth';
+import { startSocialOnboarding } from '@/data/onboarding';
 
 const { googleWebClientId, googleIosClientId } = Constants.expoConfig?.extra ?? {};
 
-GoogleSignin.configure({
-  webClientId: googleWebClientId,
-  iosClientId: googleIosClientId,
-});
+// 구글 네이티브 SDK는 웹 빌드에 없어서, configure()를 웹에서 호출하면 모듈 로드 시점에 바로 크래시난다.
+if (Platform.OS !== 'web') {
+  GoogleSignin.configure({
+    webClientId: googleWebClientId,
+    iosClientId: googleIosClientId,
+  });
+}
 
 type SocialButtonProps = {
   label: string;
@@ -72,6 +77,10 @@ export default function LoginScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const handleGoogleSignIn = async () => {
+    if (Platform.OS === 'web') {
+      setError('웹에서는 이메일로 로그인해 주세요.');
+      return;
+    }
     setLoading('google');
     setError(null);
     try {
@@ -91,6 +100,13 @@ export default function LoginScreen() {
       const outcome = await loginWithGoogle(idToken);
       if (!outcome.ok) {
         setError(outcome.message);
+        return;
+      }
+
+      // 처음 가입하는 구글 계정이면 닉네임이 아직 없다 — 약관 동의부터 닉네임까지 온보딩을 거치게 한다.
+      if (!outcome.result.profileComplete) {
+        startSocialOnboarding(outcome.result.accessToken, outcome.result.refreshToken);
+        router.push('/terms');
         return;
       }
 
