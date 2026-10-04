@@ -9,6 +9,9 @@ dist/
 web-build/
 expo-env.d.ts
 
+# Vercel (vercel link 하면 생기는 로컬 프로젝트 연결 정보)
+.vercel
+
 # Native
 .kotlin/
 *.orig.*
@@ -41,3 +44,4 @@ example
 # generated native folders
 /ios
 /android
+.env*
