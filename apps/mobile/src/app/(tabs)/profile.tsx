@@ -75,7 +75,7 @@ export default function ProfileScreen() {
           bordered
           onPress={() => router.push('/verify-center')}
         />
-        <SettingsRow icon="notifications" label="알림" bordered />
+        <SettingsRow icon="notifications" label="알림" bordered onPress={() => router.push('/notif-settings')} />
         <CloseCallToggleRow
           enabled={!game.simpleNotificationsOnly}
           onToggle={() => setSimpleNotificationsOnly(!game.simpleNotificationsOnly)}
