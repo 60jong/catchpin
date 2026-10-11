@@ -1,5 +1,7 @@
 import Constants from 'expo-constants';
 
+import { setAccessToken } from './session';
+
 const { apiBaseUrl } = Constants.expoConfig?.extra ?? {};
 
 export type AuthResult = {
@@ -26,6 +28,7 @@ async function postAuth(path: string, body: unknown): Promise<AuthOutcome> {
     }
 
     const { data } = await response.json();
+    setAccessToken(data.accessToken);
     return { ok: true, result: data };
   } catch (error: any) {
     return { ok: false, message: String(error?.message ?? error) };
