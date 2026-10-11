@@ -16,6 +16,11 @@ google:
   oauth:
     client-ids: ${GOOGLE_OAUTH_CLIENT_IDS:534259490222-u8921g1s80eheung7a29hiu67aqi0jkq.apps.googleusercontent.com}
 
+kakao:
+  oauth:
+    # 토큰 aud로 허용할 앱 키들(쉼표로 구분) — REST API 키와/또는 네이티브 앱 키. 서버 로그의 "audience mismatch: [...]"에 실제 aud가 나온다.
+    rest-api-key: ${KAKAO_REST_API_KEY:}
+
 jwt:
   secret: ${JWT_SECRET:dev-only-secret-change-me-please-0123456789}
   access-token-ttl-minutes: 60

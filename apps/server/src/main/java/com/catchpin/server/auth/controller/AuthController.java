@@ -2,6 +2,7 @@ package com.catchpin.server.auth.controller;
 
 import com.catchpin.server.auth.domain.AuthResponse;
 import com.catchpin.server.auth.domain.GoogleLoginRequest;
+import com.catchpin.server.auth.domain.KakaoLoginRequest;
 import com.catchpin.server.auth.domain.LoginRequest;
 import com.catchpin.server.auth.domain.RefreshTokenRequest;
 import com.catchpin.server.auth.domain.SignupRequest;
@@ -26,6 +27,12 @@ public class AuthController {
 	@PostMapping("/google")
 	public ApiResponse<AuthResponse> google(@RequestBody GoogleLoginRequest request) {
 		return ApiResponse.success(AuthResponse.from(authService.loginWithGoogle(request.idToken())));
+	}
+
+	// 프론트가 카카오 SDK로 받은 idToken(OpenID Connect)만 넘기면, 서버가 검증하고 우리 토큰을 발급한다.
+	@PostMapping("/kakao")
+	public ApiResponse<AuthResponse> kakao(@RequestBody KakaoLoginRequest request) {
+		return ApiResponse.success(AuthResponse.from(authService.loginWithKakao(request.idToken())));
 	}
 
 	@PostMapping("/signup")

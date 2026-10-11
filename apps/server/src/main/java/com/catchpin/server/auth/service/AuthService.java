@@ -2,6 +2,7 @@ package com.catchpin.server.auth.service;
 
 import com.catchpin.server.auth.domain.AuthResult;
 import com.catchpin.server.auth.domain.GoogleUserInfo;
+import com.catchpin.server.auth.domain.KakaoUserInfo;
 import com.catchpin.server.auth.domain.entity.AuthProvider;
 import com.catchpin.server.auth.domain.entity.AuthProviderType;
 import com.catchpin.server.auth.exception.DuplicateEmailException;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
 
 	private final GoogleTokenVerifier googleTokenVerifier;
+	private final KakaoTokenVerifier kakaoTokenVerifier;
 	private final AuthProviderRepository authProviderRepository;
 	private final MemberService memberService;
 	private final JwtProvider jwtProvider;
@@ -28,11 +30,13 @@ public class AuthService {
 
 	public AuthService(
 			GoogleTokenVerifier googleTokenVerifier,
+			KakaoTokenVerifier kakaoTokenVerifier,
 			AuthProviderRepository authProviderRepository,
 			MemberService memberService,
 			JwtProvider jwtProvider,
 			RefreshTokenService refreshTokenService) {
 		this.googleTokenVerifier = googleTokenVerifier;
+		this.kakaoTokenVerifier = kakaoTokenVerifier;
 		this.authProviderRepository = authProviderRepository;
 		this.memberService = memberService;
 		this.jwtProvider = jwtProvider;
@@ -58,6 +62,20 @@ public class AuthService {
 				.findByProviderAndProviderUserId(AuthProviderType.GOOGLE, userInfo.sub())
 				.map(AuthProvider::getMember)
 				.orElseGet(() -> registerSocialMember(AuthProviderType.GOOGLE, userInfo.sub(), userInfo.email()));
+
+		return issueTokens(member);
+	}
+
+	// 카카오 idToken을 서버가 직접 검증(JWKS)하고, 이미 연결된 회원이면 그대로, 처음이면 새로 만들어서 로그인시킨다.
+	// 카카오 이메일은 동의항목을 받은 경우에만 오고, 없으면 같은 이메일 검사는 못 한다.
+	@Transactional
+	public AuthResult loginWithKakao(String idToken) {
+		KakaoUserInfo userInfo = kakaoTokenVerifier.verify(idToken);
+
+		Member member = authProviderRepository
+				.findByProviderAndProviderUserId(AuthProviderType.KAKAO, userInfo.sub())
+				.map(AuthProvider::getMember)
+				.orElseGet(() -> registerSocialMember(AuthProviderType.KAKAO, userInfo.sub(), userInfo.email()));
 
 		return issueTokens(member);
 	}
@@ -134,6 +152,7 @@ public class AuthService {
 	private static String providerName(AuthProviderType provider) {
 		return switch (provider) {
 			case GOOGLE -> "구글";
+			case KAKAO -> "카카오";
 			case APPLE -> "Apple";
 			case NAVER -> "네이버";
 			case EMAIL -> "이메일";
