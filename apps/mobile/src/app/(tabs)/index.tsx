@@ -29,6 +29,7 @@ import {
 import { mockPinsRepository, type Pin } from '@/data/pins';
 import { pickCloseCallMarginSeconds } from '@/utils/closeCall';
 import { getMarkerPlacement, getPinPlacement, getRadarVisualSize } from '@/utils/radarLayout';
+import { playSound } from '@/utils/sounds';
 import { buildToastCopy, pickTapMarginSeconds } from '@/utils/toast';
 
 const MARKER_SIZE = 56;
@@ -149,6 +150,7 @@ export default function HomeScreen() {
         const copy = buildToastCopy(won ? 'success' : 'failure', won ? pin.points : 0, margin);
         const toast: ToastItem = { id: createToastId(), outcome: won ? 'success' : 'failure', points: won ? pin.points : 0, ...copy };
         setToasts((prev) => [toast, ...prev].slice(0, MAX_VISIBLE_TOASTS));
+        playSound(won ? 'simpleWin' : 'simpleLose');
         recordClaim({ type: toast.outcome, message: copy.title, points: toast.points });
         recordNotification({
           type: won ? 'win' : 'lose',

@@ -4,6 +4,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-na
 
 import { Brand, BrandFonts } from '@/constants/theme';
 import type { Pin } from '@/data/pins';
+import { playSound } from '@/utils/sounds';
 
 type PinButtonProps = {
   pin: Pin;
@@ -37,6 +38,7 @@ export function PinButton({ pin, onPress, disabled }: PinButtonProps) {
       onPressIn={() => {
         press.value = withSpring(1, PRESS_SPRING);
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+        playSound('tap');
       }}
       onPressOut={() => {
         press.value = withSpring(0, RELEASE_SPRING);

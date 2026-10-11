@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
@@ -8,6 +8,13 @@ import { CloseCallOverlay } from '@/components/claim-result/CloseCallOverlay';
 import { LostResultCard } from '@/components/claim-result/LostResultCard';
 import { WonResultCard } from '@/components/claim-result/WonResultCard';
 import { setSimpleNotificationsOnly, useGameState } from '@/data/gameState';
+import { playSound } from '@/utils/sounds';
+
+/**
+ * 판정 소리를 화면이 열린 뒤 몇 ms 만에 재생할지. 0이면 연출이 시작되는 순간 같이 울린다.
+ * (예전에는 연출이 끝나는 약 2.6초 시점에 재생해서 소리가 늦었다. 아직 어긋나면 이 값으로 앞뒤를 맞춘다.)
+ */
+const JUDGE_SOUND_DELAY_MS = 0;
 
 /**
  * 전체화면 "초접전 연출" 결과 화면. 홈에서 핀을 탭했을 때(간단 알림 모드가 꺼져있으면) 여기로 넘어온다.
@@ -25,6 +32,12 @@ export default function ClaimResultScreen() {
   const [revealed, setRevealed] = useState(false);
   // 연출을 끝까지 본 건지(fast:false) 건너뛴 건지(fast:true) — 결과 카드가 등장하는 애니메이션 길이가 달라진다.
   const [fast, setFast] = useState(false);
+
+  // 판정 소리는 연출이 끝난 뒤가 아니라 화면이 열리는 순간부터 재생한다. 먼저 닫으면 예약한 소리를 취소한다.
+  useEffect(() => {
+    const timer = setTimeout(() => playSound(outcome === 'won' ? 'judgeWin' : 'judgeLose'), JUDGE_SOUND_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [outcome]);
 
   // CloseCallOverlay가 연출을 끝내거나 "건너뛰기"를 누르면 호출된다 — 그 순간 결과 카드를 보여주기 시작한다.
   const handleReveal = useCallback(({ fast: wasFast }: { fast: boolean }) => {
