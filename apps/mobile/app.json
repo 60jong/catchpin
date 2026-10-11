@@ -38,7 +38,21 @@
       "@react-native-google-signin/google-signin",
       "expo-font",
       "expo-notifications",
-      "expo-audio"
+      "expo-audio",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "extraMavenRepos": ["https://devrepo.kakao.com/nexus/content/groups/public/"]
+          }
+        }
+      ],
+      [
+        "@react-native-seoul/kakao-login",
+        {
+          "kakaoAppKey": "c13c548bd8c60d2ee12a05b87f798503"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

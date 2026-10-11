@@ -39,6 +39,10 @@ export function loginWithGoogle(idToken: string): Promise<AuthOutcome> {
   return postAuth('/api/v1/auth/google', { idToken });
 }
 
+export function loginWithKakao(idToken: string): Promise<AuthOutcome> {
+  return postAuth('/api/v1/auth/kakao', { idToken });
+}
+
 export function loginWithEmail(email: string, password: string): Promise<AuthOutcome> {
   return postAuth('/api/v1/auth/login', { email, password });
 }
