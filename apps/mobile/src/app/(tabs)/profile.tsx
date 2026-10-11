@@ -81,7 +81,7 @@ export default function ProfileScreen() {
           onToggle={() => setSimpleNotificationsOnly(!game.simpleNotificationsOnly)}
         />
         <SettingsRow icon="location" label="위치 권한" value="앱 사용 중" bordered />
-        <SettingsRow icon="account" label="계정 관리" />
+        <SettingsRow icon="account" label="계정 관리" onPress={() => router.push('/account')} />
       </SettingsSection>
 
       <SettingsSection title="고객지원">
