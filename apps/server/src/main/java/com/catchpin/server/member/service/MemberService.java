@@ -18,6 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
 	private static final String PHONE_IN_USE_MESSAGE = "이미 다른 계정에서 인증한 번호예요.";
+	private static final String INVITE_CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+	private static final SecureRandom RANDOM = new SecureRandom();
+
 	private final MemberRepository memberRepository;
 	private final ProfileImageService profileImageService;
 
@@ -42,6 +45,10 @@ public class MemberService {
 		return memberRepository.findByPhoneNumber(phoneNumber);
 	}
 
+	public Optional<Member> findByInviteCode(String inviteCode) {
+		return memberRepository.findByInviteCode(inviteCode);
+	}
+
 	// 인증한 휴대폰 번호를 회원에 저장한다. 번호 하나당 한 계정만 허용 — 이미 다른 회원이 쓰고 있으면 거부한다.
 	@Transactional
 	public Member verifyPhone(Long memberId, String phone) {
@@ -57,6 +64,28 @@ public class MemberService {
 			throw new MemberRuleException(HttpStatus.CONFLICT, PHONE_IN_USE_MESSAGE);
 		}
 		return member;
+	}
+
+	// 친구 초대 코드를 만든다 (이미 있으면 그대로) — "PIN" + 헷갈리는 글자(I, O, 0, 1)를 뺀 4글자.
+	@Transactional
+	public String ensureInviteCode(Long memberId) {
+		Member member = getById(memberId);
+		if (member.getInviteCode() == null) {
+			String code;
+			do {
+				code = "PIN" + randomCodeChars(4);
+			} while (memberRepository.existsByInviteCode(code));
+			member.assignInviteCode(code);
+		}
+		return member.getInviteCode();
+	}
+
+	private String randomCodeChars(int length) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < length; i++) {
+			sb.append(INVITE_CODE_CHARS.charAt(RANDOM.nextInt(INVITE_CODE_CHARS.length())));
+		}
+		return sb.toString();
 	}
 
 	public Optional<Member> findByEmail(String email) {
