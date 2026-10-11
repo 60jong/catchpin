@@ -62,7 +62,7 @@ export default function ProfileScreen() {
       />
 
       <SettingsSection>
-        <SettingsRow icon="invite" label="친구 초대하기" badge="+500P" />
+        <SettingsRow icon="invite" label="친구 초대하기" badge="+500P" onPress={() => router.push('/invite')} />
       </SettingsSection>
 
       <SettingsSection title="설정">
