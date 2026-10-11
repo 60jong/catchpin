@@ -33,7 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * v1 레이더 — 앱이 4초쯤마다 ping(위치 폴링)하면 내 위치를 저장하고, 활성 사용자 아무나(위치 불문)와 핀을 만들어서 돌려준다.
- * 핀을 탭하면 서버가 "먼저 도착한 순서"로 한 명만 가져가게 판정하고, 포인트/탭권 계산은 아직 앱 안 상태가 맡는다.
+ * 핀을 탭하면 서버가 "먼저 도착한 순서"로 한 명만 가져가게 판정하고, 이긴 사람의 포인트를 올리고 탭권을 1장 차감한다(진 사람의 탭권은 그대로).
  */
 @Service
 public class PinService {
@@ -121,24 +121,46 @@ public class PinService {
 				.findById(pinId)
 				.filter(p -> p.involves(memberId))
 				.orElseThrow(() -> new PinException(HttpStatus.NOT_FOUND, "핀을 찾을 수 없어요."));
-		Member member = memberService.getById(memberId);
+		// 같은 회원의 탭을 한 줄씩 처리하고(탭권이 음수가 되지 않게), 밀린 무료 탭권 적립을 따라잡은 뒤 탭권부터 확인한다.
+		if (!memberService.lockAndCatchUp(memberId).hasTicket()) {
+			throw new PinException(HttpStatus.CONFLICT, "탭권이 없어요.");
+		}
 
 		// 핵심: 아직 열려 있을 때만 가져가는 한 번의 업데이트 — 동시에 눌러도 정확히 한 명만 성공한다.
-		if (pinRepository.claimIfOpen(pinId, member, now) == 1) {
+		boolean won = pinRepository.claimIfOpen(pinId, memberService.getById(memberId), now) == 1;
+
+		// 위 업데이트가 영속성 컨텍스트를 비웠으니, 이후에 바꿀 회원과 핀은 다시 읽는다.
+		Member member = memberService.getById(memberId);
+		if (won) {
+			// 탭권은 이겼을 때만 쓴다 (졌을 때는 그대로)
+			member.spendTicket(now);
+			member.addPoints(pin.getPoints());
+			member.incrementTodayEarned();
 			captureRepository.save(new Capture(member, pin.getPoints(), CaptureOutcome.WON, null));
-			return new ClaimResult(ClaimOutcome.WON, pin.getPoints(), null);
+			return result(ClaimOutcome.WON, pin.getPoints(), null, member, now);
 		}
 
 		// 못 가져갔다 — 방금 상대가 가져갔는지, 그냥 만료됐는지 다시 읽어서 가른다.
 		Pin fresh = pinRepository.findById(pinId).orElseThrow(() -> new PinException(HttpStatus.NOT_FOUND, "핀을 찾을 수 없어요."));
 		if (fresh.getStatus() == PinStatus.CLAIMED) {
 			if (fresh.getClaimedBy().getId().equals(memberId)) {
-				return new ClaimResult(ClaimOutcome.WON, fresh.getPoints(), null); // 같은 핀을 내가 두 번 누른 경우
+				return result(ClaimOutcome.WON, fresh.getPoints(), null, member, now); // 같은 핀을 내가 두 번 누른 경우 — 포인트와 탭권은 한 번만
 			}
 			long marginMs = Duration.between(fresh.getClaimedAt(), now).toMillis();
 			captureRepository.save(new Capture(member, fresh.getPoints(), CaptureOutcome.LOST, marginMs));
-			return new ClaimResult(ClaimOutcome.LOST, fresh.getPoints(), marginMs);
+			return result(ClaimOutcome.LOST, fresh.getPoints(), marginMs, member, now);
 		}
-		return new ClaimResult(ClaimOutcome.EXPIRED, fresh.getPoints(), null);
+		return result(ClaimOutcome.EXPIRED, fresh.getPoints(), null, member, now);
+	}
+
+	private ClaimResult result(ClaimOutcome outcome, int points, Long marginMs, Member member, LocalDateTime now) {
+		return new ClaimResult(
+				outcome,
+				points,
+				marginMs,
+				member.getPointBalance(),
+				member.getTickets(),
+				member.getTodayEarned(),
+				member.nextFreeTicketInSeconds(now));
 	}
 }

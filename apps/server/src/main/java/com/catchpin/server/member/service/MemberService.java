@@ -41,6 +41,35 @@ public class MemberService {
 		return memberRepository.save(new Member(null));
 	}
 
+	// 회원 행을 잠그고 밀린 일일 리셋/무료 탭권 적립을 따라잡은 채로 돌려준다 — 탭 판정처럼 탭권을 읽고 바꾸는 흐름이 쓴다.
+	@Transactional
+	public Member lockAndCatchUp(Long memberId) {
+		Member member = memberRepository
+				.findByIdForUpdate(memberId)
+				.orElseThrow(() -> new MemberNotFoundException("회원을 찾을 수 없어요."));
+		catchUp(member);
+		return member;
+	}
+
+	// 광고 시청으로 탭권을 채운다 (오늘 횟수가 남아 있고, 탭권이 가득 차지 않았을 때만).
+	// 주의: 아직 광고 시청을 서버가 검증하지 않는다(AdMob 서버 측 확인 전의 임시 방식) — 앱이 보낸 대로 믿는다.
+	@Transactional
+	public Member refillTicketsByAd(Long memberId, int count) {
+		if (count < 1 || count > 4) {
+			throw new MemberRuleException(HttpStatus.BAD_REQUEST, "충전할 수 있는 탭권 수가 아니에요.");
+		}
+		Member member = lockAndCatchUp(memberId);
+		if (member.getTodayAdRefillsLeft() <= 0) {
+			throw new MemberRuleException(HttpStatus.CONFLICT, "오늘 광고 충전 횟수를 다 썼어요.");
+		}
+		if (member.getTickets() >= member.getMaxTickets()) {
+			throw new MemberRuleException(HttpStatus.CONFLICT, "탭권이 이미 가득 찼어요.");
+		}
+		member.addTickets(count);
+		member.consumeAdRefill();
+		return member;
+	}
+
 	// 개발용 봇 계정 — 로그인 수단 없이 닉네임만 가진 회원을 만든다.
 	@Transactional
 	public Member createBot(String nickname) {

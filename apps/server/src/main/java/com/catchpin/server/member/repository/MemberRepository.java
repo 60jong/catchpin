@@ -15,6 +15,11 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
 	List<Member> findByBotTrue();
 
+	// 같은 회원의 탭이 동시에 들어와도 한 줄씩 처리하도록 행을 잠그고 읽는다 (탭권이 음수가 되지 않게).
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	@Query("select m from Member m where m.id = :id")
+	Optional<Member> findByIdForUpdate(@Param("id") Long id);
+
 	Optional<Member> findByPhoneNumber(String phoneNumber);
 
 	Optional<Member> findByInviteCode(String inviteCode);

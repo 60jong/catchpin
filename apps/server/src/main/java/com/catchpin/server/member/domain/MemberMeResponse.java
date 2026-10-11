@@ -23,6 +23,7 @@ public record MemberMeResponse(
 		int todayEarned,
 		int todayAdRefillsLeft,
 		LocalDateTime nextFreeTicketAt,
+		Long nextFreeTicketInSeconds,
 		boolean simpleNotificationsOnly) {
 
 	// Member 엔티티 → 응답 DTO 변환 (컨트롤러에서 바로 쓰기 위한 정적 팩토리)
@@ -45,6 +46,7 @@ public record MemberMeResponse(
 				member.getTodayEarned(),
 				member.getTodayAdRefillsLeft(),
 				member.getNextFreeTicketAt(),
+				member.nextFreeTicketInSeconds(LocalDateTime.now()),
 				member.isSimpleNotificationsOnly());
 	}
 

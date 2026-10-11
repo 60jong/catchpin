@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.Getter;
@@ -102,6 +103,47 @@ public class Member extends BaseEntity {
 
 	public void changeProfileImage(String profileImageKey) {
 		this.profileImageKey = profileImageKey;
+	}
+
+	public boolean hasTicket() {
+		return tickets > 0;
+	}
+
+	// 탭 성공 시에만 부른다 (졌을 때는 탭권을 쓰지 않는다). 가득 차 있다가 처음 쓰면 무료 충전 타이머가 시작된다.
+	public void spendTicket(LocalDateTime now) {
+		if (tickets <= 0) {
+			throw new IllegalStateException("탭권이 없어요.");
+		}
+		boolean wasFull = tickets >= maxTickets;
+		tickets--;
+		if (wasFull) {
+			nextFreeTicketAt = now.plusMinutes(FREE_TICKET_INTERVAL_MINUTES);
+		}
+	}
+
+	// 광고로 충전한 탭권 — 최대 보유 수를 넘지 않고, 가득 차면 무료 충전 타이머를 멈춘다.
+	public void addTickets(int amount) {
+		tickets = Math.min(maxTickets, tickets + amount);
+		if (tickets >= maxTickets) {
+			nextFreeTicketAt = null;
+		}
+	}
+
+	public void incrementTodayEarned() {
+		todayEarned++;
+	}
+
+	public void consumeAdRefill() {
+		todayAdRefillsLeft--;
+	}
+
+	/** 다음 무료 탭권까지 남은 초 (가득 차 있어서 타이머가 없으면 null). 서버 시각대에 기대지 않도록 "시각" 대신 "남은 초"로 내려준다. */
+	public Long nextFreeTicketInSeconds(LocalDateTime now) {
+		return nextFreeTicketAt == null ? null : Math.max(0, Duration.between(now, nextFreeTicketAt).getSeconds());
+	}
+
+	public void addPoints(int amount) {
+		this.pointBalance += amount;
 	}
 
 	public boolean isBot() {
