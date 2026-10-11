@@ -5,7 +5,8 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import { TicketIllustration } from '@/components/refill/TicketIllustration';
 import { Brand, BrandFonts } from '@/constants/theme';
 import { mockAdsRepository } from '@/data/ads';
-import { addTickets, consumeAdRefillQuota, useGameState } from '@/data/gameState';
+import { applyServerState, useGameState } from '@/data/gameState';
+import { refillTicketsByAd } from '@/data/tickets';
 import { formatCountdown } from '@/utils/formatCountdown';
 
 export default function RefillScreen() {
@@ -25,11 +26,12 @@ export default function RefillScreen() {
     setNotice(null);
     try {
       await mockAdsRepository.watchAd();
-      if (!consumeAdRefillQuota()) {
-        setNotice('오늘 광고 충전 횟수를 다 썼어요.');
+      const result = await refillTicketsByAd(kind === 'single' ? 1 : 4);
+      if (!result.ok) {
+        setNotice(result.message);
         return;
       }
-      addTickets(kind === 'single' ? 1 : 4);
+      applyServerState(result.data);
     } finally {
       setWatching(null);
     }

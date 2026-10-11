@@ -1,5 +1,6 @@
 import {
   addPoints,
+  applyServerState,
   addTickets,
   consumeAdRefillQuota,
   deleteNotification,
@@ -18,6 +19,33 @@ import {
 // 각 테스트가 서로 영향을 주지 않도록, 매번 초기 상태로 되돌리고 시작한다.
 beforeEach(() => {
   resetGameStateForTests();
+  // 앱은 서버가 알려준 상태로 시작하므로, 테스트도 "탭권 3/5장, 1시간 뒤 무료 충전" 상태를 서버에서 받은 것처럼 맞춰 놓는다.
+  applyServerState({ tickets: 3, maxTickets: 5, todayEarned: 3, todayAdRefillsLeft: 5, nextFreeTicketInSeconds: 3600 });
+});
+
+describe('applyServerState', () => {
+  test('서버가 준 항목만 바꾸고 나머지는 그대로 둔다', () => {
+    applyServerState({ points: 700, tickets: 1 });
+
+    expect(getGameState().points).toBe(700);
+    expect(getGameState().tickets).toBe(1);
+    expect(getGameState().maxTickets).toBe(5);
+  });
+
+  test('다음 무료 탭권까지 남은 초를 지금 시각 기준의 시각으로 바꾼다', () => {
+    jest.spyOn(Date, 'now').mockReturnValue(1_000_000);
+
+    applyServerState({ nextFreeTicketInSeconds: 90 });
+
+    expect(getGameState().nextFreeTicketAt).toBe(1_000_000 + 90_000);
+    jest.restoreAllMocks();
+  });
+
+  test('남은 초가 null이면 무료 충전 타이머를 멈춘다(탭권이 가득 참)', () => {
+    applyServerState({ nextFreeTicketInSeconds: null });
+
+    expect(getGameState().nextFreeTicketAt).toBeNull();
+  });
 });
 
 describe('addPoints', () => {

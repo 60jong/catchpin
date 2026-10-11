@@ -3,7 +3,6 @@ import { useSyncExternalStore } from 'react';
 import { notificationSeeds, type NotificationType } from './notifications';
 
 const FREE_TICKET_INTERVAL_MS = 60 * 60 * 1000;
-const DAILY_AD_REFILLS = 5;
 /** 기록이 무한히 쌓이지 않도록 두는 상한선 */
 const MAX_CLAIM_HISTORY = 50;
 /** 알림센터도 마찬가지로 무한히 쌓이지 않도록 두는 상한선 */
@@ -56,12 +55,12 @@ function createInitialNotifications(): NotificationRecord[] {
 
 function createInitialState(): GameState {
   return {
-    points: 12480,
-    tickets: 3,
+    points: 0,
+    tickets: 0,
     maxTickets: 5,
-    todayEarned: 3,
-    todayAdRefillsLeft: DAILY_AD_REFILLS,
-    nextFreeTicketAt: Date.now() + FREE_TICKET_INTERVAL_MS,
+    todayEarned: 0,
+    todayAdRefillsLeft: 0,
+    nextFreeTicketAt: null,
     claimHistory: [],
     notifications: createInitialNotifications(),
     simpleNotificationsOnly: false,
@@ -103,6 +102,27 @@ export function spendTicket(): boolean {
     nextFreeTicketAt: wasFull ? Date.now() + FREE_TICKET_INTERVAL_MS : state.nextFreeTicketAt,
   });
   return true;
+}
+
+/** 서버가 알려준 내 상태 — 포인트, 탭권 등의 기준은 서버다. 주는 항목만 바꾼다. */
+export type ServerState = {
+  points?: number;
+  tickets?: number;
+  maxTickets?: number;
+  todayEarned?: number;
+  todayAdRefillsLeft?: number;
+  /** 다음 무료 탭권까지 남은 초 (가득 차서 타이머가 없으면 null). 서버 시각대에 기대지 않으려고 "남은 초"로 받는다. */
+  nextFreeTicketInSeconds?: number | null;
+};
+
+export function applyServerState(server: ServerState) {
+  const { nextFreeTicketInSeconds, ...rest } = server;
+  setState({
+    ...rest,
+    ...(nextFreeTicketInSeconds !== undefined && {
+      nextFreeTicketAt: nextFreeTicketInSeconds === null ? null : Date.now() + nextFreeTicketInSeconds * 1000,
+    }),
+  });
 }
 
 export function addPoints(amount: number) {

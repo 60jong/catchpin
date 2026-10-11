@@ -18,11 +18,9 @@ import type { ToastItem } from '@/components/home/ResultToast';
 import { TopBar } from '@/components/home/TopBar';
 import { Brand } from '@/constants/theme';
 import {
-  addPoints,
-  incrementTodayEarned,
+  applyServerState,
   recordClaim,
   recordNotification,
-  spendTicket,
   tickFreeTicketClock,
   useGameState,
 } from '@/data/gameState';
@@ -85,11 +83,12 @@ export default function HomeScreen() {
     return () => subscription.remove();
   }, [checkLocationPermission]);
 
-  // 프로필 편집에서 사진을 바꾸고 돌아왔을 때도 내 마커에 바로 반영되도록, 홈이 보일 때마다 내 프로필을 다시 가져온다.
+  // 보유 포인트는 서버가 기준이라 홈이 보일 때마다 맞추고, 프로필 편집에서 사진을 바꾸고 돌아왔을 때도 내 마커에 바로 반영되도록 같이 가져온다.
   useFocusEffect(
     useCallback(() => {
       fetchMe().then((me) => {
         setProfileImageUrl(me?.profileImageUrl ?? null);
+        if (me) applyServerState(me);
       });
     }, []),
   );
@@ -178,6 +177,13 @@ export default function HomeScreen() {
         setPins((prev) => prev.filter((p) => p.id !== pin.id));
         return;
       }
+      // 포인트, 탭권, 오늘 획득은 서버가 계산했으니 그 값으로 맞춘다 (탭권은 이긴 경우에만 1장 줄어 있다).
+      applyServerState({
+        points: claim.data.pointBalance,
+        tickets: claim.data.tickets,
+        todayEarned: claim.data.todayEarned,
+        nextFreeTicketInSeconds: claim.data.nextFreeTicketInSeconds,
+      });
       const { outcome, marginMs } = claim.data;
       const won = outcome === 'won';
       // 진 경우의 시간차는 서버가 잰 실제 값이고, 이긴 경우는 서버가 모르는 값이라 지금처럼 연출용으로 둔다.
@@ -185,9 +191,6 @@ export default function HomeScreen() {
 
       // 2) 승패에 따라 보상/피드백 처리
       if (won) {
-        spendTicket(); // 탭 성공 시에만 차감
-        addPoints(pin.points);
-        incrementTodayEarned();
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       } else {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);

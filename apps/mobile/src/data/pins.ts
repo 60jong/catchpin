@@ -86,11 +86,16 @@ export type ServerClaim = {
   outcome: 'won' | 'lost' | 'expired';
   points: number;
   marginMs: number | null;
+  /** 판정 뒤 내 상태 (서버 기준) */
+  pointBalance: number;
+  tickets: number;
+  todayEarned: number;
+  nextFreeTicketInSeconds: number | null;
 };
 
 /** 핀을 탭한다 — 서버가 먼저 도착한 순서로 판정한다. */
 export async function claimPinOnServer(pinId: string): Promise<ApiResult<ServerClaim>> {
-  const result = await callApi<{ outcome: string; points: number; marginMs: number | null }>(
+  const result = await callApi<{ outcome: string; points: number; marginMs: number | null; pointBalance: number; tickets: number; todayEarned: number; nextFreeTicketInSeconds: number | null }>(
     'POST',
     `/api/v1/pins/${pinId}/claim`,
   );
@@ -101,6 +106,10 @@ export async function claimPinOnServer(pinId: string): Promise<ApiResult<ServerC
           outcome: result.data.outcome.toLowerCase() as ServerClaim['outcome'],
           points: result.data.points,
           marginMs: result.data.marginMs,
+          pointBalance: result.data.pointBalance,
+          tickets: result.data.tickets,
+          todayEarned: result.data.todayEarned,
+          nextFreeTicketInSeconds: result.data.nextFreeTicketInSeconds,
         },
       }
     : result;

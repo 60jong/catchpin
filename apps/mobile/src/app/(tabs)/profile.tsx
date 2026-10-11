@@ -9,7 +9,7 @@ import { SettingsSection } from '@/components/profile/SettingsSection';
 import { StatsRow } from '@/components/profile/StatsRow';
 import { Icon } from '@/components/ui/Icon';
 import { Brand, BrandFonts } from '@/constants/theme';
-import { setSimpleNotificationsOnly, useGameState } from '@/data/gameState';
+import { applyServerState, setSimpleNotificationsOnly, useGameState } from '@/data/gameState';
 import { fetchMe, type Me } from '@/data/member';
 import { setAccessToken } from '@/data/session';
 import { computeWinRatePercent, countClaimsThisMonth } from '@/utils/profileStats';
@@ -24,7 +24,10 @@ export default function ProfileScreen() {
   // 프로필 편집에서 돌아왔을 때도 바뀐 닉네임/사진이 보이도록, 화면이 포커스될 때마다 다시 가져온다.
   useFocusEffect(
     useCallback(() => {
-      fetchMe().then(setMe);
+      fetchMe().then((result) => {
+        setMe(result);
+        if (result) applyServerState(result);
+      });
     }, []),
   );
 
