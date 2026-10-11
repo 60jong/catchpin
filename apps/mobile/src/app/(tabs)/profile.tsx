@@ -36,6 +36,7 @@ export default function ProfileScreen() {
         providerLabel={me?.email ?? '로그인 계정'}
         provider={me?.providers[0]}
         imageUrl={me?.profileImageUrl}
+        onPress={() => router.push('/profile-edit')}
       />
 
       <StatsRow

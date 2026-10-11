@@ -40,6 +40,14 @@
       "expo-notifications",
       "expo-audio",
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "프로필 사진을 고르려면 사진 보관함에 접근해야 해요.",
+          "cameraPermission": "프로필 사진을 찍으려면 카메라에 접근해야 해요.",
+          "microphonePermission": false
+        }
+      ],
+      [
         "expo-build-properties",
         {
           "android": {
