@@ -9,4 +9,9 @@ public interface CaptureRepository extends JpaRepository<Capture, Long> {
 
 	// 기록(History) 탭, 통계(이번 달 획득/성공률) 계산용 — 한 회원의 캡처 이력을 최신순으로.
 	List<Capture> findByMemberOrderByCreatedAtDesc(Member member);
+
+	List<Capture> findByMemberIdOrderByCreatedAtDesc(Long memberId);
+
+	// 탈퇴 — 회원의 캡처 이력을 모두 지운다.
+	void deleteByMemberId(Long memberId);
 }

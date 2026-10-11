@@ -66,6 +66,13 @@ public class AuthService {
 		return issueTokens(member);
 	}
 
+	// 탈퇴 — 회원의 로그인 방식 연결과 리프레시 토큰을 모두 지운다.
+	@Transactional
+	public void deleteAllOf(Long memberId) {
+		refreshTokenService.deleteAllOf(memberId);
+		authProviderRepository.deleteByMemberId(memberId);
+	}
+
 	// 카카오 idToken을 서버가 직접 검증(JWKS)하고, 이미 연결된 회원이면 그대로, 처음이면 새로 만들어서 로그인시킨다.
 	// 카카오 이메일은 동의항목을 받은 경우에만 오고, 없으면 같은 이메일 검사는 못 한다.
 	@Transactional

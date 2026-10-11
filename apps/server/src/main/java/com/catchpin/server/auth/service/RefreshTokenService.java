@@ -26,6 +26,12 @@ public class RefreshTokenService {
 		this.ttlDays = ttlDays;
 	}
 
+	// 탈퇴 — 회원의 리프레시 토큰을 모두 지운다.
+	@Transactional
+	public void deleteAllOf(Long memberId) {
+		refreshTokenRepository.deleteByMemberId(memberId);
+	}
+
 	// 새 리프레시 토큰을 발급한다 — 원본(raw) 값은 클라이언트에만 주고, DB에는 해시만 저장한다.
 	@Transactional
 	public String issue(Member member) {

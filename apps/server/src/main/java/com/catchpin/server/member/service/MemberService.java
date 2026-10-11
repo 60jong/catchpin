@@ -80,6 +80,12 @@ public class MemberService {
 		return member.getInviteCode();
 	}
 
+	// 탈퇴 — 회원 행 자체를 지운다. 이 회원을 가리키는 다른 도메인의 데이터는 호출하는 쪽(WithdrawalService)이 먼저 지워야 한다.
+	@Transactional
+	public void delete(Member member) {
+		memberRepository.delete(member);
+	}
+
 	private String randomCodeChars(int length) {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < length; i++) {

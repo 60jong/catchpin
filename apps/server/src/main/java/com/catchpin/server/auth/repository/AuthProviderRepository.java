@@ -18,4 +18,6 @@ public interface AuthProviderRepository extends JpaRepository<AuthProvider, Long
 	// 회원이 연결한 로그인 방식들 — 먼저 연결한 순서.
 	List<AuthProvider> findByMemberIdOrderByIdAsc(Long memberId);
 
+	// 탈퇴 — 회원의 로그인 연결을 모두 지운다.
+	void deleteByMemberId(Long memberId);
 }
