@@ -30,6 +30,12 @@ public class MemberService {
 		return memberRepository.findByEmail(email).orElseGet(() -> memberRepository.save(new Member(email)));
 	}
 
+	// 이메일 없이 회원을 만든다 — 카카오 로그인 첫 가입용(카카오는 이메일 동의가 없을 수 있고, 이메일로 기존 회원과 합치지도 않는다).
+	@Transactional
+	public Member createWithoutEmail() {
+		return memberRepository.save(new Member(null));
+	}
+
 	public Optional<Member> findByEmail(String email) {
 		return memberRepository.findByEmail(email);
 	}

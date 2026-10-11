@@ -1,5 +1,6 @@
 package com.catchpin.server.member.controller;
 
+import com.catchpin.server.auth.service.AuthService;
 import com.catchpin.server.common.auth.CurrentMemberId;
 import com.catchpin.server.common.response.ApiResponse;
 import com.catchpin.server.member.domain.MemberMeResponse;
@@ -23,10 +24,13 @@ public class MemberController {
 
 	private final MemberService memberService;
 	private final ProfileImageService profileImageService;
+	private final AuthService authService;
 
-	public MemberController(MemberService memberService, ProfileImageService profileImageService) {
+	public MemberController(
+			MemberService memberService, ProfileImageService profileImageService, AuthService authService) {
 		this.memberService = memberService;
 		this.profileImageService = profileImageService;
+		this.authService = authService;
 	}
 
 	// 앱 부트스트랩 호출 — 포인트/탭권/오늘 통계/설정을 한 번에 내려준다.
@@ -61,6 +65,9 @@ public class MemberController {
 	}
 
 	private MemberMeResponse toResponse(Member member) {
-		return MemberMeResponse.from(member, profileImageService.urlOf(member.getProfileImageKey()));
+		return MemberMeResponse.from(
+				member,
+				profileImageService.urlOf(member.getProfileImageKey()),
+				authService.getLoginProviders(member.getId()));
 	}
 }
