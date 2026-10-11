@@ -4,15 +4,16 @@ import { StyleSheet, Text, View } from 'react-native';
 import { Brand, BrandFonts } from '@/constants/theme';
 
 type SettingsSectionProps = {
-  title: string;
+  /** 없으면 제목 없이 카드만 (친구 초대처럼 섹션 이름이 필요 없는 묶음) */
+  title?: string;
   children: ReactNode;
 };
 
-/** "혜택"/"설정"/"고객지원" 같은 섹션 묶음 — 제목 + 그 아래 둥근 흰 카드에 SettingsRow들을 담는다. */
+/** "설정"/"고객지원" 같은 섹션 묶음 — (선택) 제목 + 그 아래 둥근 흰 카드에 SettingsRow들을 담는다. */
 export function SettingsSection({ title, children }: SettingsSectionProps) {
   return (
     <View style={styles.wrap}>
-      <Text style={styles.title}>{title}</Text>
+      {title && <Text style={styles.title}>{title}</Text>}
       <View style={styles.card}>{children}</View>
     </View>
   );

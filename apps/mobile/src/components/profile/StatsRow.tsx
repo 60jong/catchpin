@@ -8,7 +8,7 @@ type StatsRowProps = {
   winRatePercent: number;
 };
 
-/** 보유 포인트/이번 달 획득/선점 성공률을 3칸으로 보여준다 — 값 계산은 상위(profileStats.ts)에서 끝내고 온다. */
+/** 보유 포인트/이번 달 획득/성공률을 3칸으로 보여준다 — 값 계산은 상위(profileStats.ts)에서 끝내고 온다. */
 export function StatsRow({ points, monthlyEarned, winRatePercent }: StatsRowProps) {
   return (
     <View style={styles.card}>
@@ -22,7 +22,7 @@ export function StatsRow({ points, monthlyEarned, winRatePercent }: StatsRowProp
       </View>
       <View style={styles.cell}>
         <Text style={styles.valueInk}>{winRatePercent}%</Text>
-        <Text style={styles.label}>선점 성공률</Text>
+        <Text style={styles.label}>성공률</Text>
       </View>
     </View>
   );
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     gap: 2,
-    paddingVertical: 12,
+    paddingVertical: 14,
     paddingHorizontal: 4,
   },
   cellBordered: {
@@ -51,19 +51,19 @@ const styles = StyleSheet.create({
   },
   valueGold: {
     fontFamily: BrandFonts.soraExtraBold,
-    fontSize: 19,
+    fontSize: 20,
     letterSpacing: -0.3,
     color: Brand.goldText,
   },
   valueBlue: {
     fontFamily: BrandFonts.soraExtraBold,
-    fontSize: 19,
+    fontSize: 20,
     letterSpacing: -0.3,
     color: Brand.primaryDark,
   },
   valueInk: {
     fontFamily: BrandFonts.soraExtraBold,
-    fontSize: 19,
+    fontSize: 20,
     letterSpacing: -0.3,
     color: Brand.ink,
   },

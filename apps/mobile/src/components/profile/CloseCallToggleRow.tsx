@@ -10,7 +10,7 @@ type CloseCallToggleRowProps = {
   onToggle: () => void;
 };
 
-/** 홈에서 핀을 눌렀을 때 초접전 연출을 보여줄지, 상단 푸시 알림만 보여줄지 켜고 끈다. */
+/** 홈에서 핀을 눌렀을 때 판정 연출(초접전)을 보여줄지, 상단 푸시 알림만 보여줄지 켜고 끈다. */
 export function CloseCallToggleRow({ enabled, onToggle }: CloseCallToggleRowProps) {
   return (
     <Pressable
@@ -20,9 +20,9 @@ export function CloseCallToggleRow({ enabled, onToggle }: CloseCallToggleRowProp
       style={[styles.row, styles.rowBordered]}>
       <SettingsIcon variant="closeCall" />
       <View style={styles.textWrap}>
-        <Text style={styles.label}>초접전 연출</Text>
+        <Text style={styles.label}>판정 연출</Text>
         <Text style={styles.sub}>
-          {enabled ? '거의 동시에 눌렀을 때 화려한 연출을 보여줘요' : '간단한 알림으로만 결과를 알려줘요'}
+          {enabled ? '거의 동시에 눌렀을 때 연출을 보여줘요' : '간단한 알림으로만 알려줘요'}
         </Text>
       </View>
       <View style={[styles.track, { backgroundColor: enabled ? Brand.green : '#D6DBE5' }]}>
@@ -49,13 +49,13 @@ const styles = StyleSheet.create({
     gap: 1,
   },
   label: {
-    fontFamily: BrandFonts.gothicBold,
-    fontSize: 15,
+    fontFamily: BrandFonts.gothicMedium,
+    fontSize: 16,
     color: Brand.ink,
   },
   sub: {
     fontFamily: BrandFonts.gothicMedium,
-    fontSize: 12,
+    fontSize: 13,
     color: Brand.muted,
   },
   track: {

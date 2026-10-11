@@ -8,6 +8,8 @@ import { SettingsIcon, type SettingsIconVariant } from './SettingsIcon';
 type SettingsRowProps = {
   icon: SettingsIconVariant;
   label: string;
+  /** 배지 대신 오른쪽에 그냥 글자로 보여줄 현재 값 (예: "앱 사용 중") */
+  value?: string;
   badge?: string;
   badgeColor?: string;
   badgeBg?: string;
@@ -20,6 +22,7 @@ type SettingsRowProps = {
 export function SettingsRow({
   icon,
   label,
+  value,
   badge,
   badgeColor = Brand.goldText,
   badgeBg = '#FFF8E1',
@@ -30,6 +33,7 @@ export function SettingsRow({
     <Pressable onPress={onPress} style={[styles.row, bordered && styles.rowBordered]}>
       <SettingsIcon variant={icon} />
       <Text style={styles.label}>{label}</Text>
+      {value && <Text style={styles.value}>{value}</Text>}
       {badge && (
         <View style={[styles.badge, { backgroundColor: badgeBg }]}>
           <Text style={[styles.badgeText, { color: badgeColor }]}>{badge}</Text>
@@ -59,6 +63,11 @@ const styles = StyleSheet.create({
     fontFamily: BrandFonts.gothicBold,
     fontSize: 15,
     color: Brand.ink,
+  },
+  value: {
+    fontFamily: BrandFonts.gothicMedium,
+    fontSize: 16,
+    color: Brand.muted,
   },
   badge: {
     borderRadius: 999,
