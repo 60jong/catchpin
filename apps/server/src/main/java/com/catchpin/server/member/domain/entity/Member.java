@@ -33,6 +33,9 @@ public class Member extends BaseEntity {
 
 	private String avatarId;
 
+	/** 업로드한 프로필 사진의 S3 키 (없으면 null). URL이 아니라 키만 저장 — 공개 URL은 응답을 만들 때 조립한다. */
+	private String profileImageKey;
+
 	@Column(nullable = false)
 	private int pointBalance = 0;
 
@@ -81,6 +84,10 @@ public class Member extends BaseEntity {
 		if (avatarId != null) {
 			this.avatarId = avatarId;
 		}
+	}
+
+	public void changeProfileImage(String profileImageKey) {
+		this.profileImageKey = profileImageKey;
 	}
 
 	public void updateSimpleNotificationsOnly(boolean value) {

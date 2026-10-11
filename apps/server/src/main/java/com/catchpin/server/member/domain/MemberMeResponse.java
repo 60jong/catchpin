@@ -9,6 +9,7 @@ public record MemberMeResponse(
 		String email,
 		String nickname,
 		String avatarId,
+		String profileImageUrl,
 		boolean profileComplete,
 		int points,
 		int tickets,
@@ -19,12 +20,14 @@ public record MemberMeResponse(
 		boolean simpleNotificationsOnly) {
 
 	// Member 엔티티 → 응답 DTO 변환 (컨트롤러에서 바로 쓰기 위한 정적 팩토리)
-	public static MemberMeResponse from(Member member) {
+	// profileImageUrl은 키에서 공개 URL을 조립해야 해서(설정 필요) 엔티티만으론 못 만들고, 호출하는 쪽이 넘겨준다.
+	public static MemberMeResponse from(Member member, String profileImageUrl) {
 		return new MemberMeResponse(
 				member.getId(),
 				member.getEmail(),
 				member.getNickname(),
 				member.getAvatarId(),
+				profileImageUrl,
 				member.isProfileComplete(),
 				member.getPointBalance(),
 				member.getTickets(),
@@ -34,4 +37,5 @@ public record MemberMeResponse(
 				member.getNextFreeTicketAt(),
 				member.isSimpleNotificationsOnly());
 	}
+
 }

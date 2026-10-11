@@ -3,9 +3,13 @@ package com.catchpin.server.member.service;
 import com.catchpin.server.member.domain.entity.Member;
 import com.catchpin.server.member.exception.MemberNotFoundException;
 import com.catchpin.server.member.repository.MemberRepository;
+import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,9 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberService {
 
 	private final MemberRepository memberRepository;
+	private final ProfileImageService profileImageService;
 
-	public MemberService(MemberRepository memberRepository) {
+	public MemberService(MemberRepository memberRepository, ProfileImageService profileImageService) {
 		this.memberRepository = memberRepository;
+		this.profileImageService = profileImageService;
 	}
 
 	// 이메일로 기존 회원을 찾고, 없으면 새로 만든다 (소셜 로그인 첫 로그인 시, 이메일 가입 시 둘 다 여기로 들어온다).
@@ -40,12 +46,21 @@ public class MemberService {
 	// 아직 프로필이 안 끝났으면(온보딩 중) completeProfile로 profileComplete를 true로 바꾸고,
 	// 이미 끝난 회원이면 updateProfile로 부분 수정만 한다.
 	@Transactional
-	public Member updateProfile(Long memberId, String nickname, String avatarId) {
+	public Member updateProfile(Long memberId, String nickname, String avatarId, String profileImageKey) {
 		Member member = getById(memberId);
 		if (!member.isProfileComplete()) {
 			member.completeProfile(nickname, avatarId);
 		} else {
 			member.updateProfile(nickname, avatarId);
+		}
+		if (profileImageKey != null) {
+			// 빈 문자열은 "기본 이미지로 변경" — 올려둔 사진을 프로필에서 뗀다.
+			if (profileImageKey.isEmpty()) {
+				member.changeProfileImage(null);
+			} else {
+				profileImageService.verifyOwnKey(memberId, profileImageKey);
+				member.changeProfileImage(profileImageKey);
+			}
 		}
 		return member;
 	}
@@ -57,7 +72,7 @@ public class MemberService {
 		return member;
 	}
 
-	private Member getById(Long memberId) {
+	public Member getById(Long memberId) {
 		return memberRepository.findById(memberId).orElseThrow(() -> new MemberNotFoundException("회원을 찾을 수 없어요."));
 	}
 
