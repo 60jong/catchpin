@@ -1,3 +1,4 @@
+import { Image } from 'expo-image';
 import { StyleSheet, View } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 
@@ -6,9 +7,11 @@ const SIZE = 56;
 type MyMarkerProps = {
   /** noLocation: 위치 권한이 꺼진 상태 — 사람 아이콘 대신 회색 위치-꺼짐 아이콘을 보여준다. */
   variant?: 'normal' | 'noLocation';
+  /** 내가 올린 프로필 사진 URL — 없으면 기본 실루엣을 보여준다. */
+  imageUrl?: string | null;
 };
 
-export function MyMarker({ variant = 'normal' }: MyMarkerProps) {
+export function MyMarker({ variant = 'normal', imageUrl }: MyMarkerProps) {
   if (variant === 'noLocation') {
     return (
       <View style={styles.wrap} pointerEvents="none">
@@ -43,11 +46,15 @@ export function MyMarker({ variant = 'normal' }: MyMarkerProps) {
       <View style={styles.shadow} />
       <View style={styles.container}>
         <View style={styles.inner}>
-          <Svg width="100%" height="100%" viewBox="0 0 48 48">
-            <Rect width={48} height={48} fill="#D7E6FA" />
-            <Circle cx={24} cy={19} r={9} fill="#8FA9CF" />
-            <Path d="M6 48c1-10 8-16 18-16s17 6 18 16z" fill="#8FA9CF" />
-          </Svg>
+          {imageUrl ? (
+            <Image source={{ uri: imageUrl }} style={styles.image} contentFit="cover" />
+          ) : (
+            <Svg width="100%" height="100%" viewBox="0 0 48 48">
+              <Rect width={48} height={48} fill="#D7E6FA" />
+              <Circle cx={24} cy={19} r={9} fill="#8FA9CF" />
+              <Path d="M6 48c1-10 8-16 18-16s17 6 18 16z" fill="#8FA9CF" />
+            </Svg>
+          )}
         </View>
       </View>
     </View>
@@ -87,8 +94,14 @@ const styles = StyleSheet.create({
     borderColor: '#AEB4C6',
     shadowColor: '#8C93A8',
   },
+  image: {
+    width: '100%',
+    height: '100%',
+  },
   inner: {
     flex: 1,
+    // 바깥 원이 alignItems: 'center'라서 가만두면 가로가 내용 크기(0)로 줄어든다 — 사진이 보이려면 가로로 꽉 채워야 한다.
+    alignSelf: 'stretch',
     borderRadius: SIZE / 2,
     borderWidth: 2,
     borderColor: '#FFFFFF',

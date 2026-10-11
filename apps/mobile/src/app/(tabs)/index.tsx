@@ -2,7 +2,7 @@ import * as Haptics from 'expo-haptics';
 import * as Location from 'expo-location';
 import { getNetworkStateAsync, useNetworkState } from 'expo-network';
 import * as Notifications from 'expo-notifications';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, AppState, LayoutChangeEvent, Linking, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -26,6 +26,7 @@ import {
   tickFreeTicketClock,
   useGameState,
 } from '@/data/gameState';
+import { fetchMe } from '@/data/member';
 import { mockPinsRepository, type Pin } from '@/data/pins';
 import { pickCloseCallMarginSeconds } from '@/utils/closeCall';
 import { getMarkerPlacement, getPinPlacement, getRadarVisualSize } from '@/utils/radarLayout';
@@ -57,6 +58,7 @@ export default function HomeScreen() {
   const [bottomSheetHeight, setBottomSheetHeight] = useState(0);
   // null = 아직 확인 전(그 사이엔 평소 화면으로 둔다 — 깜빡임 방지)
   const [locationGranted, setLocationGranted] = useState<boolean | null>(null);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const network = useNetworkState();
   // 처음 로딩 중엔 isConnected가 undefined라 "오프라인"으로 오판하지 않게, 확실히 false일 때만 오프라인으로 본다.
   const isOffline = network.isConnected === false;
@@ -80,6 +82,15 @@ export default function HomeScreen() {
     });
     return () => subscription.remove();
   }, [checkLocationPermission]);
+
+  // 프로필 편집에서 사진을 바꾸고 돌아왔을 때도 내 마커에 바로 반영되도록, 홈이 보일 때마다 내 프로필을 다시 가져온다.
+  useFocusEffect(
+    useCallback(() => {
+      fetchMe().then((me) => {
+        setProfileImageUrl(me?.profileImageUrl ?? null);
+      });
+    }, []),
+  );
 
   useEffect(() => {
     const id = setInterval(tickFreeTicketClock, 1000);
@@ -217,7 +228,7 @@ export default function HomeScreen() {
             </View>
 
             <View style={[styles.absolute, { left: marker.x, top: marker.y }]}>
-              <MyMarker variant={markerVariant} />
+              <MyMarker variant={markerVariant} imageUrl={profileImageUrl} />
             </View>
 
             {visiblePins.map((pin) => {
