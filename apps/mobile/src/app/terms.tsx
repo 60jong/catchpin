@@ -42,7 +42,7 @@ export default function TermsScreen() {
         <Text style={styles.backArrow}>‹</Text>
       </Pressable>
 
-      <ProgressBar step={1} total={4} />
+      <ProgressBar step={1} total={5} />
 
       <View style={styles.headerText}>
         <Text style={styles.title}>{'서비스 이용에\n동의해 주세요'}</Text>

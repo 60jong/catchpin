@@ -8,7 +8,8 @@ export type SettingsIconVariant =
   | 'account'
   | 'notice'
   | 'support'
-  | 'terms';
+  | 'terms'
+  | 'verify';
 
 const COLORS: Record<SettingsIconVariant, [dark: string, light: string]> = {
   invite: ['#B33B33', '#E8534A'],
@@ -19,6 +20,7 @@ const COLORS: Record<SettingsIconVariant, [dark: string, light: string]> = {
   notice: ['#6B7289', '#8C93A8'],
   support: ['#6B7289', '#8C93A8'],
   terms: ['#6B7289', '#8C93A8'],
+  verify: ['#1D52B8', '#2F6FE8'],
 };
 
 /** 설정 행 왼쪽의 둥근 사각 배지 아이콘 — variant별로 색상 2톤 + 안쪽 그림(Glyph)만 다르다. */
@@ -44,6 +46,13 @@ function Glyph({ variant }: { variant: SettingsIconVariant }) {
           <Rect x={4} y={9} width={16} height={11} rx={2} fill="#FFFFFF" />
           <Rect x={3} y={6} width={18} height={4} rx={1.5} fill="#FFFFFF" />
           <Rect x={11} y={6} width={2} height={14} fill="#E8534A" />
+        </>
+      );
+    case 'verify':
+      return (
+        <>
+          <Rect x={8} y={3.5} width={8} height={14} rx={2} fill="#FFFFFF" />
+          <Rect x={10.5} y={14.5} width={3} height={1.5} rx={0.75} fill="#2F6FE8" />
         </>
       );
     case 'notifications':

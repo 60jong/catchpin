@@ -77,7 +77,7 @@ export default function PermLocationScreen() {
         <Text style={styles.backArrow}>‹</Text>
       </Pressable>
 
-      <ProgressBar step={2} total={4} />
+      <ProgressBar step={2} total={5} />
 
       <View style={styles.illustrationBox}>
         <LocationIllustration />

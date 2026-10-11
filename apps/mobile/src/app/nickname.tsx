@@ -47,7 +47,8 @@ export default function NicknameScreen() {
     }
 
     resetOnboarding();
-    router.replace('/(tabs)');
+    // 계정이 만들어졌으니 마지막 단계(휴대폰 인증)로 — 건너뛸 수 있다.
+    router.replace('/signup-phone');
   };
 
   return (
@@ -56,7 +57,7 @@ export default function NicknameScreen() {
         <Text style={styles.backArrow}>‹</Text>
       </Pressable>
 
-      <ProgressBar step={4} total={4} />
+      <ProgressBar step={4} total={5} />
 
       <View style={styles.headerText}>
         <Text style={styles.title}>어떻게 불러드릴까요?</Text>

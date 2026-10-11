@@ -36,7 +36,7 @@ export default function PermNotifyScreen() {
         <Text style={styles.backArrow}>‹</Text>
       </Pressable>
 
-      <ProgressBar step={3} total={4} />
+      <ProgressBar step={3} total={5} />
 
       <View style={styles.mockup}>
         <Svg style={StyleSheet.absoluteFill} viewBox="0 0 100 100" preserveAspectRatio="none">

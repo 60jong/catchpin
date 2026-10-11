@@ -1,12 +1,13 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { CloseCallToggleRow } from '@/components/profile/CloseCallToggleRow';
 import { ProfileCard } from '@/components/profile/ProfileCard';
 import { SettingsRow } from '@/components/profile/SettingsRow';
 import { SettingsSection } from '@/components/profile/SettingsSection';
 import { StatsRow } from '@/components/profile/StatsRow';
+import { Icon } from '@/components/ui/Icon';
 import { Brand, BrandFonts } from '@/constants/theme';
 import { setSimpleNotificationsOnly, useGameState } from '@/data/gameState';
 import { fetchMe, type Me } from '@/data/member';
@@ -39,6 +40,21 @@ export default function ProfileScreen() {
         onPress={() => router.push('/profile-edit')}
       />
 
+      {me && !me.phoneVerified && (
+        <Pressable onPress={() => router.push('/verify-center')} accessibilityRole="button" style={styles.verifyBanner}>
+          <View style={styles.verifyIcon}>
+            <Icon name="phone" size={22} color={Brand.onGold} />
+          </View>
+          <View style={styles.verifyText}>
+            <Text style={styles.verifyTitle}>휴대폰 인증이 필요해요</Text>
+            <Text style={styles.verifyBody}>포인트를 상품권으로 바꾸려면 인증해 주세요</Text>
+          </View>
+          <View style={styles.verifyPill}>
+            <Text style={styles.verifyPillText}>인증하기</Text>
+          </View>
+        </Pressable>
+      )}
+
       <StatsRow
         points={game.points}
         monthlyEarned={countClaimsThisMonth(game.claimHistory, now)}
@@ -50,6 +66,15 @@ export default function ProfileScreen() {
       </SettingsSection>
 
       <SettingsSection title="설정">
+        <SettingsRow
+          icon="verify"
+          label="인증 관리"
+          badge={me?.phoneVerified ? '인증 완료' : '휴대폰 미인증'}
+          badgeColor={me?.phoneVerified ? '#1F7A3F' : '#C73A31'}
+          badgeBg={me?.phoneVerified ? '#E7F7EC' : '#FFE8E5'}
+          bordered
+          onPress={() => router.push('/verify-center')}
+        />
         <SettingsRow icon="notifications" label="알림" bordered />
         <CloseCallToggleRow
           enabled={!game.simpleNotificationsOnly}
@@ -99,6 +124,55 @@ const styles = StyleSheet.create({
     fontSize: 28,
     letterSpacing: -1,
     color: Brand.ink,
+  },
+  verifyBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    backgroundColor: '#FFF8E1',
+    borderWidth: 2,
+    borderColor: '#FFE08A',
+    borderBottomWidth: 4,
+    borderRadius: 20,
+  },
+  verifyIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: Brand.gold,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: Brand.goldDark,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+  },
+  verifyText: {
+    flex: 1,
+    gap: 2,
+  },
+  verifyTitle: {
+    fontFamily: BrandFonts.gothicBlack,
+    fontSize: 15,
+    color: Brand.onGold,
+  },
+  verifyBody: {
+    fontFamily: BrandFonts.gothicBold,
+    fontSize: 12,
+    color: '#7A5600',
+  },
+  verifyPill: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 999,
+  },
+  verifyPillText: {
+    fontFamily: BrandFonts.gothicBlack,
+    fontSize: 13,
+    color: '#6B4A00',
   },
   logoutButton: {
     minHeight: 52,
