@@ -63,6 +63,13 @@ public class Member extends BaseEntity {
 	@Column(nullable = false)
 	private boolean simpleNotificationsOnly = false;
 
+	/** 인증한 휴대폰 번호(숫자만, 예: 01012345678). 한 번호는 한 계정만 쓸 수 있다(unique). 인증 전엔 null. */
+	@Column(unique = true)
+	private String phoneNumber;
+
+	/** 휴대폰 번호를 인증한 시각. null이면 미인증. */
+	private LocalDateTime phoneVerifiedAt;
+
 	// 신규 가입 시: 이메일만 갖고 생성 (닉네임/아바타는 아직 없음, 탭권 등은 필드 기본값 그대로 "가득 참" 상태로 시작)
 	public Member(String email) {
 		this.email = email;
@@ -88,6 +95,15 @@ public class Member extends BaseEntity {
 
 	public void changeProfileImage(String profileImageKey) {
 		this.profileImageKey = profileImageKey;
+	}
+
+	public boolean isPhoneVerified() {
+		return phoneVerifiedAt != null;
+	}
+
+	public void verifyPhone(String phoneNumber, LocalDateTime now) {
+		this.phoneNumber = phoneNumber;
+		this.phoneVerifiedAt = now;
 	}
 
 	public void updateSimpleNotificationsOnly(boolean value) {

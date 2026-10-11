@@ -13,6 +13,9 @@ public record MemberMeResponse(
 		String avatarId,
 		String profileImageUrl,
 		List<AuthProviderType> providers,
+		boolean phoneVerified,
+		String phoneMasked,
+		LocalDateTime phoneVerifiedAt,
 		boolean profileComplete,
 		int points,
 		int tickets,
@@ -32,6 +35,9 @@ public record MemberMeResponse(
 				member.getAvatarId(),
 				profileImageUrl,
 				providers,
+				member.isPhoneVerified(),
+				maskPhone(member.getPhoneNumber()),
+				member.getPhoneVerifiedAt(),
 				member.isProfileComplete(),
 				member.getPointBalance(),
 				member.getTickets(),
@@ -42,4 +48,11 @@ public record MemberMeResponse(
 				member.isSimpleNotificationsOnly());
 	}
 
+	// 010-12**-5678 처럼 가운데 일부만 가려서 보여준다 (인증 전이거나 형식이 이상하면 null).
+	private static String maskPhone(String phone) {
+		if (phone == null || phone.length() < 10) {
+			return null;
+		}
+		return phone.substring(0, 3) + "-" + phone.substring(3, 5) + "**-" + phone.substring(phone.length() - 4);
+	}
 }

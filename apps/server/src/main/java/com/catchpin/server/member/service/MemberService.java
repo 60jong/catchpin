@@ -2,6 +2,7 @@ package com.catchpin.server.member.service;
 
 import com.catchpin.server.member.domain.entity.Member;
 import com.catchpin.server.member.exception.MemberNotFoundException;
+import com.catchpin.server.member.exception.MemberRuleException;
 import com.catchpin.server.member.repository.MemberRepository;
 import java.security.SecureRandom;
 import java.time.LocalDate;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class MemberService {
 
+	private static final String PHONE_IN_USE_MESSAGE = "이미 다른 계정에서 인증한 번호예요.";
 	private final MemberRepository memberRepository;
 	private final ProfileImageService profileImageService;
 
@@ -34,6 +36,27 @@ public class MemberService {
 	@Transactional
 	public Member createWithoutEmail() {
 		return memberRepository.save(new Member(null));
+	}
+
+	public Optional<Member> findByPhoneNumber(String phoneNumber) {
+		return memberRepository.findByPhoneNumber(phoneNumber);
+	}
+
+	// 인증한 휴대폰 번호를 회원에 저장한다. 번호 하나당 한 계정만 허용 — 이미 다른 회원이 쓰고 있으면 거부한다.
+	@Transactional
+	public Member verifyPhone(Long memberId, String phone) {
+		Member member = getById(memberId);
+		memberRepository.findByPhoneNumber(phone).filter(other -> !other.getId().equals(memberId)).ifPresent(other -> {
+			throw new MemberRuleException(HttpStatus.CONFLICT, PHONE_IN_USE_MESSAGE);
+		});
+		member.verifyPhone(phone, LocalDateTime.now());
+		try {
+			memberRepository.saveAndFlush(member);
+		} catch (DataIntegrityViolationException e) {
+			// 동시에 같은 번호를 인증한 경우 — unique 제약이 막아준다.
+			throw new MemberRuleException(HttpStatus.CONFLICT, PHONE_IN_USE_MESSAGE);
+		}
+		return member;
 	}
 
 	public Optional<Member> findByEmail(String email) {
