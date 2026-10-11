@@ -21,6 +21,14 @@ kakao:
     # 토큰 aud로 허용할 앱 키들(쉼표로 구분) — REST API 키와/또는 네이티브 앱 키. 서버 로그의 "audience mismatch: [...]"에 실제 aud가 나온다.
     rest-api-key: ${KAKAO_REST_API_KEY:}
 
+catchpin:
+  pin:
+    # 같은 두 사람 사이에서 포인트를 가져간 뒤 다시 핀이 뜨기까지의 시간(시간 단위). 로컬 테스트에서는 0으로 줄여도 된다.
+    pair-cooldown-hours: ${CATCHPIN_PIN_PAIR_COOLDOWN_HOURS:24}
+  dev:
+    # 개발용 봇 API(/api/v1/dev/bots) — 운영에서는 꺼 둔다.
+    bot-api-enabled: ${CATCHPIN_DEV_BOT_API_ENABLED:false}
+
 jwt:
   secret: ${JWT_SECRET:dev-only-secret-change-me-please-0123456789}
   access-token-ttl-minutes: 60

@@ -3,6 +3,7 @@ package com.catchpin.server.capture.service;
 import com.catchpin.server.capture.domain.CaptureRecord;
 import com.catchpin.server.capture.repository.CaptureRepository;
 import com.catchpin.server.capture.repository.MemberLocationRepository;
+import com.catchpin.server.capture.repository.PinRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,10 +14,15 @@ public class CaptureDataService {
 
 	private final CaptureRepository captureRepository;
 	private final MemberLocationRepository memberLocationRepository;
+	private final PinRepository pinRepository;
 
-	public CaptureDataService(CaptureRepository captureRepository, MemberLocationRepository memberLocationRepository) {
+	public CaptureDataService(
+			CaptureRepository captureRepository,
+			MemberLocationRepository memberLocationRepository,
+			PinRepository pinRepository) {
 		this.captureRepository = captureRepository;
 		this.memberLocationRepository = memberLocationRepository;
+		this.pinRepository = pinRepository;
 	}
 
 	@Transactional(readOnly = true)
@@ -35,6 +41,7 @@ public class CaptureDataService {
 	/** 탈퇴 — 이 회원의 캡처 이력과 위치를 모두 지운다. */
 	@Transactional
 	public void deleteAllOf(Long memberId) {
+		pinRepository.deleteByMemberAIdOrMemberBId(memberId, memberId);
 		captureRepository.deleteByMemberId(memberId);
 		deleteLocation(memberId);
 	}

@@ -63,6 +63,9 @@ public class Member extends BaseEntity {
 	@Column(nullable = false)
 	private boolean simpleNotificationsOnly = false;
 
+	/** 개발용 봇 계정이면 true (기존 행 때문에 NOT NULL로 못 만들어서 null도 "아님"으로 본다) */
+	private Boolean bot;
+
 	/** 인증한 휴대폰 번호(숫자만, 예: 01012345678). 한 번호는 한 계정만 쓸 수 있다(unique). 인증 전엔 null. */
 	@Column(unique = true)
 	private String phoneNumber;
@@ -99,6 +102,14 @@ public class Member extends BaseEntity {
 
 	public void changeProfileImage(String profileImageKey) {
 		this.profileImageKey = profileImageKey;
+	}
+
+	public boolean isBot() {
+		return Boolean.TRUE.equals(bot);
+	}
+
+	public void markAsBot() {
+		this.bot = true;
 	}
 
 	public boolean isPhoneVerified() {

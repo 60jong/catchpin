@@ -41,6 +41,19 @@ public class MemberService {
 		return memberRepository.save(new Member(null));
 	}
 
+	// 개발용 봇 계정 — 로그인 수단 없이 닉네임만 가진 회원을 만든다.
+	@Transactional
+	public Member createBot(String nickname) {
+		Member bot = new Member(null);
+		bot.completeProfile(nickname, null);
+		bot.markAsBot();
+		return memberRepository.save(bot);
+	}
+
+	public List<Member> findBots() {
+		return memberRepository.findByBotTrue();
+	}
+
 	public Optional<Member> findByPhoneNumber(String phoneNumber) {
 		return memberRepository.findByPhoneNumber(phoneNumber);
 	}
