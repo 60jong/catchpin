@@ -25,6 +25,14 @@ catchpin:
   pin:
     # 같은 두 사람 사이에서 포인트를 가져간 뒤 다시 핀이 뜨기까지의 시간(시간 단위). 로컬 테스트에서는 0으로 줄여도 된다.
     pair-cooldown-hours: ${CATCHPIN_PIN_PAIR_COOLDOWN_HOURS:24}
+  phone:
+    # 휴대폰 인증 확인 방식: octomo(기본, 실제 문자를 Octomo로 확인) | dev-approve(개발용, 항상 통과 — 운영에서는 절대 쓰지 않는다)
+    provider: ${CATCHPIN_PHONE_PROVIDER:octomo}
+  octomo:
+    # API 키는 octomo.octoverse.kr 로그인 후 마이페이지에서 받아서 환경변수로만 넣는다 (파일에 적지 않는다)
+    api-key: ${OCTOMO_API_KEY:}
+    # 사용자가 인증 코드를 문자로 보낼 Octomo 대표번호
+    destination-number: ${OCTOMO_DESTINATION_NUMBER:1666-3538}
   dev:
     # 개발용 봇 API(/api/v1/dev/bots) — 운영에서는 꺼 둔다.
     bot-api-enabled: ${CATCHPIN_DEV_BOT_API_ENABLED:false}
