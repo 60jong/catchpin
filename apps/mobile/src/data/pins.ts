@@ -19,7 +19,7 @@ export interface PinsRepository {
 
 const POINT_VALUES = [10, 20, 30, 40, 50];
 
-function randomPin(index: number): Pin {
+export function randomPin(index: number): Pin {
   return {
     id: `pin-${index}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
     points: POINT_VALUES[Math.floor(Math.random() * POINT_VALUES.length)],
@@ -29,7 +29,7 @@ function randomPin(index: number): Pin {
   };
 }
 
-function randomGoldenPin(): Pin {
+export function randomGoldenPin(): Pin {
   return {
     id: `pin-gold-${Date.now()}`,
     points: 100,

@@ -3,7 +3,7 @@ import * as Location from 'expo-location';
 import { getNetworkStateAsync, useNetworkState } from 'expo-network';
 import * as Notifications from 'expo-notifications';
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Alert, AppState, LayoutChangeEvent, Linking, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -25,7 +25,7 @@ import {
   useGameState,
 } from '@/data/gameState';
 import { fetchMe } from '@/data/member';
-import { claimPinOnServer, pingPins, type Pin } from '@/data/pins';
+import { randomGoldenPin, randomPin, type Pin } from '@/data/pins';
 import { pickCloseCallMarginSeconds } from '@/utils/closeCall';
 import { getMarkerPlacement, getPinPlacement, getRadarVisualSize } from '@/utils/radarLayout';
 import { playSound } from '@/utils/sounds';
@@ -33,8 +33,11 @@ import { buildToastCopy, pickTapMarginSeconds } from '@/utils/toast';
 
 const MARKER_SIZE = 56;
 const MAX_VISIBLE_TOASTS = 3;
-/** 위치를 서버에 보내고 핀을 받는 주기 (폴링) */
-const PING_INTERVAL_MS = 4000;
+/** 핀이 하나씩 새로 뜨는 주기 — 지금은 서버 없이 앱 안에서만 만든다 (애니메이션 확인용) */
+const SPAWN_INTERVAL_MS = 5000;
+const MAX_PINS = 5;
+const GOLDEN_CHANCE = 0.1;
+const WIN_CHANCE = 0.6;
 
 // 토스트/알림 각각이 갖는 고유 id — 화면에 여러 개 동시에 떠도 구분하고 개별로 닫을 수 있어야 해서 필요하다.
 function createToastId() {
@@ -93,30 +96,19 @@ export default function HomeScreen() {
     }, []),
   );
 
-  // 위치 폴링 — 홈이 화면에 보이고, 위치 권한이 있고, 온라인인 동안만 4초마다 내 위치를 보내 핀을 받는다.
-  const pingingRef = useRef(false);
-  const pingNow = useCallback(async () => {
-    // 이전 ping이 아직 끝나지 않았으면 겹쳐 보내지 않는다 (같은 사용자의 요청이 동시에 서버에 닿지 않게).
-    if (pingingRef.current) return;
-    pingingRef.current = true;
-    try {
-      const position = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
-      const result = await pingPins(position.coords.latitude, position.coords.longitude);
-      if (result.ok) setPins(result.data);
-    } catch (error) {
-      console.warn('[pins] 위치 폴링 실패', error);
-    } finally {
-      pingingRef.current = false;
-    }
+  // 핀 생성 — 홈이 화면에 보이고, 위치 권한이 있고, 온라인인 동안 5초마다 핀을 하나씩 띄운다. 서버에는 보내지 않는다.
+  const spawnPin = useCallback(() => {
+    const pin = Math.random() < GOLDEN_CHANCE ? randomGoldenPin() : randomPin(0);
+    setPins((prev) => [...prev, pin].slice(-MAX_PINS));
   }, []);
 
   useFocusEffect(
     useCallback(() => {
       if (locationGranted !== true || isOffline) return;
-      pingNow();
-      const id = setInterval(pingNow, PING_INTERVAL_MS);
+      spawnPin();
+      const id = setInterval(spawnPin, SPAWN_INTERVAL_MS);
       return () => clearInterval(id);
-    }, [locationGranted, isOffline, pingNow]),
+    }, [locationGranted, isOffline, spawnPin]),
   );
 
   useEffect(() => {
@@ -152,11 +144,11 @@ export default function HomeScreen() {
       '앱을 쓰는 동안에만 확인하고, 앱을 닫으면 쓰지 않아요. 정확한 위치는 공개되지 않고, 다른 사람에게는 이름 없는 핀으로만 보여요.',
     );
 
-  // 오프라인 배너의 "다시 시도" — 지금 바로 연결 상태를 다시 확인하고, 됐으면 핀 목록을 새로 받아온다.
+  // 오프라인 배너의 "다시 시도" — 지금 바로 연결 상태를 다시 확인하고, 됐으면 핀을 하나 띄운다.
   const handleRetryConnection = async () => {
     const state = await getNetworkStateAsync();
     if (state.isConnected) {
-      pingNow();
+      spawnPin();
     }
   };
 
@@ -166,28 +158,9 @@ export default function HomeScreen() {
     if (claimingId || game.tickets <= 0) return;
     setClaimingId(pin.id);
     try {
-      // 1) 서버(지금은 mock)에 판정을 맡긴다 — 클라이언트는 결과만 받는다
-      const claim = await claimPinOnServer(pin.id);
-      if (!claim.ok) {
-        Alert.alert('핀을 잡지 못했어요', claim.message);
-        return;
-      }
-      if (claim.data.outcome === 'expired') {
-        // 그 사이 사라진 핀 — 결과 없이 화면에서만 치운다.
-        setPins((prev) => prev.filter((p) => p.id !== pin.id));
-        return;
-      }
-      // 포인트, 탭권, 오늘 획득은 서버가 계산했으니 그 값으로 맞춘다 (탭권은 이긴 경우에만 1장 줄어 있다).
-      applyServerState({
-        points: claim.data.pointBalance,
-        tickets: claim.data.tickets,
-        todayEarned: claim.data.todayEarned,
-        nextFreeTicketInSeconds: claim.data.nextFreeTicketInSeconds,
-      });
-      const { outcome, marginMs } = claim.data;
+      // 1) 서버 없이 앱 안에서 승패만 정한다 — 연출을 보기 위한 임시 동작이라 포인트·탭권은 건드리지 않는다.
+      const outcome = Math.random() < WIN_CHANCE ? 'won' : 'lost';
       const won = outcome === 'won';
-      // 진 경우의 시간차는 서버가 잰 실제 값이고, 이긴 경우는 서버가 모르는 값이라 지금처럼 연출용으로 둔다.
-      const serverMargin = marginMs != null ? (marginMs / 1000).toFixed(2) : null;
 
       // 2) 승패에 따라 보상/피드백 처리
       if (won) {
@@ -200,7 +173,7 @@ export default function HomeScreen() {
       // 3) 결과를 보여줄 방식을 사용자 설정으로 분기 — 알림센터 기록은 두 경로 모두 공통으로 남긴다.
       if (game.simpleNotificationsOnly) {
         // 3-a) 간단 모드: 상단 토스트만 띄우고 끝
-        const margin = serverMargin ?? pickTapMarginSeconds();
+        const margin = pickTapMarginSeconds();
         const copy = buildToastCopy(won ? 'success' : 'failure', won ? pin.points : 0, margin);
         const toast: ToastItem = { id: createToastId(), outcome: won ? 'success' : 'failure', points: won ? pin.points : 0, ...copy };
         setToasts((prev) => [toast, ...prev].slice(0, MAX_VISIBLE_TOASTS));
@@ -213,7 +186,7 @@ export default function HomeScreen() {
         });
       } else {
         // 3-b) 기본 모드: 전체화면 초접전 연출로 넘어간다 (연출 자체는 claim-result 화면이 담당)
-        const margin = serverMargin ?? pickCloseCallMarginSeconds();
+        const margin = pickCloseCallMarginSeconds();
         const title = won ? `+${pin.points}P 획득!` : '앗, 한 발 늦었어요';
         recordClaim({ type: won ? 'success' : 'failure', message: title, points: won ? pin.points : 0 });
         recordNotification({
