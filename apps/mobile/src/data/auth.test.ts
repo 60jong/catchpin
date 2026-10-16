@@ -1,4 +1,12 @@
-import { loginWithEmail, loginWithGoogle, signup } from './auth';
+import { autoLogin, loginWithEmail, loginWithGoogle, signup } from './auth';
+import { clearSession, getAccessToken, loadStoredRefreshToken } from './session';
+
+jest.mock('./session', () => ({
+  ...jest.requireActual('./session'),
+  loadStoredRefreshToken: jest.fn(),
+  persistSession: jest.fn(),
+  clearSession: jest.fn(),
+}));
 
 // fetch는 실제 네트워크를 타지 않도록 매번 새로 모킹한다.
 beforeEach(() => {
@@ -89,5 +97,39 @@ describe('signup', () => {
         body: JSON.stringify({ email: 'me@catchpin.dev', password: 'password1234', nickname: 'tester', avatarId: null }),
       }),
     );
+  });
+});
+
+describe('autoLogin', () => {
+  const stored = loadStoredRefreshToken as jest.Mock;
+
+  test('저장된 토큰이 없으면 none', async () => {
+    stored.mockResolvedValueOnce(null);
+    expect(await autoLogin()).toBe('none');
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+  });
+
+  test('저장된 리프레시 토큰으로 새 토큰을 받으면 ok이고 액세스 토큰이 채워진다', async () => {
+    stored.mockResolvedValueOnce('old-refresh');
+    mockFetchOnce(200, { success: true, data: { accessToken: 'new-a', refreshToken: 'new-r', profileComplete: true } });
+
+    expect(await autoLogin()).toBe('ok');
+    expect(getAccessToken()).toBe('new-a');
+    expect((globalThis.fetch as jest.Mock).mock.calls[0][1].body).toBe(JSON.stringify({ refreshToken: 'old-refresh' }));
+  });
+
+  test('토큰이 거부되면 저장된 로그인을 지우고 none', async () => {
+    stored.mockResolvedValueOnce('expired');
+    mockFetchOnce(401, { detail: '유효하지 않은 토큰이에요.' });
+
+    expect(await autoLogin()).toBe('none');
+    expect(clearSession).toHaveBeenCalled();
+  });
+
+  test('서버 오류나 네트워크 문제면 failed (저장된 로그인은 남겨둔다)', async () => {
+    stored.mockResolvedValueOnce('r');
+    (globalThis.fetch as jest.Mock).mockRejectedValueOnce(new Error('offline'));
+
+    expect(await autoLogin()).toBe('failed');
   });
 });

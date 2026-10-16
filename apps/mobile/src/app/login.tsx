@@ -5,7 +5,7 @@ import {
 import { login } from '@react-native-seoul/kakao-login';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -21,7 +21,7 @@ import { GoogleLogo } from '@/components/brand/GoogleLogo';
 import { Logo } from '@/components/brand/Logo';
 import { Wordmark } from '@/components/brand/Wordmark';
 import { Brand, BrandFonts } from '@/constants/theme';
-import { loginWithGoogle, loginWithKakao, type AuthOutcome } from '@/data/auth';
+import { autoLogin, loginWithGoogle, loginWithKakao, type AuthOutcome } from '@/data/auth';
 import { startSocialOnboarding } from '@/data/onboarding';
 
 const { googleWebClientId, googleIosClientId } = Constants.expoConfig?.extra ?? {};
@@ -94,6 +94,24 @@ function SocialButton({
 export default function LoginScreen() {
   const [loading, setLoading] = useState<'google' | 'kakao' | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // 저장된 로그인으로 들어가는 중에는 버튼 대신 스피너를 보여준다 (눌러도 소용없고 깜빡이지도 않게).
+  const [autoLoggingIn, setAutoLoggingIn] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    autoLogin().then((outcome) => {
+      if (cancelled) return;
+      if (outcome === 'ok') {
+        router.replace('/(tabs)');
+        return;
+      }
+      if (outcome === 'failed') setError('자동 로그인에 실패했어요. 인터넷 연결을 확인하고 다시 로그인해 주세요.');
+      setAutoLoggingIn(false);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // 소셜 로그인(구글/카카오)이 서버 로그인까지 끝난 뒤의 공통 처리.
   const finishSocialLogin = (outcome: AuthOutcome) => {
@@ -174,6 +192,11 @@ export default function LoginScreen() {
         <Text style={styles.subtitle}>{'내 주변 핀을 가장 먼저 눌러\n포인트를 모아보세요'}</Text>
       </View>
 
+      {autoLoggingIn ? (
+        <View style={styles.buttons}>
+          <ActivityIndicator color={Brand.primary} />
+        </View>
+      ) : (
       <View style={styles.buttons}>
         <SocialButton
           label="카카오로 시작하기"
@@ -232,6 +255,7 @@ export default function LoginScreen() {
           에 동의하게 돼요
         </Text>
       </View>
+      )}
     </View>
   );
 }

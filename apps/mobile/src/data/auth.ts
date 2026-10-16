@@ -1,6 +1,6 @@
 import Constants from 'expo-constants';
 
-import { setAccessToken } from './session';
+import { clearSession, loadStoredRefreshToken, persistSession, setSession } from './session';
 
 const { apiBaseUrl } = Constants.expoConfig?.extra ?? {};
 
@@ -28,7 +28,9 @@ async function postAuth(path: string, body: unknown): Promise<AuthOutcome> {
     }
 
     const { data } = await response.json();
-    setAccessToken(data.accessToken);
+    setSession(data.accessToken, data.refreshToken);
+    // 닉네임까지 정한 계정만 기기에 남긴다. 온보딩 도중에 앱을 끄면 처음부터 다시 하게 둔다.
+    if (data.profileComplete) await persistSession();
     return { ok: true, result: data };
   } catch (error: any) {
     return { ok: false, message: String(error?.message ?? error) };
@@ -73,5 +75,34 @@ export async function completeProfile(accessToken: string, nickname: string): Pr
     return { ok: true };
   } catch (error: any) {
     return { ok: false, message: String(error?.message ?? error) };
+  }
+}
+
+/** 앱을 켰을 때 로그인 상태: 들어갈 수 있음 / 저장된 로그인이 없거나 만료됨 / 네트워크·서버 문제로 확인 못 함 */
+export type AutoLoginOutcome = 'ok' | 'none' | 'failed';
+
+/** 기기에 저장된 리프레시 토큰으로 로그인 요청을 보내 새 토큰을 받는다. */
+export async function autoLogin(): Promise<AutoLoginOutcome> {
+  const stored = await loadStoredRefreshToken();
+  if (!stored) return 'none';
+  try {
+    const response = await fetch(`${apiBaseUrl}/api/v1/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken: stored }),
+    });
+    if (response.status >= 500) return 'failed';
+    if (!response.ok) {
+      // 만료되었거나 폐기된 토큰 — 다시 로그인해야 한다.
+      await clearSession();
+      return 'none';
+    }
+    const { data } = await response.json();
+    setSession(data.accessToken, data.refreshToken);
+    await persistSession();
+    return 'ok';
+  } catch (error) {
+    console.warn('[auth] 자동 로그인 실패', error);
+    return 'failed';
   }
 }

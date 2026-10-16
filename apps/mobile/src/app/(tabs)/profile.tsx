@@ -11,7 +11,7 @@ import { Icon } from '@/components/ui/Icon';
 import { Brand, BrandFonts } from '@/constants/theme';
 import { applyServerState, setSimpleNotificationsOnly, useGameState } from '@/data/gameState';
 import { fetchMe, type Me } from '@/data/member';
-import { setAccessToken } from '@/data/session';
+import { clearSession } from '@/data/session';
 import { computeWinRatePercent, countClaimsThisMonth } from '@/utils/profileStats';
 
 /** "내 정보" 탭 화면 — 프로필/통계/설정(판정 연출 토글 포함)을 한 화면에 모은다. */
@@ -95,8 +95,8 @@ export default function ProfileScreen() {
 
       <SettingsSection>
         <Pressable
-          onPress={() => {
-            setAccessToken(null);
+          onPress={async () => {
+            await clearSession();
             router.replace('/login');
           }}
           style={styles.logoutButton}>

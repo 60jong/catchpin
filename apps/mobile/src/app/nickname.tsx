@@ -13,6 +13,7 @@ import { ProgressBar } from '@/components/onboarding/ProgressBar';
 import { Brand, BrandFonts } from '@/constants/theme';
 import { completeProfile, signup } from '@/data/auth';
 import { getPendingOnboarding, resetOnboarding } from '@/data/onboarding';
+import { persistSession } from '@/data/session';
 import { validateNickname } from '@/utils/nickname';
 
 const SUGGESTIONS = ['빠른손가락', '번개탭', '핀사냥꾼'];
@@ -47,6 +48,8 @@ export default function NicknameScreen() {
     }
 
     resetOnboarding();
+    // 프로필까지 완성됐으니 이제부터 앱을 다시 켜도 로그인이 이어지게 기기에 남긴다.
+    await persistSession();
     // 계정이 만들어졌으니 마지막 단계(휴대폰 인증)로 — 건너뛸 수 있다.
     router.replace('/signup-phone');
   };

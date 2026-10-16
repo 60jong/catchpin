@@ -9,7 +9,7 @@ import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { Brand, BrandFonts } from '@/constants/theme';
 import { withdrawAccount } from '@/data/account';
 import { useGameState } from '@/data/gameState';
-import { setAccessToken } from '@/data/session';
+import { clearSession } from '@/data/session';
 
 const REASONS = ['자주 쓰지 않아요', '핀이 잘 안 나타나요', '포인트 모으기가 어려워요', '기타'];
 
@@ -29,7 +29,7 @@ export default function WithdrawScreen() {
       return;
     }
     // 서버에서 계정이 지워졌으니 이 기기의 로그인 정보도 지우고 처음 화면으로 돌아간다.
-    setAccessToken(null);
+    await clearSession();
     router.replace('/login');
   };
 
