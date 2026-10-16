@@ -65,10 +65,13 @@ public class PhoneVerificationService {
 
 	/** 인증 코드를 만들어서 돌려준다 — 사용자가 이 코드를 destinationNumber로 문자로 보내야 한다. */
 	public synchronized PhoneCodeResponse issueCode(Long memberId, String rawPhone) {
-		String phone = normalize(rawPhone);
+		log.info("[휴대폰 인증] 코드 발급 요청 memberId={}", memberId);
+		String phone = normalize(memberId, rawPhone);
 
 		// 이미 다른 계정이 인증한 번호면 코드를 만들기 전에 막는다 (문자 비용과 헛수고를 줄임).
 		memberService.findByPhoneNumber(phone).filter(other -> !other.getId().equals(memberId)).ifPresent(other -> {
+			log.info("[휴대폰 인증] 코드 발급 거절 — 다른 계정이 인증한 번호 memberId={} phone={} otherMemberId={}",
+					memberId, mask(phone), other.getId());
 			throw new MemberRuleException(HttpStatus.CONFLICT, "이미 다른 계정에서 인증한 번호예요.");
 		});
 
@@ -79,6 +82,7 @@ public class PhoneVerificationService {
 			recent.pollFirst();
 		}
 		if (recent.size() >= MAX_ISSUES_PER_WINDOW) {
+			log.info("[휴대폰 인증] 코드 발급 거절 — 요청 횟수 초과 memberId={} phone={}", memberId, mask(phone));
 			throw new MemberRuleException(HttpStatus.TOO_MANY_REQUESTS, "인증을 너무 많이 요청했어요. 잠시 후 다시 시도해 주세요.");
 		}
 		recent.addLast(now);
@@ -86,15 +90,20 @@ public class PhoneVerificationService {
 		String code = String.format("%06d", random.nextInt(1_000_000));
 		Duration ttl = Duration.ofMinutes(CODE_MINUTES);
 		pending.put(memberId, new Pending(phone, code, now.plus(ttl)));
+		log.info("[휴대폰 인증] 코드 발급 memberId={} phone={} destination={} 최근발급={}회",
+				memberId, mask(phone), destinationNumber, recent.size());
 		return new PhoneCodeResponse(code, destinationNumber, (int) ttl.toSeconds());
 	}
 
 	/** 사용자가 코드를 문자로 보냈다고 하면 도착했는지 확인하고, 맞으면 이 번호를 내 인증 번호로 저장한다. */
 	public synchronized Member verify(Long memberId, String rawPhone) {
-		String phone = normalize(rawPhone);
+		log.info("[휴대폰 인증] 확인 요청 memberId={}", memberId);
+		String phone = normalize(memberId, rawPhone);
 		Pending p = pending.get(memberId);
 
 		if (p == null || !p.phone.equals(phone) || Instant.now().isAfter(p.expiresAt)) {
+			String reason = p == null ? "발급된 코드 없음(재시작 등)" : !p.phone.equals(phone) ? "발급 때와 다른 번호" : "시간 만료";
+			log.info("[휴대폰 인증] 확인 실패 — {} memberId={} phone={}", reason, memberId, mask(phone));
 			pending.remove(memberId);
 			throw new MemberRuleException(HttpStatus.BAD_REQUEST, "인증 시간이 지났어요. 인증을 다시 시작해 주세요.");
 		}
@@ -103,13 +112,16 @@ public class PhoneVerificationService {
 		try {
 			arrived = messageChecker.exists(phone, p.code, CODE_MINUTES);
 		} catch (MessageCheckException e) {
-			log.error("휴대폰 인증 확인 서비스 오류", e);
+			log.error("[휴대폰 인증] 확인 서비스 오류 memberId={} phone={}", memberId, mask(phone), e);
 			throw new MemberRuleException(HttpStatus.SERVICE_UNAVAILABLE, "지금은 인증을 확인할 수 없어요. 잠시 후 다시 시도해 주세요.");
 		}
 
 		if (!arrived) {
 			// 문자를 보내고 도착하기까지 잠깐 걸릴 수 있어 다시 눌러 볼 수 있게 두되, 무한정은 안 된다.
-			if (++p.attempts >= MAX_VERIFY_ATTEMPTS) {
+			++p.attempts;
+			log.info("[휴대폰 인증] 문자 아직 미도착 memberId={} phone={} 시도={}/{}",
+					memberId, mask(phone), p.attempts, MAX_VERIFY_ATTEMPTS);
+			if (p.attempts >= MAX_VERIFY_ATTEMPTS) {
 				pending.remove(memberId);
 				throw new MemberRuleException(HttpStatus.BAD_REQUEST, "확인 횟수를 넘었어요. 인증을 다시 시작해 주세요.");
 			}
@@ -117,15 +129,23 @@ public class PhoneVerificationService {
 		}
 
 		pending.remove(memberId);
-		return memberService.verifyPhone(memberId, phone);
+		Member member = memberService.verifyPhone(memberId, phone);
+		log.info("[휴대폰 인증] 인증 완료 memberId={} phone={}", memberId, mask(phone));
+		return member;
 	}
 
 	// 하이픈/공백을 빼고 숫자만 남긴 뒤, 휴대폰 번호 형식인지 확인한다.
-	private String normalize(String rawPhone) {
+	private String normalize(Long memberId, String rawPhone) {
 		String phone = rawPhone == null ? "" : rawPhone.replaceAll("\\D", "");
 		if (!PHONE_PATTERN.matcher(phone).matches()) {
+			log.info("[휴대폰 인증] 번호 형식 오류 memberId={} 자릿수={}", memberId, phone.length());
 			throw new MemberRuleException(HttpStatus.BAD_REQUEST, "올바른 휴대폰 번호가 아니에요.");
 		}
 		return phone;
+	}
+
+	// 로그에 번호 전체를 남기지 않는다 — 앞 3자리와 뒤 4자리만 (010****5678)
+	private static String mask(String phone) {
+		return phone.length() < 8 ? "****" : phone.substring(0, 3) + "****" + phone.substring(phone.length() - 4);
 	}
 }

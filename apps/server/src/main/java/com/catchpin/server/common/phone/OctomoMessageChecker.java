@@ -2,6 +2,7 @@ package com.catchpin.server.common.phone;
 
 import java.net.http.HttpClient;
 import java.time.Duration;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
@@ -15,6 +16,7 @@ import org.springframework.web.client.RestClientException;
  * API 키는 옥토모 사이트 로그인 후 마이페이지에서 받아서 환경변수 OCTOMO_API_KEY로만 넣는다 (코드/설정 파일에 두지 않는다).
  * catchpin.phone.provider가 octomo(기본값)일 때 쓰이고, 키가 없으면 인증은 실패한다(문을 열어 두지 않는다).
  */
+@Slf4j
 @Component
 @ConditionalOnProperty(name = "catchpin.phone.provider", havingValue = "octomo", matchIfMissing = true)
 public class OctomoMessageChecker implements MessageChecker {
@@ -44,6 +46,7 @@ public class OctomoMessageChecker implements MessageChecker {
 	@Override
 	public boolean exists(String phoneNumber, String text, int withinMinutes) {
 		if (apiKey.isBlank()) {
+			log.error("[Octomo] OCTOMO_API_KEY가 비어 있어 문자 확인을 할 수 없어요");
 			throw new MessageCheckException("OCTOMO_API_KEY가 설정돼 있지 않아요.");
 		}
 		try {
@@ -54,8 +57,11 @@ public class OctomoMessageChecker implements MessageChecker {
 					.body(new ExistsRequest(phoneNumber, text, withinMinutes))
 					.retrieve()
 					.body(ExistsResponse.class);
-			return response != null && response.exists();
+			boolean exists = response != null && response.exists();
+			log.info("[Octomo] 문자 확인 결과 exists={}", exists);
+			return exists;
 		} catch (RestClientException e) {
+			log.warn("[Octomo] 호출 실패 {}: {}", e.getClass().getSimpleName(), e.getMessage());
 			throw new MessageCheckException("Octomo 호출에 실패했어요.", e);
 		}
 	}
