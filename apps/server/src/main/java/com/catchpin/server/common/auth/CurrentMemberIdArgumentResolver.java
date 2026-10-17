@@ -2,7 +2,9 @@ package com.catchpin.server.common.auth;
 
 import com.catchpin.server.auth.service.JwtProvider;
 import com.catchpin.server.common.exception.UnauthorizedException;
+import com.catchpin.server.common.logging.RequestLoggingFilter;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.MDC;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -49,7 +51,10 @@ public class CurrentMemberIdArgumentResolver implements HandlerMethodArgumentRes
 
 		// 2) "Bearer " 뒤의 토큰을 JwtProvider로 검증/파싱 — 서명이 틀렸거나 만료됐으면 예외가 던져진다.
 		try {
-			return jwtProvider.parseMemberId(header.substring(BEARER_PREFIX.length()));
+			Long memberId = jwtProvider.parseMemberId(header.substring(BEARER_PREFIX.length()));
+			// 이 요청의 이후 로그(접근 로그 포함)에 memberId가 붙게 한다. 지우는 건 RequestLoggingFilter.
+			MDC.put(RequestLoggingFilter.MEMBER_ID, String.valueOf(memberId));
+			return memberId;
 		} catch (RuntimeException e) {
 			throw new UnauthorizedException("인증 토큰이 유효하지 않아요.");
 		}

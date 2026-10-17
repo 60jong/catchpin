@@ -5,7 +5,10 @@
 
 	<!-- 운영에서만 로그를 Grafana Cloud(Loki)로도 보낸다. 전송 설정은 application-prod.yml -->
 	<springProfile name="prod">
-		<appender name="OTEL" class="io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender"/>
+		<appender name="OTEL" class="io.opentelemetry.instrumentation.logback.appender.v1_0.OpenTelemetryAppender">
+			<!-- MDC의 requestId/memberId를 Loki에서 검색 가능한 속성으로 같이 보낸다 -->
+			<captureMdcAttributes>*</captureMdcAttributes>
+		</appender>
 		<root level="INFO">
 			<appender-ref ref="OTEL"/>
 		</root>
