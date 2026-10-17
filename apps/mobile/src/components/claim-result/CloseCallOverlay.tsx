@@ -196,7 +196,7 @@ export function CloseCallOverlay({ pinPoints, onReveal }: CloseCallOverlayProps)
   if (hidden) return null;
 
   return (
-    <Animated.View pointerEvents="none" style={[styles.overlay, containerStyle]}>
+    <Animated.View style={[styles.overlay, containerStyle]}>
       <Animated.View style={[StyleSheet.absoluteFill, stageStyle]}>
         <Animated.View style={[styles.chip, styles.chipLeft, chipLStyle]}>
           <View style={styles.chipAvatar}>
