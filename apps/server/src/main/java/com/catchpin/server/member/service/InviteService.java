@@ -6,10 +6,12 @@ import com.catchpin.server.member.domain.entity.Member;
 import com.catchpin.server.member.exception.MemberRuleException;
 import com.catchpin.server.member.repository.InvitationRepository;
 import java.time.LocalDate;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 public class InviteService {
 
@@ -52,6 +54,7 @@ public class InviteService {
 			throw new MemberRuleException(HttpStatus.CONFLICT, "이 코드는 이번 달 초대 한도를 넘었어요.");
 		}
 		invitationRepository.save(new Invitation(inviter, memberService.getById(memberId)));
+		log.info("[초대] 코드 입력 inviterId={} inviteeId={}", inviter.getId(), memberId);
 	}
 
 	// 탈퇴 — 내가 초대한 기록과 초대받은 기록을 모두 지운다.

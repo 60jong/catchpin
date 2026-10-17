@@ -8,10 +8,12 @@ import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Base64;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Component
 public class RefreshTokenService {
 
@@ -64,9 +66,14 @@ public class RefreshTokenService {
 	private RefreshToken findValid(String rawRefreshToken) {
 		RefreshToken token = refreshTokenRepository
 				.findByTokenHash(hash(rawRefreshToken))
-				.orElseThrow(() -> new InvalidRefreshTokenException("리프레시 토큰이 유효하지 않아요."));
+				.orElseThrow(() -> {
+					log.warn("[인증] 리프레시 거부 — 모르는 토큰");
+					return new InvalidRefreshTokenException("리프레시 토큰이 유효하지 않아요.");
+				});
 
 		if (token.isRevoked() || token.getExpiresAt().isBefore(LocalDateTime.now())) {
+			// 이미 폐기된 토큰이 다시 오는 건 토큰 유출·재사용 신호일 수 있어 WARN으로 남긴다.
+			log.warn("[인증] 리프레시 거부 — {} memberId={}", token.isRevoked() ? "폐기된 토큰" : "만료된 토큰", token.getMember().getId());
 			throw new InvalidRefreshTokenException("리프레시 토큰이 유효하지 않아요.");
 		}
 

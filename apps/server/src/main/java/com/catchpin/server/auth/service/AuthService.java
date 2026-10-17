@@ -12,11 +12,13 @@ import com.catchpin.server.member.domain.entity.Member;
 import com.catchpin.server.member.service.MemberService;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 public class AuthService {
 
@@ -63,6 +65,7 @@ public class AuthService {
 				.map(AuthProvider::getMember)
 				.orElseGet(() -> registerSocialMember(AuthProviderType.GOOGLE, userInfo.sub(), userInfo.email()));
 
+		log.info("[인증] 로그인 provider=GOOGLE memberId={}", member.getId());
 		return issueTokens(member);
 	}
 
@@ -84,6 +87,7 @@ public class AuthService {
 				.map(AuthProvider::getMember)
 				.orElseGet(() -> registerSocialMember(AuthProviderType.KAKAO, userInfo.sub(), userInfo.email()));
 
+		log.info("[인증] 로그인 provider=KAKAO memberId={}", member.getId());
 		return issueTokens(member);
 	}
 
@@ -99,24 +103,27 @@ public class AuthService {
 		authProviderRepository.save(
 				new AuthProvider(member, AuthProviderType.EMAIL, null, passwordEncoder.encode(password)));
 
+		log.info("[인증] 가입 provider=EMAIL memberId={}", member.getId());
 		return issueTokens(member);
 	}
 
 	// 이메일/비밀번호 로그인 — 이메일 존재 여부와 비밀번호 틀림을 구분하지 않고 같은 메시지로 응답한다 (계정 존재 여부 노출 방지).
 	@Transactional
 	public AuthResult loginWithEmail(String email, String password) {
+		// 실패 로그에는 이메일을 남기지 않는다 (계정 존재 여부를 응답에서 숨기는 것과 같은 이유 + 개인정보). 반복 시도는 ip로 본다.
 		Member member = memberService
 				.findByEmail(email)
-				.orElseThrow(() -> new InvalidCredentialsException("이메일 또는 비밀번호가 올바르지 않아요."));
+				.orElseThrow(() -> loginFailed());
 
 		AuthProvider authProvider = authProviderRepository
 				.findByMemberAndProvider(member, AuthProviderType.EMAIL)
-				.orElseThrow(() -> new InvalidCredentialsException("이메일 또는 비밀번호가 올바르지 않아요."));
+				.orElseThrow(() -> loginFailed());
 
 		if (!passwordEncoder.matches(password, authProvider.getPasswordHash())) {
-			throw new InvalidCredentialsException("이메일 또는 비밀번호가 올바르지 않아요.");
+			throw loginFailed();
 		}
 
+		log.info("[인증] 로그인 provider=EMAIL memberId={}", member.getId());
 		return issueTokens(member);
 	}
 
@@ -141,7 +148,13 @@ public class AuthService {
 		}
 		Member member = hasEmail ? memberService.findOrCreateByEmail(email) : memberService.createWithoutEmail();
 		authProviderRepository.save(new AuthProvider(member, provider, providerUserId));
+		log.info("[인증] 가입 provider={} memberId={}", provider, member.getId());
 		return member;
+	}
+
+	private InvalidCredentialsException loginFailed() {
+		log.warn("[인증] 로그인 실패 provider=EMAIL");
+		return new InvalidCredentialsException("이메일 또는 비밀번호가 올바르지 않아요.");
 	}
 
 	// 이 이메일로 이미 가입한 회원이 있으면, 어떤 방식으로 가입했는지 담아서 거부한다 (예: "이미 구글로 가입된 이메일이에요. 구글로 로그인해 주세요.")

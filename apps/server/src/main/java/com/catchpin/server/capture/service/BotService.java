@@ -9,10 +9,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /** 개발용 봇 — 혼자서도 핀이 생기게, 임의 위치의 가짜 사용자를 만든다. 봇은 항상 활성이고 핀을 누르지 않는다. */
+@Slf4j
 @Service
 public class BotService {
 
@@ -45,6 +47,7 @@ public class BotService {
 			location.ping(location.getLocation(), now);
 			locationRepository.save(location);
 		}
+		log.warn("[개발용 봇] 봇 {}명 생성 호출자 memberId={}", count, callerId);
 		return memberService.findBots().size();
 	}
 

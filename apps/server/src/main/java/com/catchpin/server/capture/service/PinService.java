@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
  * v1 레이더 — 앱이 4초쯤마다 ping(위치 폴링)하면 내 위치를 저장하고, 활성 사용자 아무나(위치 불문)와 핀을 만들어서 돌려준다.
  * 핀을 탭하면 서버가 "먼저 도착한 순서"로 한 명만 가져가게 판정하고, 이긴 사람의 포인트를 올리고 탭권을 1장 차감한다(진 사람의 탭권은 그대로).
  */
+@Slf4j
 @Service
 public class PinService {
 
@@ -137,6 +139,7 @@ public class PinService {
 			member.addPoints(pin.getPoints());
 			member.incrementTodayEarned();
 			captureRepository.save(new Capture(member, pin.getPoints(), CaptureOutcome.WON, null));
+			log.info("[핀] 선점 성공 memberId={} pinId={} points={}", memberId, pinId, pin.getPoints());
 			return result(ClaimOutcome.WON, pin.getPoints(), null, member, now);
 		}
 
@@ -148,8 +151,10 @@ public class PinService {
 			}
 			long marginMs = Duration.between(fresh.getClaimedAt(), now).toMillis();
 			captureRepository.save(new Capture(member, fresh.getPoints(), CaptureOutcome.LOST, marginMs));
+			log.info("[핀] 선점 실패 memberId={} pinId={} 시간차={}ms", memberId, pinId, marginMs);
 			return result(ClaimOutcome.LOST, fresh.getPoints(), marginMs, member, now);
 		}
+		log.info("[핀] 만료된 핀 memberId={} pinId={}", memberId, pinId);
 		return result(ClaimOutcome.EXPIRED, fresh.getPoints(), null, member, now);
 	}
 
