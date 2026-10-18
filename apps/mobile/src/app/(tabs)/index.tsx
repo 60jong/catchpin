@@ -26,6 +26,7 @@ import {
 } from '@/data/gameState';
 import { fetchMe } from '@/data/member';
 import { randomGoldenPin, randomPin, type Pin } from '@/data/pins';
+import { BackdropMap, useMapCenter } from '@/map';
 import { pickCloseCallMarginSeconds } from '@/utils/closeCall';
 import { getMarkerPlacement, getPinPlacement, getRadarVisualSize } from '@/utils/radarLayout';
 import { playSound } from '@/utils/sounds';
@@ -95,6 +96,9 @@ export default function HomeScreen() {
       });
     }, []),
   );
+
+  // 배경 지도의 가운데가 될 내 위치 (모르면 지도를 그리지 않는다)
+  const mapCenter = useMapCenter(locationGranted === true);
 
   // 핀 생성 — 홈이 화면에 보이고, 위치 권한이 있고, 온라인인 동안 5초마다 핀을 하나씩 띄운다. 서버에는 보내지 않는다.
   const spawnPin = useCallback(() => {
@@ -237,6 +241,7 @@ export default function HomeScreen() {
       {/* 마커·핀은 이 View 기준 좌표(radarLayout.ts와 동일한 좌표계)를 그대로 쓴다.
           레이더 시각(링·스윕)만 따로 더 큰 정사각형에 그려서 가운데 겹쳐 보이게 한다. */}
       <View style={styles.radarArea} onLayout={onRadarLayout}>
+        {locationGranted !== false && <BackdropMap center={mapCenter} />}
         {hasMeasuredArea && (
           <>
             <View style={{ width: visualSize, height: visualSize }}>

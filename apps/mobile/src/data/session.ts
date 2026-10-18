@@ -1,6 +1,8 @@
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
+import { clearLastPosition } from './lastPosition';
+
 /**
  * 로그인 토큰. 액세스 토큰은 메모리에만 들고 있고, 리프레시 토큰은 기기에 저장해 두었다가
  * 앱을 다시 켰을 때 그걸로 로그인을 이어간다 (data/auth.ts의 autoLogin).
@@ -60,4 +62,5 @@ export async function clearSession() {
   accessToken = null;
   refreshToken = null;
   await writeStored(null);
+  await clearLastPosition();
 }
