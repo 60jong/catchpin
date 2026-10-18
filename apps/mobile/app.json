@@ -63,7 +63,14 @@
           "kakaoAppKey": "c13c548bd8c60d2ee12a05b87f798503"
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "@maplibre/maplibre-react-native",
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-2628381420614049~8716988959"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
@@ -71,6 +78,8 @@
     },
     "extra": {
       "apiBaseUrl": "https://catchpin.60jong.dev",
+      "admobRewardedUnitId": "ca-app-pub-2628381420614049/2738738117",
+      "admobTestAds": true,
       "googleWebClientId": "534259490222-u8921g1s80eheung7a29hiu67aqi0jkq.apps.googleusercontent.com",
       "googleIosClientId": "534259490222-j0ro68i7a706dsstjho20dnuteel3irk.apps.googleusercontent.com",
       "router": {},
