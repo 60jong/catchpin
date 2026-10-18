@@ -1,12 +1,12 @@
 /**
- * 광고 시청 데이터 계층. 지금은 AdMob 같은 실제 SDK가 없어서 흉내만 내는 mock 구현이다.
- * 나중에 실제 광고 SDK로 교체할 때 이 파일(과 이 함수를 쓰는 곳)만 바꾸면 된다.
+ * 광고 시청 데이터 계층. 호출하는 쪽은 이 인터페이스만 알면 되어서, 광고 SDK를 바꿔도 여기만 고치면 된다.
  */
 export interface AdsRepository {
-  /** 광고 1편을 "시청"한다. 실제 SDK가 붙으면 여기서 리워드 콜백을 기다리게 된다. */
+  /** 광고 1편을 보여준다. 끝까지 봐서 보상 조건을 채우면 끝나고, 그렇지 않으면 사용자에게 보여줄 메시지와 함께 던진다. */
   watchAd(): Promise<void>;
 }
 
+/** SDK 없이 흉내만 내는 구현 — 웹과 아직 실제 광고를 붙이지 않은 자리에서 쓴다. */
 export const mockAdsRepository: AdsRepository = {
   watchAd: () => new Promise((resolve) => setTimeout(resolve, 900)),
 };

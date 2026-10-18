@@ -4,7 +4,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 
 import { TicketIllustration } from '@/components/refill/TicketIllustration';
 import { Brand, BrandFonts } from '@/constants/theme';
-import { mockAdsRepository } from '@/data/ads';
+import { adMobAdsRepository } from '@/data/adMobAds';
 import { applyServerState, useGameState } from '@/data/gameState';
 import { refillTicketsByAd } from '@/data/tickets';
 import { formatCountdown } from '@/utils/formatCountdown';
@@ -25,7 +25,12 @@ export default function RefillScreen() {
     setWatching(kind);
     setNotice(null);
     try {
-      await mockAdsRepository.watchAd();
+      try {
+        await adMobAdsRepository.watchAd();
+      } catch (error) {
+        setNotice(error instanceof Error ? error.message : '광고를 볼 수 없어요.');
+        return;
+      }
       const result = await refillTicketsByAd(kind === 'single' ? 1 : 4);
       if (!result.ok) {
         setNotice(result.message);
