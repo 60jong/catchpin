@@ -1,5 +1,5 @@
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { CloseCallToggleRow } from '@/components/profile/CloseCallToggleRow';
@@ -20,6 +20,18 @@ export default function ProfileScreen() {
   // "이번 달 획득" 계산 기준 시각 — 화면이 떠있는 동안 바뀔 필요 없어서 마운트 시점에 한 번만 고정.
   const [now] = useState(() => Date.now());
   const [me, setMe] = useState<Me | null>(null);
+  // 버전 글자를 7번 연속 누르면 테스트 도구(테스트 위치)가 열린다. 일반 사용자는 모르는 숨은 입구다.
+  const versionTaps = useRef({ count: 0, lastAt: 0 });
+  const openDevTools = () => {
+    const now = Date.now();
+    const taps = versionTaps.current;
+    taps.count = now - taps.lastAt < 1500 ? taps.count + 1 : 1;
+    taps.lastAt = now;
+    if (taps.count >= 7) {
+      taps.count = 0;
+      router.push('/dev-location');
+    }
+  };
 
   // 프로필 편집에서 돌아왔을 때도 바뀐 닉네임/사진이 보이도록, 화면이 포커스될 때마다 다시 가져온다.
   useFocusEffect(
@@ -104,7 +116,9 @@ export default function ProfileScreen() {
         </Pressable>
       </SettingsSection>
 
-      <Text style={styles.versionText}>catch pin 1.0.0</Text>
+      <Pressable onPress={openDevTools} accessibilityRole="text">
+        <Text style={styles.versionText}>catch pin 1.0.0</Text>
+      </Pressable>
     </ScrollView>
   );
 }
