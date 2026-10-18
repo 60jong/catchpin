@@ -4,9 +4,10 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 
 import { TicketIllustration } from '@/components/refill/TicketIllustration';
 import { Brand, BrandFonts } from '@/constants/theme';
-import { adMobAdsRepository } from '@/data/adMobAds';
+import { adMobAdsRepository, usesTestAds } from '@/data/adMobAds';
 import { applyServerState, useGameState } from '@/data/gameState';
-import { refillTicketsByAd } from '@/data/tickets';
+import { fetchMe } from '@/data/member';
+import { requestTapTicketReward, waitForAdReward } from '@/data/tickets';
 import { formatCountdown } from '@/utils/formatCountdown';
 
 export default function RefillScreen() {
@@ -25,18 +26,35 @@ export default function RefillScreen() {
     setWatching(kind);
     setNotice(null);
     try {
+      // 1) 서버에 보상 요청 — 오늘 한도를 다 썼거나 탭권이 가득이면 광고를 보여주기 전에 여기서 거절된다.
+      const ticket = await requestTapTicketReward(kind === 'single' ? 1 : 4);
+      if (!ticket.ok) {
+        setNotice(ticket.message);
+        return;
+      }
+      // 2) 광고. 서버가 어떤 요청의 광고인지 알아보도록 userId와 nonce를 실어 보낸다.
       try {
-        await adMobAdsRepository.watchAd();
+        await adMobAdsRepository.watchAd({ userId: ticket.data.userId, customData: ticket.data.nonce });
       } catch (error) {
         setNotice(error instanceof Error ? error.message : '광고를 볼 수 없어요.');
         return;
       }
-      const result = await refillTicketsByAd(kind === 'single' ? 1 : 4);
-      if (!result.ok) {
-        setNotice(result.message);
+      // 3) 탭권은 광고를 다 본 뒤 AdMob이 서버로 보내는 확인 콜백으로 지급된다. 테스트 광고는 콜백이 없다.
+      if (usesTestAds) {
+        setNotice('테스트 광고라서 서버 확인이 오지 않아 탭권은 지급되지 않아요.');
         return;
       }
-      applyServerState(result.data);
+      const outcome = await waitForAdReward(ticket.data.nonce);
+      if (outcome.status === 'REJECTED') {
+        setNotice(outcome.reason ?? '탭권을 받을 수 없었어요.');
+        return;
+      }
+      if (outcome.status === 'TIMEOUT') {
+        setNotice('광고 확인이 늦어지고 있어요. 잠시 후 탭권을 확인해 주세요.');
+      }
+      // 지급됐든 늦어지든, 서버가 알고 있는 최신 탭권으로 맞춘다.
+      const me = await fetchMe();
+      if (me) applyServerState(me);
     } finally {
       setWatching(null);
     }

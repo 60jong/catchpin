@@ -7,7 +7,7 @@ import mobileAds, {
   TestIds,
 } from 'react-native-google-mobile-ads';
 
-import type { AdsRepository } from './ads';
+import type { AdServerVerification, AdsRepository } from './ads';
 
 const { admobRewardedUnitId, admobTestAds } = Constants.expoConfig?.extra ?? {};
 
@@ -26,6 +26,9 @@ function initAds(): Promise<void> {
   return initialized;
 }
 
+/** 지금 구글 테스트 광고만 쓰는지. 테스트 광고는 AdMob이 서버 확인 콜백을 보내지 않아서, 서버가 보상을 지급하지 못한다. */
+export const usesTestAds = admobTestAds !== false;
+
 /**
  * 광고 단위 ID. admobTestAds(app.json)가 켜져 있으면 구글 테스트 광고만 쓴다 — 실제 광고 단위로 내 광고를 눌러 보면 AdMob 정책 위반(무효 트래픽)이 되기 때문이다.
  */
@@ -38,10 +41,12 @@ function rewardedUnitId(): string {
  * 광고 SDK가 웹에 없어서 웹은 adMobAds.web.ts가 mock으로 대신한다.
  */
 export const adMobAdsRepository: AdsRepository = {
-  watchAd: async () => {
+  watchAd: async (verification?: AdServerVerification) => {
     await initAds();
     return new Promise<void>((resolve, reject) => {
-      const ad = RewardedAd.createForAdRequest(rewardedUnitId());
+      const ad = RewardedAd.createForAdRequest(rewardedUnitId(), {
+        serverSideVerificationOptions: verification,
+      });
       let earned = false;
       const unsubscribe = [
         ad.addAdEventListener(RewardedAdEventType.LOADED, () => {
