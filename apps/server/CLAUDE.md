@@ -7,7 +7,7 @@ Spring Boot 백엔드. Java 21, Gradle(Groovy DSL), JPA, PostgreSQL.
 - 레이어별이 아니라 **도메인(기능)별**로 최상위 패키지를 나눈다 (`com.catchpin.server.<domain>`).
 - 각 도메인 패키지 하위 구조는 고정:
   - `<domain>.domain.entity` — JPA 엔티티, 엔티티 컬럼에 쓰이는 enum
-  - `<domain>.domain` — 엔티티 아닌 것 전부 (서비스 반환 DTO, API 요청/응답 DTO). API DTO도 여기 같이 둔다 — 따로 안 나눔
+  - `<domain>.domain` — 엔티티 아닌 것 전부 (서비스 결과 객체 `XxxResult`, API 요청/응답 DTO). API DTO도 여기 같이 둔다 — 따로 안 나눔
   - `<domain>.repository` — Repository 인터페이스
   - `<domain>.service` — 서비스 클래스. **인터페이스 안 만든다** (구현체 안 바뀌므로 불필요한 껍데기)
   - `<domain>.controller` — `@RestController`
@@ -19,6 +19,37 @@ Spring Boot 백엔드. Java 21, Gradle(Groovy DSL), JPA, PostgreSQL.
 - 다른 도메인의 **기능(비즈니스 로직)**은 그 도메인의 Service를 통해서만 쓴다. 다른 도메인의 Repository를 직접 주입하거나 로직을 복제하지 않는다.
   - 예: 회원가입/로그인 로직은 `auth.service.AuthService`에 있고, `AuthService`가 `member.service.MemberService`를 호출한다. `MemberRepository`를 직접 쓰지 않는다.
 - 단, **엔티티 참조(FK)는 예외** — `@ManyToOne` 등으로 다른 도메인 엔티티를 참조하는 건 정상적인 데이터 모델링이라 규칙 대상 아님.
+- **도메인 패키지끼리 순환 참조를 만들지 않는다** (`a → b → a`). 순환이 생길 것 같으면 의존 방향을 한쪽으로 정한다.
+  - 기본 방향: `member`는 다른 도메인이 쓰는 기반이라 `auth`/`ads`/`capture`가 `member`를 부르고, `member`는 그들을 부르지 않는다.
+  - 탈퇴·내 데이터 내보내기처럼 **여러 도메인을 한꺼번에 건드리는 흐름**은 어느 한 도메인에 두지 않는다. 지금은 `member`에 있어서 순환을 만들고 있다 — 고칠 때 상위 서비스나 이벤트로 옮긴다 (위치와 이름은 그때 정한다).
+  - 컨트롤러·응답 DTO가 여러 도메인의 값을 조합하는 것은 순환으로 보지 않는다 (서비스끼리의 호출과 엔티티 참조만 본다).
+
+## 레이어 간 데이터 규칙
+
+서비스 규모가 커지기 전까지는 복잡한 설계(유스케이스별 Command, 포트/어댑터 등)를 도입하지 않는다. 아래 규칙만 지킨다.
+
+- **컨트롤러 → 서비스**: 컨트롤러가 요청 DTO(`@RequestBody`)에서 필요한 값을 꺼내 서비스에 넘긴다. **API 요청 DTO를 서비스에 그대로 넘기지 않는다.** 값이 많아 읽기 힘들면 서비스 전용 입력 객체를 만들어도 된다.
+- **서비스 반환**: **API 응답 DTO도, 엔티티도 반환하지 않는다.** 필요한 값만 담은 서비스 결과 객체(`XxxResult` 레코드, 도메인 용어로 이름 짓는다 — 예: `AuthResult`, `ClaimResult`)를 반환하거나, 값 하나·`void`면 그대로 반환한다. 컨트롤러가 결과 객체를 응답 DTO로 변환한다.
+- **OSIV는 끈다** (`spring.jpa.open-in-view=false`). 트랜잭션 밖(컨트롤러)에서 엔티티의 지연 로딩 필드를 읽지 않는다 — 이 규칙(서비스가 엔티티를 안 돌려줌)이 그걸 보장한다.
+- 서비스끼리는 엔티티를 주고받아도 된다 (같은 트랜잭션 안이므로). 단, 컨트롤러까지 올라오면 안 된다.
+
+### 컨트롤러가 리포지토리를 직접 쓰는 예외
+
+단순 조회이면서 성능이 중요할 때만, 컨트롤러가 리포지토리를 직접 호출할 수 있다. 조건:
+
+- **읽기 전용**이고 비즈니스 규칙이 없다.
+- **자기 도메인의 리포지토리만** 쓴다. 다른 도메인 리포지토리 금지는 그대로다.
+- OSIV가 꺼져 있어 엔티티는 지연 로딩이 안 되므로, 필요한 컬럼만 담은 **프로젝션**(인터페이스 또는 레코드)을 리포지토리가 직접 돌려주게 하고, 그걸 응답 DTO로 변환한다. 엔티티를 컨트롤러에서 다루지 않는다.
+- 조건이 하나라도 안 맞으면 서비스를 거친다.
+
+### 적용 방식과 현재 위반 (코드가 아직 규칙을 못 지키는 곳)
+
+- **새 코드는 이 규칙대로 쓴다.** 기존 위반은 점진적으로 고치고, 고치면서 이 목록에서 지운다.
+- OSIV(`open-in-view`)는 지금 설정이 없어 Boot 기본값(켜짐)이다. 위반을 모두 정리한 **마지막에** 끈다 (먼저 끄면 컨트롤러의 지연 로딩이 깨진다).
+- 서비스가 응답 DTO를 반환: `AdRewardService`(`AdRewardRequestResponse`, `AdRewardStatusResponse`), `PhoneVerificationService.issueCode`(`PhoneCodeResponse`), `InviteService.getInfo`, `ProfileImageService.createUpload`, `NotificationSettingService`, `MemberExportService`, `PinService.ping`(`PingResponse`).
+- 서비스가 엔티티를 반환해 컨트롤러가 응답으로 변환: `MemberService`의 다수 메서드(`getCurrentState`, `updateProfile`, `updateSimpleNotificationsOnly`, `verifyPhone` 등), `PhoneVerificationService.verify`, `RefreshTokenService.rotate`. 컨트롤러의 `toResponse(Member)`가 해당한다.
+- 서비스가 API 요청 DTO를 받음: `NotificationSettingService.update(memberId, UpdateNotificationSettingsRequest)`.
+- 도메인 순환: `member ↔ ads`, `member ↔ auth`, `member ↔ capture` (원인: `member`의 `WithdrawalService`, `MemberExportService`가 다른 도메인 서비스를 호출).
 
 ## 엔티티
 
