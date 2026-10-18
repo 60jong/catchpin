@@ -1,5 +1,6 @@
 package com.catchpin.server.member.service;
 
+import com.catchpin.server.ads.service.AdRewardService;
 import com.catchpin.server.auth.service.AuthService;
 import com.catchpin.server.capture.service.CaptureDataService;
 import com.catchpin.server.member.domain.entity.Member;
@@ -20,6 +21,7 @@ public class WithdrawalService {
 	private final InviteService inviteService;
 	private final NotificationSettingService notificationSettingService;
 	private final ProfileImageService profileImageService;
+	private final AdRewardService adRewardService;
 
 	public WithdrawalService(
 			MemberService memberService,
@@ -27,13 +29,15 @@ public class WithdrawalService {
 			CaptureDataService captureDataService,
 			InviteService inviteService,
 			NotificationSettingService notificationSettingService,
-			ProfileImageService profileImageService) {
+			ProfileImageService profileImageService,
+			AdRewardService adRewardService) {
 		this.memberService = memberService;
 		this.authService = authService;
 		this.captureDataService = captureDataService;
 		this.inviteService = inviteService;
 		this.notificationSettingService = notificationSettingService;
 		this.profileImageService = profileImageService;
+		this.adRewardService = adRewardService;
 	}
 
 	@Transactional
@@ -43,6 +47,7 @@ public class WithdrawalService {
 
 		// 이 회원을 가리키는 데이터부터 지우고, 마지막에 회원 행을 지운다 (FK 때문에 순서가 중요하다).
 		captureDataService.deleteAllOf(memberId);
+		adRewardService.deleteAllOf(memberId);
 		inviteService.deleteAllOf(memberId);
 		notificationSettingService.deleteAllOf(memberId);
 		authService.deleteAllOf(memberId);

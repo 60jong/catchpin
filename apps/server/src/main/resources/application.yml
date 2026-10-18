@@ -38,6 +38,9 @@ catchpin:
     api-key: ${OCTOMO_API_KEY:}
     # 사용자가 인증 코드를 문자로 보낼 Octomo 대표번호
     destination-number: ${OCTOMO_DESTINATION_NUMBER:1666-3538}
+  admob:
+    # SSV 콜백의 ad_unit(광고 단위 ID에서 '/' 뒤의 숫자)으로 허용할 값들(쉼표로 구분). 다른 AdMob 계정이 서명받은 콜백을 우리 쪽으로 보내 보상을 받는 걸 막는다.
+    rewarded-ad-unit-ids: ${ADMOB_REWARDED_AD_UNIT_IDS:2738738117}
   dev:
     # 개발용 봇 API(/api/v1/dev/bots) — 운영에서는 꺼 둔다.
     bot-api-enabled: ${CATCHPIN_DEV_BOT_API_ENABLED:false}

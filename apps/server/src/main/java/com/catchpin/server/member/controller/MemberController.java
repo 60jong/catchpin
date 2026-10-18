@@ -4,7 +4,6 @@ import com.catchpin.server.auth.service.AuthService;
 import com.catchpin.server.common.auth.CurrentMemberId;
 import com.catchpin.server.common.response.ApiResponse;
 import com.catchpin.server.capture.service.CaptureDataService;
-import com.catchpin.server.member.domain.AdRefillRequest;
 import com.catchpin.server.member.domain.MemberExportResponse;
 import com.catchpin.server.member.domain.MemberMeResponse;
 import com.catchpin.server.member.domain.ProfileImageUploadRequest;
@@ -80,12 +79,6 @@ public class MemberController {
 			@CurrentMemberId Long memberId, @RequestBody UpdateSettingsRequest request) {
 		return ApiResponse.success(
 				toResponse(memberService.updateSimpleNotificationsOnly(memberId, request.simpleNotificationsOnly())));
-	}
-
-	// 광고 시청으로 탭권 충전 — 갱신된 내 정보(탭권, 남은 충전 횟수 등)를 돌려준다.
-	@PostMapping("/me/tickets/ad-refill")
-	public ApiResponse<MemberMeResponse> refillTickets(@CurrentMemberId Long memberId, @RequestBody AdRefillRequest request) {
-		return ApiResponse.success(toResponse(memberService.refillTicketsByAd(memberId, request.count())));
 	}
 
 	// 회원 탈퇴 — 내 데이터를 즉시 모두 지운다 (되돌릴 수 없다). 떠나는 이유는 선택.

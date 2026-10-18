@@ -53,24 +53,31 @@ public class MemberService {
 		return member;
 	}
 
-	// 광고 시청으로 탭권을 채운다 (오늘 횟수가 남아 있고, 탭권이 가득 차지 않았을 때만).
-	// 주의: 아직 광고 시청을 서버가 검증하지 않는다(AdMob 서버 측 확인 전의 임시 방식) — 앱이 보낸 대로 믿는다.
+	// 광고로 탭권을 채울 수 있는지 미리 확인한다 — 못 채우면 이유와 함께 던진다 (광고를 보여주기 전에 거르려는 용도).
 	@Transactional
-	public Member refillTicketsByAd(Long memberId, int count) {
-		if (count < 1 || count > 4) {
-			throw new MemberRuleException(HttpStatus.BAD_REQUEST, "충전할 수 있는 탭권 수가 아니에요.");
-		}
+	public void checkAdRefillAllowed(Long memberId) {
+		String reason = adRefillBlockReason(lockAndCatchUp(memberId));
+		if (reason != null) throw new MemberRuleException(HttpStatus.CONFLICT, reason);
+	}
+
+	// 광고 시청이 확인되어 탭권을 채운다 (오늘 횟수가 남아 있고, 탭권이 가득 차지 않았을 때만).
+	// 채웠으면 null, 못 채웠으면 그 이유를 돌려준다 — 던지지 않는 이유: 호출한 쪽이 같은 트랜잭션에서 "거절됨"을 기록해야 해서,
+	// 예외가 나면 그 트랜잭션이 롤백 표시가 되어 기록까지 사라진다.
+	@Transactional
+	public String refillTicketsByAd(Long memberId, int count) {
 		Member member = lockAndCatchUp(memberId);
-		if (member.getTodayAdRefillsLeft() <= 0) {
-			throw new MemberRuleException(HttpStatus.CONFLICT, "오늘 광고 충전 횟수를 다 썼어요.");
-		}
-		if (member.getTickets() >= member.getMaxTickets()) {
-			throw new MemberRuleException(HttpStatus.CONFLICT, "탭권이 이미 가득 찼어요.");
-		}
+		String reason = adRefillBlockReason(member);
+		if (reason != null) return reason;
 		member.addTickets(count);
 		member.consumeAdRefill();
 		log.info("[탭권] 광고 충전 memberId={} count={} 남은횟수={}", memberId, count, member.getTodayAdRefillsLeft());
-		return member;
+		return null;
+	}
+
+	private static String adRefillBlockReason(Member member) {
+		if (member.getTodayAdRefillsLeft() <= 0) return "오늘 광고 충전 횟수를 다 썼어요.";
+		if (member.getTickets() >= member.getMaxTickets()) return "탭권이 이미 가득 찼어요.";
+		return null;
 	}
 
 	// 개발용 봇 계정 — 로그인 수단 없이 닉네임만 가진 회원을 만든다.
