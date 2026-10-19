@@ -1,16 +1,23 @@
-package com.catchpin.server.member.service;
+package com.catchpin.server.account.service;
 
 import com.catchpin.server.ads.service.AdRewardService;
 import com.catchpin.server.auth.service.AuthService;
 import com.catchpin.server.capture.service.CaptureDataService;
 import com.catchpin.server.member.domain.entity.Member;
+import com.catchpin.server.member.service.InviteService;
+import com.catchpin.server.member.service.MemberService;
+import com.catchpin.server.member.service.NotificationSettingService;
+import com.catchpin.server.member.service.ProfileImageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-/** 회원 탈퇴 — 회원과 연결된 모든 데이터를 즉시 완전히 지운다. 다른 도메인의 데이터는 그 도메인의 서비스를 통해 지운다. */
+/**
+ * 회원 탈퇴 — 회원과 연결된 모든 데이터를 즉시 완전히 지운다. 다른 도메인의 데이터는 그 도메인의 서비스를 통해 지운다.
+ * 여러 도메인을 한꺼번에 건드리는 흐름이라 member가 아니라 account에 둔다 (member가 auth/ads/capture를 부르면 순환이 된다).
+ */
 @Slf4j
 @Service
 public class WithdrawalService {

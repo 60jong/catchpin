@@ -21,7 +21,7 @@ Spring Boot 백엔드. Java 21, Gradle(Groovy DSL), JPA, PostgreSQL.
 - 단, **엔티티 참조(FK)는 예외** — `@ManyToOne` 등으로 다른 도메인 엔티티를 참조하는 건 정상적인 데이터 모델링이라 규칙 대상 아님.
 - **도메인 패키지끼리 순환 참조를 만들지 않는다** (`a → b → a`). 순환이 생길 것 같으면 의존 방향을 한쪽으로 정한다.
   - 기본 방향: `member`는 다른 도메인이 쓰는 기반이라 `auth`/`ads`/`capture`가 `member`를 부르고, `member`는 그들을 부르지 않는다.
-  - 탈퇴·내 데이터 내보내기처럼 **여러 도메인을 한꺼번에 건드리는 흐름**은 어느 한 도메인에 두지 않는다. 지금은 `member`에 있어서 순환을 만들고 있다 — 고칠 때 상위 서비스나 이벤트로 옮긴다 (위치와 이름은 그때 정한다).
+  - 탈퇴·내 데이터 내보내기처럼 **여러 도메인을 한꺼번에 건드리는 흐름**은 어느 한 도메인에 두지 않고 `account` 도메인에 둔다 (`account.service.WithdrawalService`, `MemberExportService`). `account`는 다른 도메인의 서비스를 마음껏 부르는 가장 위쪽이고, 아무도 `account`를 부르지 않는다. 주소는 그대로 `/api/v1/members/me/...`.
   - 컨트롤러·응답 DTO가 여러 도메인의 값을 조합하는 것은 순환으로 보지 않는다 (서비스끼리의 호출과 엔티티 참조만 본다).
 
 ## 레이어 간 데이터 규칙
@@ -49,7 +49,7 @@ Spring Boot 백엔드. Java 21, Gradle(Groovy DSL), JPA, PostgreSQL.
 - 서비스가 응답 DTO를 반환: `AdRewardService`(`AdRewardRequestResponse`, `AdRewardStatusResponse`), `PhoneVerificationService.issueCode`(`PhoneCodeResponse`), `InviteService.getInfo`, `ProfileImageService.createUpload`, `NotificationSettingService`, `MemberExportService`, `PinService.ping`(`PingResponse`).
 - 서비스가 엔티티를 반환해 컨트롤러가 응답으로 변환: `MemberService`의 다수 메서드(`getCurrentState`, `updateProfile`, `updateSimpleNotificationsOnly`, `verifyPhone` 등), `PhoneVerificationService.verify`, `RefreshTokenService.rotate`. 컨트롤러의 `toResponse(Member)`가 해당한다.
 - 서비스가 API 요청 DTO를 받음: `NotificationSettingService.update(memberId, UpdateNotificationSettingsRequest)`.
-- 도메인 순환: `member ↔ ads`, `member ↔ auth`, `member ↔ capture` (원인: `member`의 `WithdrawalService`, `MemberExportService`가 다른 도메인 서비스를 호출).
+- 도메인 의존: 서비스와 엔티티 사이의 순환은 없다 (`account → ads/auth/capture/member`, `ads/auth/capture → member`). 다만 `member`의 컨트롤러·`MemberMeResponse`가 `auth`(로그인 방식)와 `capture`(위치 삭제)를 참조해서 import 상으로는 `member ↔ auth`, `member ↔ capture`가 남아 있다 — 위의 "컨트롤러·응답 DTO는 순환으로 보지 않는다" 예외에 해당한다.
 
 ## 엔티티
 

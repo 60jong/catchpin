@@ -4,18 +4,14 @@ import com.catchpin.server.auth.service.AuthService;
 import com.catchpin.server.common.auth.CurrentMemberId;
 import com.catchpin.server.common.response.ApiResponse;
 import com.catchpin.server.capture.service.CaptureDataService;
-import com.catchpin.server.member.domain.MemberExportResponse;
 import com.catchpin.server.member.domain.MemberMeResponse;
 import com.catchpin.server.member.domain.ProfileImageUploadRequest;
 import com.catchpin.server.member.domain.ProfileImageUploadResponse;
 import com.catchpin.server.member.domain.UpdateProfileRequest;
 import com.catchpin.server.member.domain.UpdateSettingsRequest;
-import com.catchpin.server.member.domain.WithdrawalRequest;
 import com.catchpin.server.member.domain.entity.Member;
-import com.catchpin.server.member.service.MemberExportService;
 import com.catchpin.server.member.service.MemberService;
 import com.catchpin.server.member.service.ProfileImageService;
-import com.catchpin.server.member.service.WithdrawalService;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -31,22 +27,16 @@ public class MemberController {
 	private final MemberService memberService;
 	private final ProfileImageService profileImageService;
 	private final AuthService authService;
-	private final WithdrawalService withdrawalService;
-	private final MemberExportService memberExportService;
 	private final CaptureDataService captureDataService;
 
 	public MemberController(
 			MemberService memberService,
 			ProfileImageService profileImageService,
 			AuthService authService,
-			WithdrawalService withdrawalService,
-			MemberExportService memberExportService,
 			CaptureDataService captureDataService) {
 		this.memberService = memberService;
 		this.profileImageService = profileImageService;
 		this.authService = authService;
-		this.withdrawalService = withdrawalService;
-		this.memberExportService = memberExportService;
 		this.captureDataService = captureDataService;
 	}
 
@@ -79,20 +69,6 @@ public class MemberController {
 			@CurrentMemberId Long memberId, @RequestBody UpdateSettingsRequest request) {
 		return ApiResponse.success(
 				toResponse(memberService.updateSimpleNotificationsOnly(memberId, request.simpleNotificationsOnly())));
-	}
-
-	// 회원 탈퇴 — 내 데이터를 즉시 모두 지운다 (되돌릴 수 없다). 떠나는 이유는 선택.
-	@PostMapping("/me/withdrawal")
-	public ApiResponse<Void> withdraw(
-			@CurrentMemberId Long memberId, @RequestBody(required = false) WithdrawalRequest request) {
-		withdrawalService.withdraw(memberId, request == null ? null : request.reason());
-		return ApiResponse.success(null);
-	}
-
-	// 내 데이터 내려받기 — 프로필, 포인트, 로그인 방식, 핀 기록.
-	@GetMapping("/me/export")
-	public ApiResponse<MemberExportResponse> export(@CurrentMemberId Long memberId) {
-		return ApiResponse.success(memberExportService.export(memberId));
 	}
 
 	// 위치 기록 삭제 — 서버에 저장된 내 마지막 위치를 지운다.

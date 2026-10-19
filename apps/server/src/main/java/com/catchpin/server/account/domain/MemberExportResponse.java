@@ -1,4 +1,4 @@
-package com.catchpin.server.member.domain;
+package com.catchpin.server.account.domain;
 
 import com.catchpin.server.auth.domain.entity.AuthProviderType;
 import com.catchpin.server.capture.domain.CaptureRecord;

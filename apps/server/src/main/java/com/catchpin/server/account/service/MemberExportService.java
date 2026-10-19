@@ -1,12 +1,14 @@
-package com.catchpin.server.member.service;
+package com.catchpin.server.account.service;
 
 import com.catchpin.server.auth.service.AuthService;
 import com.catchpin.server.capture.service.CaptureDataService;
-import com.catchpin.server.member.domain.MemberExportResponse;
+import com.catchpin.server.account.domain.MemberExportResponse;
 import com.catchpin.server.member.domain.entity.Member;
+import com.catchpin.server.member.service.MemberService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+/** 내 데이터 내려받기 — 프로필, 로그인 방식, 핀 기록을 모은다. 여러 도메인을 조합하므로 member가 아니라 account에 둔다. */
 @Service
 public class MemberExportService {
 
