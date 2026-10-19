@@ -22,7 +22,7 @@ describe('radarMapStyle', () => {
 
   test('다리는 블록과 물보다 위에, 큰길 점선은 다리 아래에 그려진다', () => {
     const order = layers.map((layer) => layer.id);
-    for (const id of ['bridge-shadow', 'bridge-edge', 'bridge-deck', 'bridge-dash', 'bike-path']) {
+    for (const id of ['bridge-shadow', 'bridge-edge', 'bridge-deck', 'bridge-dash']) {
       expect(order.indexOf(id)).toBeGreaterThan(order.indexOf('building-edge'));
       expect(order.indexOf(id)).toBeGreaterThan(order.indexOf('water'));
     }

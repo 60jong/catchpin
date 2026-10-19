@@ -36,7 +36,7 @@ const widthByZoom = (small: number, large: number) =>
 const bridgeWidth = (small: number, large: number) =>
   ['interpolate', ['linear'], ['zoom'], 14, small, 18, large] as never;
 
-const MAIN_ROADS = ['motorway', 'trunk', 'primary', 'secondary', 'tertiary'];
+const MAIN_ROADS = ['trunk', 'primary', 'secondary'];
 const isMainRoad = ['match', ['get', 'class'], MAIN_ROADS, true, false];
 // 다리와 터널은 길 자체가 아니라 물·땅 위/아래를 지나는 구간이라, 다리는 따로 그리고 터널은 그리지 않는다.
 const onGround = [
@@ -44,21 +44,8 @@ const onGround = [
   ['!=', ['get', 'brunnel'], 'bridge'],
   ['!=', ['get', 'brunnel'], 'tunnel'],
 ];
-const mainRoadFilter = ['all', isMainRoad, onGround] as never;
+const mainRoadFilter = ['all', isMainRoad, onGround, ['!=', ['get', 'ramp'], 1]] as never;
 const bridgeFilter = ['all', isMainRoad, ['==', ['get', 'brunnel'], 'bridge']] as never;
-const bikePathFilter = [
-  'all',
-  ['==', ['get', 'class'], 'path'],
-  ['==', ['get', 'subclass'], 'cycleway'],
-  onGround,
-] as never;
-// 등산로 — OSM에서 highway=path 로 표시된 길 (도시의 인도·계단은 subclass가 달라 걸러진다)
-const trailFilter = [
-  'all',
-  ['==', ['get', 'class'], 'path'],
-  ['==', ['get', 'subclass'], 'path'],
-  onGround,
-] as never;
 
 const landcoverOf = (...classes: string[]) => ['match', ['get', 'class'], classes, true, false] as never;
 
@@ -157,28 +144,6 @@ const layers: Layer[] = [
     filter: bridgeFilter,
     layout: { 'line-cap': 'butt', 'line-join': 'round' },
     paint: { 'line-color': BRIDGE_EDGE, 'line-width': widthByZoom(1.5, 3), 'line-dasharray': [3.3, 2.7] },
-  },
-
-  // 자전거길 — 흰 점선
-  {
-    id: 'bike-path',
-    type: 'line',
-    source: 'openmaptiles',
-    'source-layer': 'transportation',
-    filter: bikePathFilter,
-    layout: { 'line-cap': 'round', 'line-join': 'round' },
-    paint: { 'line-color': ROAD_DASH, 'line-width': widthByZoom(1.5, 3), 'line-dasharray': [2, 2.7] },
-  },
-
-  // 등산로 — 흰 점선 (자전거길보다 성기게)
-  {
-    id: 'trail',
-    type: 'line',
-    source: 'openmaptiles',
-    'source-layer': 'transportation',
-    filter: trailFilter,
-    layout: { 'line-cap': 'round', 'line-join': 'round' },
-    paint: { 'line-color': ROAD_DASH, 'line-width': widthByZoom(1.5, 3), 'line-dasharray': [3.5, 3.2] },
   },
 
   // 큰길만 가운데에 흰 점선 (작은 길은 그리지 않는다)
