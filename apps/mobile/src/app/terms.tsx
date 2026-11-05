@@ -1,9 +1,10 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { ProgressBar } from '@/components/onboarding/ProgressBar';
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
+import { makeStyles } from '@/hooks/use-theme';
 
 type ConsentKey = 'tos' | 'priv' | 'loc' | 'age' | 'mkt';
 
@@ -19,6 +20,7 @@ const ROWS: { key: ConsentKey; label: string; hasChevron: boolean }[] = [
 ];
 
 export default function TermsScreen() {
+  const styles = useStyles();
   const [checked, setChecked] = useState<Record<ConsentKey, boolean>>({
     tos: false,
     priv: false,
@@ -93,10 +95,10 @@ export default function TermsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.bg,
     paddingTop: 18,
     paddingHorizontal: 20,
     paddingBottom: 28,
@@ -112,7 +114,7 @@ const styles = StyleSheet.create({
   },
   backArrow: {
     fontSize: 28,
-    color: '#AEB4C6',
+    color: c.textFaint,
     fontWeight: '700',
   },
   headerText: {
@@ -121,14 +123,14 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 28,
-    color: Brand.ink,
+    color: c.text,
     letterSpacing: -1,
     lineHeight: 36,
   },
   subtitle: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 15,
-    color: Brand.muted,
+    color: c.textSub,
     lineHeight: 22,
   },
   allRow: {
@@ -137,21 +139,21 @@ const styles = StyleSheet.create({
     gap: 12,
     minHeight: 60,
     paddingHorizontal: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.card,
     borderWidth: 2,
-    borderColor: Brand.border,
+    borderColor: c.cardEdge,
     borderBottomWidth: 4,
     borderRadius: 20,
   },
   allLabel: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 17,
-    color: Brand.ink,
+    color: c.text,
   },
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.card,
     borderWidth: 2,
-    borderColor: Brand.border,
+    borderColor: c.cardEdge,
     borderBottomWidth: 4,
     borderRadius: 20,
     overflow: 'hidden',
@@ -165,24 +167,24 @@ const styles = StyleSheet.create({
   },
   rowDivider: {
     borderBottomWidth: 2,
-    borderBottomColor: Brand.border,
+    borderBottomColor: c.cardEdge,
   },
   checkCircle: {
     width: 24,
     height: 24,
     borderRadius: 12,
     borderWidth: 1.5,
-    borderColor: '#C7C7CC',
+    borderColor: c.switchOff,
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
   },
   checkCircleOn: {
     borderWidth: 0,
-    backgroundColor: Brand.primary,
+    backgroundColor: c.primary,
   },
   checkMark: {
-    color: '#FFFFFF',
+    color: c.white,
     fontSize: 13,
     fontWeight: '900',
   },
@@ -190,11 +192,11 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     fontFamily: BrandFonts.gothicMedium,
     fontSize: 15,
-    color: Brand.ink,
+    color: c.text,
   },
   chevron: {
     fontSize: 18,
-    color: '#C4C4C7',
+    color: c.line,
     fontWeight: '700',
   },
   footer: {
@@ -203,22 +205,22 @@ const styles = StyleSheet.create({
   continueButton: {
     minHeight: 54,
     borderRadius: 16,
-    backgroundColor: Brand.primary,
+    backgroundColor: c.primary,
     borderBottomWidth: 4,
-    borderBottomColor: Brand.primaryDark,
+    borderBottomColor: c.primaryEdge,
     alignItems: 'center',
     justifyContent: 'center',
   },
   continueButtonDisabled: {
-    backgroundColor: Brand.border,
-    borderBottomColor: '#CBD1DF',
+    backgroundColor: c.cardEdge,
+    borderBottomColor: c.line,
   },
   continueText: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 16,
-    color: '#FFFFFF',
+    color: c.white,
   },
   continueTextDisabled: {
-    color: '#8A8FA3',
+    color: c.textMute,
   },
-});
+}));

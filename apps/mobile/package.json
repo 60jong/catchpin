@@ -3,10 +3,10 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "dependencies": {
+    "@expo-google-fonts/black-han-sans": "^0.4.1",
     "@expo-google-fonts/gothic-a1": "^0.4.1",
     "@expo-google-fonts/sora": "^0.4.2",
     "@expo/ui": "~57.0.20",
-    "@maplibre/maplibre-react-native": "^11.5.0",
     "@react-native-google-signin/google-signin": "^16.1.5",
     "@react-native-seoul/kakao-login": "^6.0.4",
     "@shopify/react-native-skia": "2.6.2",

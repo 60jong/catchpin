@@ -1,11 +1,12 @@
 import { Tabs, TabList, TabTrigger, TabSlot, TabTriggerSlotProps, TabListProps } from 'expo-router/ui';
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { HistoryTabIcon, MapTabIcon, ProfileTabIcon, WalletTabIcon } from '@/components/navigation/TabIcons';
-import { Brand } from '@/constants/theme';
+import { makeStyles } from '@/hooks/use-theme';
 
 export default function AppTabs() {
+  const styles = useStyles();
   return (
     <Tabs>
       <TabSlot style={styles.slot} />
@@ -30,10 +31,12 @@ export default function AppTabs() {
 }
 
 function NavBar(props: TabListProps) {
+  const styles = useStyles();
   return <View {...props} style={styles.navBar} />;
 }
 
 function TabButton({ icon, isFocused, ...props }: TabTriggerSlotProps & { icon: ReactNode }) {
+  const styles = useStyles();
   return (
     <Pressable {...props} style={styles.tabItem}>
       <View style={[styles.pill, isFocused && styles.pillActive]}>{icon}</View>
@@ -41,16 +44,16 @@ function TabButton({ icon, isFocused, ...props }: TabTriggerSlotProps & { icon: 
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   slot: {
     flex: 1,
   },
   navBar: {
     flexDirection: 'row',
     height: 88, // 디자인 업데이트로 80 → 88 (숨쉴 공간 확보)
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.card,
     borderTopWidth: 2,
-    borderTopColor: Brand.border,
+    borderTopColor: c.cardEdge,
     paddingHorizontal: 8,
   },
   tabItem: {
@@ -68,7 +71,7 @@ const styles = StyleSheet.create({
   },
   pillActive: {
     borderWidth: 2,
-    borderColor: Brand.primary,
-    backgroundColor: Brand.primarySoft,
+    borderColor: c.primary,
+    backgroundColor: c.primarySoft,
   },
-});
+}));

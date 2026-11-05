@@ -1,8 +1,10 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BrandFonts } from '@/constants/theme';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
+import { withAlpha } from '@/utils/color';
 
 type OfflineBannerProps = {
   onRetry: () => void;
@@ -10,22 +12,24 @@ type OfflineBannerProps = {
 
 /** 오프라인일 때 상단에 계속 떠 있는 배너 — 핀 탭 결과 토스트(zIndex 10)보다 한 단 아래(zIndex 9)에 깐다. */
 export function OfflineBanner({ onRetry }: OfflineBannerProps) {
+  const c = useTheme();
+  const styles = useStyles();
   const insets = useSafeAreaInsets();
 
   return (
     <View style={[styles.wrap, { top: insets.top + 8 }]}>
       <View style={styles.icon}>
         <Svg width={20} height={20} viewBox="0 0 24 24">
-          <Path d="M3 3l18 18" fill="none" stroke="#FFFFFF" strokeWidth={2.4} strokeLinecap="round" />
+          <Path d="M3 3l18 18" fill="none" stroke={c.white} strokeWidth={2.4} strokeLinecap="round" />
           <Path
             d="M8.5 13.5a5 5 0 0 1 4.6-1.4M5 10a10 10 0 0 1 4-2.3M15.5 8a10 10 0 0 1 3.5 2"
             fill="none"
-            stroke="#FFFFFF"
+            stroke={c.white}
             strokeWidth={2.4}
             strokeLinecap="round"
             strokeLinejoin="round"
           />
-          <Path d="M12 18h.01" stroke="#FFFFFF" strokeWidth={2.4} strokeLinecap="round" />
+          <Path d="M12 18h.01" stroke={c.white} strokeWidth={2.4} strokeLinecap="round" />
         </Svg>
       </View>
       <View style={styles.text}>
@@ -39,16 +43,16 @@ export function OfflineBanner({ onRetry }: OfflineBannerProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   wrap: {
     position: 'absolute',
     left: 14,
     right: 14,
     zIndex: 9,
-    backgroundColor: '#1F2233',
+    backgroundColor: c.inverse,
     borderRadius: 16,
     borderBottomWidth: 4,
-    borderBottomColor: '#000000',
+    borderBottomColor: c.black,
     padding: 12,
     paddingLeft: 14,
     flexDirection: 'row',
@@ -59,7 +63,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(255,255,255,0.14)',
+    backgroundColor: withAlpha(c.white, 0.14),
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
@@ -71,18 +75,18 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 15,
-    color: '#FFFFFF',
+    color: c.white,
   },
   subtitle: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 12,
-    color: '#C9CCD8',
+    color: c.line,
   },
   retryButton: {
     minHeight: 36,
     paddingHorizontal: 12,
     borderRadius: 10,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.white,
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
@@ -90,6 +94,6 @@ const styles = StyleSheet.create({
   retryText: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 13,
-    color: '#1F2233',
+    color: c.inverse,
   },
-});
+}));

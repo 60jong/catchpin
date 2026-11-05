@@ -1,10 +1,12 @@
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
 import { Icon, type IconName } from './Icon';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
+import { withAlpha } from '@/utils/color';
 
 type IconBadgeProps = {
   icon?: IconName;
-  /** 배지 바탕색 (예: 파랑 #2F6FE8) */
+  /** 배지 바탕색 (예: 코발트) */
   color: string;
   /** 아래 두께면 색 — 안 주면 어두운 반투명 그림자 */
   edge?: string;
@@ -13,7 +15,12 @@ type IconBadgeProps = {
 };
 
 /** 설정/인증 행 왼쪽의 둥근 사각 아이콘 배지 — 바탕 + 아래 두께면 + 흰 선 아이콘. icon이 없으면 색 상자만 보인다. */
-export function IconBadge({ icon, color, edge = 'rgba(0,0,0,0.18)', size = 34, iconColor = '#FFFFFF' }: IconBadgeProps) {
+export function IconBadge({ icon, color, edge: edgeProp, size = 34, iconColor: iconColorProp }: IconBadgeProps) {
+  const c = useTheme();
+  // 아래 두께면을 안 주면 어두운 반투명 그림자
+  const edge = edgeProp ?? withAlpha(c.black, 0.18);
+  const iconColor = iconColorProp ?? c.white;
+  const styles = useStyles();
   return (
     <View
       style={[
@@ -25,7 +32,7 @@ export function IconBadge({ icon, color, edge = 'rgba(0,0,0,0.18)', size = 34, i
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   badge: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -35,4 +42,4 @@ const styles = StyleSheet.create({
     shadowRadius: 0,
     elevation: 0,
   },
-});
+}));

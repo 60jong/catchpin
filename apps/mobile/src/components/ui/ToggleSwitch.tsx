@@ -1,6 +1,6 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
 
-import { Brand } from '@/constants/theme';
 
 type ToggleSwitchProps = {
   value: boolean;
@@ -11,6 +11,8 @@ type ToggleSwitchProps = {
 
 /** 설정 화면의 켜짐/꺼짐 스위치 (50×30) — 켜지면 초록. */
 export function ToggleSwitch({ value, onValueChange, accessibilityLabel, disabled }: ToggleSwitchProps) {
+  const c = useTheme();
+  const styles = useStyles();
   return (
     <Pressable
       onPress={() => onValueChange(!value)}
@@ -19,13 +21,13 @@ export function ToggleSwitch({ value, onValueChange, accessibilityLabel, disable
       accessibilityLabel={accessibilityLabel}
       accessibilityState={{ checked: value, disabled }}
       hitSlop={6}
-      style={[styles.track, { backgroundColor: value ? Brand.green : '#D6DBE5' }]}>
+      style={[styles.track, { backgroundColor: value ? c.success : c.line }]}>
       <View style={[styles.knob, { left: value ? 23 : 3 }]} />
     </Pressable>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   track: {
     width: 50,
     height: 30,
@@ -38,11 +40,11 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000000',
+    backgroundColor: c.white,
+    shadowColor: c.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 2,
   },
-});
+}));

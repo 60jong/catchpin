@@ -1,28 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  AppState,
-  KeyboardAvoidingView,
-  Linking,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Alert, AppState, KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import { ActionButton } from '@/components/ui/ActionButton';
 import { Icon } from '@/components/ui/Icon';
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
 import type { Me } from '@/data/member';
 import { issuePhoneCode, verifyPhone, type PhoneCode } from '@/data/phone';
 import { digitsOnly, formatPhone, isValidPhone } from '@/utils/phone';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
 
-const RED = '#C73A31';
-const GREEN_TEXT = '#1F7A3F';
 
 type PhoneVerifyFormProps = {
   /** signup: 가입 중(건너뛰기 가능 안내), manage: 인증 관리에서 들어옴(개인정보 안내) */
@@ -38,11 +24,11 @@ function smsUrl(destinationNumber: string, code: string) {
   return Platform.OS === 'ios' ? `sms:${number}&body=${code}` : `sms:${number}?body=${code}`;
 }
 
-function phoneHelp(phone: string): { text: string; color: string } {
-  if (phone.length >= 3 && !/^01[016789]/.test(phone)) return { text: '010으로 시작하는 휴대폰 번호를 입력해 주세요', color: RED };
-  if (phone.length >= 10 && !isValidPhone(phone)) return { text: '번호를 다시 확인해 주세요', color: RED };
-  if (isValidPhone(phone)) return { text: '이 번호로 인증 문자를 보내게 돼요', color: GREEN_TEXT };
-  return { text: '본인 명의가 아니어도 직접 쓰는 번호면 돼요', color: Brand.muted };
+function phoneHelp(phone: string): { text: string; tone: 'error' | 'ok' | 'hint' } {
+  if (phone.length >= 3 && !/^01[016789]/.test(phone)) return { text: '010으로 시작하는 휴대폰 번호를 입력해 주세요', tone: 'error' };
+  if (phone.length >= 10 && !isValidPhone(phone)) return { text: '번호를 다시 확인해 주세요', tone: 'error' };
+  if (isValidPhone(phone)) return { text: '이 번호로 인증 문자를 보내게 돼요', tone: 'ok' };
+  return { text: '본인 명의가 아니어도 직접 쓰는 번호면 돼요', tone: 'hint' };
 }
 
 /**
@@ -50,6 +36,8 @@ function phoneHelp(phone: string): { text: string; color: string } {
  * 문자를 보내는 쪽은 서버가 아니라 사용자다. 가입 단계와 인증 관리 화면이 같이 쓴다.
  */
 export function PhoneVerifyForm({ variant, onVerified }: PhoneVerifyFormProps) {
+  const c = useTheme();
+  const styles = useStyles();
   const [step, setStep] = useState<Step>('phone');
   const [phone, setPhone] = useState('');
   const [issued, setIssued] = useState<{ info: PhoneCode; expiresAt: number } | null>(null);
@@ -138,7 +126,8 @@ export function PhoneVerifyForm({ variant, onVerified }: PhoneVerifyFormProps) {
 
   const okPhone = isValidPhone(phone);
   const help = phoneHelp(phone);
-  const ringColor = okPhone ? Brand.green : help.color === RED ? '#E8534A' : Brand.border;
+  const helpColor = help.tone === 'error' ? c.dangerText : help.tone === 'ok' ? c.successText : c.textSub;
+  const ringColor = okPhone ? c.success : help.tone === 'error' ? c.danger : c.cardEdge;
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.container}>
@@ -158,7 +147,7 @@ export function PhoneVerifyForm({ variant, onVerified }: PhoneVerifyFormProps) {
                   keyboardType="phone-pad"
                   autoComplete="tel"
                   placeholder="010-0000-0000"
-                  placeholderTextColor="#AEB4C6"
+                  placeholderTextColor={c.textFaint}
                   accessibilityLabel="휴대폰 번호"
                   style={styles.input}
                 />
@@ -168,11 +157,11 @@ export function PhoneVerifyForm({ variant, onVerified }: PhoneVerifyFormProps) {
                   </Pressable>
                 )}
               </View>
-              <Text style={[styles.help, { color: help.color }]}>{help.text}</Text>
+              <Text style={[styles.help, { color: helpColor }]}>{help.text}</Text>
             </View>
             {variant === 'signup' ? (
               <View style={styles.noteGold}>
-                <Icon name="gift" size={20} color={Brand.goldText} />
+                <Icon name="gift" size={20} color={c.goldText} />
                 <View style={styles.noteBody}>
                   <Text style={styles.noteGoldTitle}>지금은 건너뛰어도 괜찮아요</Text>
                   <Text style={styles.noteGoldText}>단, 모은 포인트를 상품권으로 바꿀 때는 휴대폰 인증이 꼭 필요해요.</Text>
@@ -195,7 +184,7 @@ export function PhoneVerifyForm({ variant, onVerified }: PhoneVerifyFormProps) {
             </View>
             <View style={styles.numberCard}>
               <View style={styles.numberIcon}>
-                <Icon name="phone" size={20} color="#FFFFFF" />
+                <Icon name="phone" size={20} color={c.white} />
               </View>
               <View style={styles.numberBody}>
                 <Text style={styles.numberLabel}>인증할 번호</Text>
@@ -223,11 +212,11 @@ export function PhoneVerifyForm({ variant, onVerified }: PhoneVerifyFormProps) {
         <>
           <ScrollView contentContainerStyle={styles.scroll}>
             <View style={styles.waitHeader}>
-              <ActivityIndicator color={Brand.primary} size="large" />
+              <ActivityIndicator color={c.primary} size="large" />
               <View style={styles.waitText}>
                 <Text style={styles.waitTitle}>문자를 기다리고 있어요...</Text>
                 <Text style={styles.waitTimer}>
-                  남은 시간 <Text style={[styles.waitTimerValue, { color: left <= 60 ? RED : Brand.primaryDark }]}>{timerText}</Text>
+                  남은 시간 <Text style={[styles.waitTimerValue, { color: left <= 60 ? c.dangerText : c.primaryText }]}>{timerText}</Text>
                 </Text>
               </View>
             </View>
@@ -263,7 +252,7 @@ export function PhoneVerifyForm({ variant, onVerified }: PhoneVerifyFormProps) {
               </View>
             </View>
             <View style={styles.warnRow}>
-              <Icon name="shield" size={18} color={Brand.primaryDark} />
+              <Icon name="shield" size={18} color={c.primaryText} />
               <Text style={styles.warnText}>입력한 번호와 다른 휴대폰, PC 문자로 보내면 인증되지 않아요.</Text>
             </View>
           </ScrollView>
@@ -279,7 +268,7 @@ export function PhoneVerifyForm({ variant, onVerified }: PhoneVerifyFormProps) {
 
       {step === 'check' && (
         <View style={styles.center}>
-          <ActivityIndicator color={Brand.primary} size="large" />
+          <ActivityIndicator color={c.primary} size="large" />
           <Text style={styles.centerTitle}>인증 문자를 확인하고 있어요</Text>
           <Text style={styles.subtitle}>잠시만 기다려 주세요</Text>
         </View>
@@ -321,15 +310,18 @@ export function PhoneVerifyForm({ variant, onVerified }: PhoneVerifyFormProps) {
 }
 
 function PrivacyNote() {
+  const c = useTheme();
+  const styles = useStyles();
   return (
     <View style={styles.noteGray}>
-      <Icon name="lock" size={20} color={Brand.primaryDark} />
+      <Icon name="lock" size={20} color={c.primaryText} />
       <Text style={styles.noteGrayText}>인증된 번호는 본인 확인과 상품권 발송에만 쓰이고, 다른 사람에게 보이지 않아요.</Text>
     </View>
   );
 }
 
 function StepRow({ n, title, body, line }: { n: number; title: string; body: string; line?: boolean }) {
+  const styles = useStyles();
   return (
     <View style={styles.stepRow}>
       <View style={styles.stepBadge}>
@@ -345,104 +337,106 @@ function StepRow({ n, title, body, line }: { n: number; title: string; body: str
 }
 
 function CopyButton({ label, copied, onPress }: { label: string; copied: boolean; onPress: () => void }) {
+  const c = useTheme();
+  const styles = useStyles();
   return (
     <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} style={styles.copy}>
-      <Icon name={copied ? 'check' : 'copy'} size={14} color={copied ? GREEN_TEXT : Brand.primaryDark} />
-      <Text style={[styles.copyText, { color: copied ? GREEN_TEXT : Brand.primaryDark }]}>{copied ? '복사됨' : '복사'}</Text>
+      <Icon name={copied ? 'check' : 'copy'} size={14} color={copied ? c.successText : c.primaryText} />
+      <Text style={[styles.copyText, { color: copied ? c.successText : c.primaryText }]}>{copied ? '복사됨' : '복사'}</Text>
     </Pressable>
   );
 }
 
 function CheckRow({ text }: { text: string }) {
+  const c = useTheme();
+  const styles = useStyles();
   return (
     <View style={styles.checkRow}>
       <View style={styles.checkBadge}>
-        <Icon name="check" size={12} color={Brand.primaryDark} strokeWidth={3.4} />
+        <Icon name="check" size={12} color={c.primaryText} strokeWidth={3.4} />
       </View>
       <Text style={styles.checkText}>{text}</Text>
     </View>
   );
 }
 
-const card = {
-  backgroundColor: '#FFFFFF',
+const cardBase = {
   borderWidth: 2,
-  borderColor: Brand.border,
   borderBottomWidth: 4,
   borderRadius: 20,
 } as const;
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   container: { flex: 1, gap: 12 },
   scroll: { gap: 18, paddingBottom: 12 },
   heading: { gap: 8 },
-  title: { fontFamily: BrandFonts.gothicBlack, fontSize: 28, lineHeight: 36, letterSpacing: -1, color: Brand.ink },
-  subtitle: { fontFamily: BrandFonts.gothicBold, fontSize: 15, lineHeight: 22, color: Brand.muted },
+  title: { fontFamily: BrandFonts.gothicBlack, fontSize: 28, lineHeight: 36, letterSpacing: -1, color: c.text },
+  subtitle: { fontFamily: BrandFonts.gothicBold, fontSize: 15, lineHeight: 22, color: c.textSub },
   field: { gap: 8 },
-  label: { fontFamily: BrandFonts.gothicBlack, fontSize: 13, color: Brand.muted, paddingHorizontal: 4 },
-  inputBox: { ...card, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, minHeight: 60 },
-  input: { flex: 1, minWidth: 0, fontFamily: BrandFonts.soraExtraBold, fontSize: 22, letterSpacing: 0.5, color: Brand.ink },
-  clear: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#D6DBE5', alignItems: 'center', justifyContent: 'center' },
-  clearText: { color: '#FFFFFF', fontSize: 12, fontFamily: BrandFonts.gothicBlack },
+  label: { fontFamily: BrandFonts.gothicBlack, fontSize: 13, color: c.textSub, paddingHorizontal: 4 },
+  inputBox: { ...cardBase, backgroundColor: c.card, borderColor: c.cardEdge, flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 16, minHeight: 60 },
+  input: { flex: 1, minWidth: 0, fontFamily: BrandFonts.soraExtraBold, fontSize: 22, letterSpacing: 0.5, color: c.text },
+  clear: { width: 28, height: 28, borderRadius: 14, backgroundColor: c.line, alignItems: 'center', justifyContent: 'center' },
+  clearText: { color: c.white, fontSize: 12, fontFamily: BrandFonts.gothicBlack },
   help: { fontFamily: BrandFonts.gothicBold, fontSize: 13, paddingHorizontal: 4 },
-  noteGold: { flexDirection: 'row', gap: 10, alignItems: 'flex-start', backgroundColor: '#FFF8E1', borderWidth: 2, borderColor: '#FFE08A', borderRadius: 16, padding: 14 },
+  noteGold: { flexDirection: 'row', gap: 10, alignItems: 'flex-start', backgroundColor: c.goldSoft, borderWidth: 2, borderColor: c.goldBorder, borderRadius: 16, padding: 14 },
   noteBody: { flex: 1, gap: 2 },
-  noteGoldTitle: { fontFamily: BrandFonts.gothicBlack, fontSize: 14, color: '#6B4A00' },
-  noteGoldText: { fontFamily: BrandFonts.gothicBold, fontSize: 13, lineHeight: 20, color: '#7A5600' },
-  noteGray: { flexDirection: 'row', gap: 10, alignItems: 'flex-start', backgroundColor: Brand.surface, borderRadius: 16, padding: 14 },
-  noteGrayText: { flex: 1, fontFamily: BrandFonts.gothicBold, fontSize: 13, lineHeight: 20, color: '#3E4255' },
-  numberCard: { ...card, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 },
-  numberIcon: { width: 34, height: 34, borderRadius: 10, backgroundColor: Brand.primary, alignItems: 'center', justifyContent: 'center' },
+  noteGoldTitle: { fontFamily: BrandFonts.gothicBlack, fontSize: 14, color: c.goldText },
+  noteGoldText: { fontFamily: BrandFonts.gothicBold, fontSize: 13, lineHeight: 20, color: c.goldText },
+  noteGray: { flexDirection: 'row', gap: 10, alignItems: 'flex-start', backgroundColor: c.sunken, borderRadius: 16, padding: 14 },
+  noteGrayText: { flex: 1, fontFamily: BrandFonts.gothicBold, fontSize: 13, lineHeight: 20, color: c.text },
+  numberCard: { ...cardBase, backgroundColor: c.card, borderColor: c.cardEdge, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 },
+  numberIcon: { width: 34, height: 34, borderRadius: 10, backgroundColor: c.primary, alignItems: 'center', justifyContent: 'center' },
   numberBody: { flex: 1, gap: 2 },
-  numberLabel: { fontFamily: BrandFonts.gothicBlack, fontSize: 12, color: Brand.muted },
-  numberValue: { fontFamily: BrandFonts.soraExtraBold, fontSize: 18, color: Brand.ink },
-  change: { fontFamily: BrandFonts.gothicBlack, fontSize: 14, color: Brand.primaryDark, textDecorationLine: 'underline' },
+  numberLabel: { fontFamily: BrandFonts.gothicBlack, fontSize: 12, color: c.textSub },
+  numberValue: { fontFamily: BrandFonts.soraExtraBold, fontSize: 18, color: c.text },
+  change: { fontFamily: BrandFonts.gothicBlack, fontSize: 14, color: c.primaryText, textDecorationLine: 'underline' },
   steps: { gap: 14, paddingHorizontal: 2 },
   stepRow: { flexDirection: 'row', gap: 12 },
-  stepBadge: { width: 32, height: 32, borderRadius: 16, backgroundColor: Brand.primarySoft, alignItems: 'center', justifyContent: 'center' },
-  stepNumber: { fontFamily: BrandFonts.soraExtraBold, fontSize: 14, color: Brand.primaryDark },
-  stepLine: { position: 'absolute', left: 15, top: 34, bottom: -14, width: 2, backgroundColor: Brand.border },
+  stepBadge: { width: 32, height: 32, borderRadius: 16, backgroundColor: c.primarySoft, alignItems: 'center', justifyContent: 'center' },
+  stepNumber: { fontFamily: BrandFonts.soraExtraBold, fontSize: 14, color: c.primaryText },
+  stepLine: { position: 'absolute', left: 15, top: 34, bottom: -14, width: 2, backgroundColor: c.cardEdge },
   stepBody: { flex: 1, gap: 2, paddingTop: 5 },
-  stepTitle: { fontFamily: BrandFonts.gothicBlack, fontSize: 15, color: Brand.ink },
-  stepText: { fontFamily: BrandFonts.gothicBold, fontSize: 13, lineHeight: 20, color: Brand.muted },
+  stepTitle: { fontFamily: BrandFonts.gothicBlack, fontSize: 15, color: c.text },
+  stepText: { fontFamily: BrandFonts.gothicBold, fontSize: 13, lineHeight: 20, color: c.textSub },
   footer: { gap: 10 },
-  footNote: { textAlign: 'center', fontFamily: BrandFonts.gothicBold, fontSize: 12, color: '#8A8FA3' },
+  footNote: { textAlign: 'center', fontFamily: BrandFonts.gothicBold, fontSize: 12, color: c.textMute },
   waitHeader: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   waitText: { flex: 1, gap: 3 },
-  waitTitle: { fontFamily: BrandFonts.gothicBlack, fontSize: 22, letterSpacing: -0.6, color: Brand.ink },
-  waitTimer: { fontFamily: BrandFonts.gothicBold, fontSize: 14, color: Brand.muted },
+  waitTitle: { fontFamily: BrandFonts.gothicBlack, fontSize: 22, letterSpacing: -0.6, color: c.text },
+  waitTimer: { fontFamily: BrandFonts.gothicBold, fontSize: 14, color: c.textSub },
   waitTimerValue: { fontFamily: BrandFonts.soraExtraBold },
-  pulseNote: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: Brand.primarySoft, borderRadius: 12, padding: 12 },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: Brand.primary },
-  pulseText: { flex: 1, fontFamily: BrandFonts.gothicBlack, fontSize: 13, color: Brand.primaryDark },
-  notYet: { backgroundColor: '#FFE8E5', borderRadius: 12, padding: 12 },
-  notYetText: { fontFamily: BrandFonts.gothicBold, fontSize: 13, lineHeight: 20, color: RED },
-  sendGuide: { fontFamily: BrandFonts.gothicBold, fontSize: 14, lineHeight: 21, color: Brand.muted },
-  sendGuideStrong: { fontFamily: BrandFonts.gothicBlack, color: Brand.ink },
-  sendCard: { ...card, overflow: 'hidden' },
+  pulseNote: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: c.primarySoft, borderRadius: 12, padding: 12 },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: c.primary },
+  pulseText: { flex: 1, fontFamily: BrandFonts.gothicBlack, fontSize: 13, color: c.primaryText },
+  notYet: { backgroundColor: c.dangerSoft, borderRadius: 12, padding: 12 },
+  notYetText: { fontFamily: BrandFonts.gothicBold, fontSize: 13, lineHeight: 20, color: c.dangerText },
+  sendGuide: { fontFamily: BrandFonts.gothicBold, fontSize: 14, lineHeight: 21, color: c.textSub },
+  sendGuideStrong: { fontFamily: BrandFonts.gothicBlack, color: c.text },
+  sendCard: { ...cardBase, backgroundColor: c.card, borderColor: c.cardEdge, overflow: 'hidden' },
   sendRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 14 },
   sendBody: { flex: 1, gap: 3 },
-  sendLabel: { fontFamily: BrandFonts.gothicBlack, fontSize: 12, color: Brand.muted },
-  sendNumber: { fontFamily: BrandFonts.soraExtraBold, fontSize: 20, letterSpacing: 1, color: Brand.ink },
-  sendCode: { fontFamily: BrandFonts.soraExtraBold, fontSize: 26, letterSpacing: 3, color: Brand.primaryDark },
-  sendDivider: { height: 2, backgroundColor: Brand.border },
-  copy: { minHeight: 40, flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12, borderWidth: 2, borderBottomWidth: 3, borderColor: Brand.border, borderRadius: 12 },
+  sendLabel: { fontFamily: BrandFonts.gothicBlack, fontSize: 12, color: c.textSub },
+  sendNumber: { fontFamily: BrandFonts.soraExtraBold, fontSize: 20, letterSpacing: 1, color: c.text },
+  sendCode: { fontFamily: BrandFonts.soraExtraBold, fontSize: 26, letterSpacing: 3, color: c.primaryText },
+  sendDivider: { height: 2, backgroundColor: c.cardEdge },
+  copy: { minHeight: 40, flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12, borderWidth: 2, borderBottomWidth: 3, borderColor: c.cardEdge, borderRadius: 12 },
   copyText: { fontFamily: BrandFonts.gothicBlack, fontSize: 13 },
   warnRow: { flexDirection: 'row', gap: 8, alignItems: 'flex-start', paddingHorizontal: 2 },
-  warnText: { flex: 1, fontFamily: BrandFonts.gothicBold, fontSize: 13, lineHeight: 20, color: '#3E4255' },
+  warnText: { flex: 1, fontFamily: BrandFonts.gothicBold, fontSize: 13, lineHeight: 20, color: c.text },
   linkButton: { minHeight: 40, alignItems: 'center', justifyContent: 'center' },
-  linkText: { fontFamily: BrandFonts.gothicBold, fontSize: 14, color: Brand.muted, textDecorationLine: 'underline' },
+  linkText: { fontFamily: BrandFonts.gothicBold, fontSize: 14, color: c.textSub, textDecorationLine: 'underline' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 14 },
-  centerTitle: { textAlign: 'center', fontFamily: BrandFonts.gothicBlack, fontSize: 24, lineHeight: 32, letterSpacing: -0.6, color: Brand.ink },
-  failRing: { width: 150, height: 150, borderRadius: 75, borderWidth: 3, borderStyle: 'dashed', borderColor: '#FFD6D0', alignItems: 'center', justifyContent: 'center' },
-  failCircle: { width: 96, height: 96, borderRadius: 48, backgroundColor: '#E8534A', alignItems: 'center', justifyContent: 'center' },
-  failMark: { color: '#FFFFFF', fontSize: 40, fontFamily: BrandFonts.gothicBlack },
-  overlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15,22,48,0.5)' },
-  sheet: { position: 'absolute', left: -20, right: -20, bottom: -12, backgroundColor: '#FFFFFF', borderTopLeftRadius: 28, borderTopRightRadius: 28, paddingTop: 12, paddingHorizontal: 24, paddingBottom: 32, gap: 16 },
-  handle: { alignSelf: 'center', width: 40, height: 5, borderRadius: 3, backgroundColor: '#D6DBE5' },
-  sheetTitle: { marginTop: 6, fontFamily: BrandFonts.gothicBlack, fontSize: 21, letterSpacing: -0.6, color: Brand.ink },
+  centerTitle: { textAlign: 'center', fontFamily: BrandFonts.gothicBlack, fontSize: 24, lineHeight: 32, letterSpacing: -0.6, color: c.text },
+  failRing: { width: 150, height: 150, borderRadius: 75, borderWidth: 3, borderStyle: 'dashed', borderColor: c.dangerBorder, alignItems: 'center', justifyContent: 'center' },
+  failCircle: { width: 96, height: 96, borderRadius: 48, backgroundColor: c.danger, alignItems: 'center', justifyContent: 'center' },
+  failMark: { color: c.white, fontSize: 40, fontFamily: BrandFonts.gothicBlack },
+  overlay: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: c.scrim },
+  sheet: { position: 'absolute', left: -20, right: -20, bottom: -12, backgroundColor: c.card, borderTopLeftRadius: 28, borderTopRightRadius: 28, paddingTop: 12, paddingHorizontal: 24, paddingBottom: 32, gap: 16 },
+  handle: { alignSelf: 'center', width: 40, height: 5, borderRadius: 3, backgroundColor: c.line },
+  sheetTitle: { marginTop: 6, fontFamily: BrandFonts.gothicBlack, fontSize: 21, letterSpacing: -0.6, color: c.text },
   checks: { gap: 12 },
   checkRow: { flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
-  checkBadge: { width: 22, height: 22, borderRadius: 11, backgroundColor: Brand.primarySoft, alignItems: 'center', justifyContent: 'center' },
-  checkText: { flex: 1, fontFamily: BrandFonts.gothicBold, fontSize: 14, lineHeight: 21, color: '#3E4255' },
-});
+  checkBadge: { width: 22, height: 22, borderRadius: 11, backgroundColor: c.primarySoft, alignItems: 'center', justifyContent: 'center' },
+  checkText: { flex: 1, fontFamily: BrandFonts.gothicBold, fontSize: 14, lineHeight: 21, color: c.text },
+}));

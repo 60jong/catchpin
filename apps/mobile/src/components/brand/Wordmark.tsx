@@ -1,12 +1,14 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
+import { makeStyles } from '@/hooks/use-theme';
 
 type WordmarkProps = {
   fontSize?: number;
 };
 
 export function Wordmark({ fontSize = 40 }: WordmarkProps) {
+  const styles = useStyles();
   const dotSize = fontSize * 0.2;
   const textStyle = [
     styles.text,
@@ -36,14 +38,14 @@ export function Wordmark({ fontSize = 40 }: WordmarkProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   row: {
     flexDirection: 'row',
     alignItems: 'flex-end',
   },
   text: {
     fontFamily: BrandFonts.soraExtraBold,
-    color: Brand.ink,
+    color: c.text,
   },
   iWrap: {
     position: 'relative',
@@ -51,6 +53,6 @@ const styles = StyleSheet.create({
   dot: {
     position: 'absolute',
     left: '50%',
-    backgroundColor: Brand.gold,
+    backgroundColor: c.gold,
   },
-});
+}));

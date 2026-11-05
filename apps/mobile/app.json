@@ -64,7 +64,6 @@
         }
       ],
       "expo-secure-store",
-      "@maplibre/maplibre-react-native",
       [
         "react-native-google-mobile-ads",
         {

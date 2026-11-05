@@ -1,7 +1,8 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
 
 type TopBarProps = {
   points: number;
@@ -13,6 +14,8 @@ type TopBarProps = {
 
 /** 홈 화면 상단 바 — 포인트, 탭권 현황(눌러서 충전), 알림센터 진입 버튼을 한 줄에 보여준다. */
 export function TopBar({ points, tickets, maxTickets, onRefillPress, onNotificationsPress }: TopBarProps) {
+  const c = useTheme();
+  const styles = useStyles();
   return (
     <View style={styles.row}>
       <View style={styles.card}>
@@ -27,8 +30,8 @@ export function TopBar({ points, tickets, maxTickets, onRefillPress, onNotificat
           style={styles.notificationsButton}
           onPress={onNotificationsPress}>
           <Svg width={22} height={22} viewBox="0 0 24 24">
-            <Path d="M12 3a6 6 0 0 0-6 6v4l-2 3h16l-2-3V9a6 6 0 0 0-6-6z" fill={Brand.ink} />
-            <Path d="M9.5 18.5a2.5 2.5 0 0 0 5 0z" fill={Brand.ink} />
+            <Path d="M12 3a6 6 0 0 0-6 6v4l-2 3h16l-2-3V9a6 6 0 0 0-6-6z" fill={c.text} />
+            <Path d="M9.5 18.5a2.5 2.5 0 0 0 5 0z" fill={c.text} />
           </Svg>
           <View style={styles.notificationDot} />
         </Pressable>
@@ -48,7 +51,7 @@ export function TopBar({ points, tickets, maxTickets, onRefillPress, onNotificat
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -61,9 +64,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.card,
     borderWidth: 2,
-    borderColor: Brand.border,
+    borderColor: c.cardEdge,
     borderBottomWidth: 4,
     borderRadius: 16,
     paddingVertical: 6,
@@ -74,14 +77,14 @@ const styles = StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: Brand.gold,
+    backgroundColor: c.gold,
     borderWidth: 2,
-    borderColor: '#FFE07A',
+    borderColor: c.goldBorder,
   },
   pointsText: {
     fontFamily: BrandFonts.soraExtraBold,
     fontSize: 19,
-    color: Brand.ink,
+    color: c.text,
   },
   rightGroup: {
     flexDirection: 'row',
@@ -92,9 +95,9 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.card,
     borderWidth: 2,
-    borderColor: Brand.border,
+    borderColor: c.cardEdge,
     borderBottomWidth: 4,
     alignItems: 'center',
     justifyContent: 'center',
@@ -106,17 +109,17 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: '#E8534A',
+    backgroundColor: c.danger,
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: c.card,
   },
   ticketCard: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.card,
     borderWidth: 2,
-    borderColor: Brand.border,
+    borderColor: c.cardEdge,
     borderBottomWidth: 4,
     borderRadius: 16,
     paddingVertical: 6,
@@ -127,34 +130,34 @@ const styles = StyleSheet.create({
     width: 26,
     height: 18,
     borderRadius: 5,
-    backgroundColor: Brand.primary,
+    backgroundColor: c.primary,
     borderBottomWidth: 2,
-    borderBottomColor: Brand.primaryDark,
+    borderBottomColor: c.primaryEdge,
   },
   ticketText: {
     fontFamily: BrandFonts.soraExtraBold,
     fontSize: 18,
-    color: Brand.ink,
+    color: c.text,
   },
   ticketMax: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 13,
-    color: Brand.muted,
+    color: c.textSub,
   },
   plusButton: {
     width: 32,
     height: 32,
     borderRadius: 10,
-    backgroundColor: Brand.primary,
+    backgroundColor: c.primary,
     borderBottomWidth: 3,
-    borderBottomColor: Brand.primaryDark,
+    borderBottomColor: c.primaryEdge,
     alignItems: 'center',
     justifyContent: 'center',
   },
   plusText: {
-    color: '#FFFFFF',
+    color: c.white,
     fontSize: 16,
     fontFamily: BrandFonts.soraExtraBold,
     marginTop: -2,
   },
-});
+}));

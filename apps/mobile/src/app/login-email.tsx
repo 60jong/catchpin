@@ -1,18 +1,14 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native';
 
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
 import { loginWithEmail } from '@/data/auth';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
 
 export default function LoginEmailScreen() {
+  const c = useTheme();
+  const styles = useStyles();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -50,7 +46,7 @@ export default function LoginEmailScreen() {
               value={email}
               onChangeText={setEmail}
               placeholder="name@example.com"
-              placeholderTextColor="#8A8FA3"
+              placeholderTextColor={c.textMute}
               autoCapitalize="none"
               keyboardType="email-address"
               style={styles.input}
@@ -65,7 +61,7 @@ export default function LoginEmailScreen() {
               value={password}
               onChangeText={setPassword}
               placeholder="8자 이상"
-              placeholderTextColor="#8A8FA3"
+              placeholderTextColor={c.textMute}
               secureTextEntry={!showPassword}
               style={styles.input}
             />
@@ -87,7 +83,7 @@ export default function LoginEmailScreen() {
           style={[styles.loginButton, loading && styles.buttonDisabled]}
           onPress={handleLogin}
           disabled={loading || !email || !password}>
-          {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.loginButtonText}>로그인</Text>}
+          {loading ? <ActivityIndicator color={c.white} /> : <Text style={styles.loginButtonText}>로그인</Text>}
         </Pressable>
         <View style={styles.signupRow}>
           <Text style={styles.signupText}>아직 계정이 없나요? </Text>
@@ -100,10 +96,10 @@ export default function LoginEmailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.bg,
     paddingTop: 20,
     paddingHorizontal: 24,
     paddingBottom: 28,
@@ -118,7 +114,7 @@ const styles = StyleSheet.create({
   },
   backArrow: {
     fontSize: 28,
-    color: '#AEB4C6',
+    color: c.textFaint,
     fontWeight: '700',
   },
   headerText: {
@@ -127,13 +123,13 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 28,
-    color: Brand.ink,
+    color: c.text,
     letterSpacing: -1,
   },
   subtitle: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 15,
-    color: Brand.muted,
+    color: c.textSub,
   },
   fields: {
     gap: 18,
@@ -144,15 +140,15 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 14,
-    color: Brand.ink,
+    color: c.text,
   },
   inputBox: {
     flexDirection: 'row',
     alignItems: 'center',
     minHeight: 54,
-    backgroundColor: Brand.surface,
+    backgroundColor: c.sunken,
     borderWidth: 2,
-    borderColor: Brand.border,
+    borderColor: c.cardEdge,
     borderRadius: 14,
     paddingHorizontal: 14,
     gap: 8,
@@ -161,13 +157,13 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: BrandFonts.gothicBold,
     fontSize: 16,
-    color: Brand.ink,
+    color: c.text,
     padding: 0,
   },
   toggleText: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 13,
-    color: Brand.muted,
+    color: c.textSub,
   },
   forgotLink: {
     alignSelf: 'flex-end',
@@ -177,12 +173,12 @@ const styles = StyleSheet.create({
   forgotText: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 14,
-    color: Brand.muted,
+    color: c.textSub,
   },
   error: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 13,
-    color: '#D14343',
+    color: c.dangerText,
   },
   footer: {
     marginTop: 'auto',
@@ -191,9 +187,9 @@ const styles = StyleSheet.create({
   loginButton: {
     minHeight: 54,
     borderRadius: 16,
-    backgroundColor: Brand.primary,
+    backgroundColor: c.primary,
     borderBottomWidth: 4,
-    borderBottomColor: Brand.primaryDark,
+    borderBottomColor: c.primaryEdge,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -203,7 +199,7 @@ const styles = StyleSheet.create({
   loginButtonText: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 16,
-    color: '#FFFFFF',
+    color: c.white,
   },
   signupRow: {
     flexDirection: 'row',
@@ -212,11 +208,11 @@ const styles = StyleSheet.create({
   signupText: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 14,
-    color: Brand.muted,
+    color: c.textSub,
   },
   signupLink: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 14,
-    color: Brand.primaryDark,
+    color: c.primaryText,
   },
-});
+}));

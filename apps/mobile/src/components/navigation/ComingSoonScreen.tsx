@@ -1,13 +1,15 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
+import { makeStyles } from '@/hooks/use-theme';
 
 type ComingSoonScreenProps = {
   title: string;
 };
 
 export function ComingSoonScreen({ title }: ComingSoonScreenProps) {
+  const styles = useStyles();
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
@@ -18,10 +20,10 @@ export function ComingSoonScreen({ title }: ComingSoonScreenProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.bg,
   },
   safeArea: {
     flex: 1,
@@ -32,11 +34,11 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 21,
-    color: Brand.ink,
+    color: c.text,
   },
   subtitle: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 14,
-    color: Brand.muted,
+    color: c.textSub,
   },
-});
+}));

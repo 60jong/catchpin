@@ -1,10 +1,11 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
 
 import { Avatar } from './Avatar';
 import { ProviderIcon, type LoginProvider } from './ProviderIcon';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
 
 type ProfileCardProps = {
   nickname: string;
@@ -19,6 +20,8 @@ type ProfileCardProps = {
 
 /** 내 정보 화면 맨 위 프로필 카드 — 아바타, 닉네임, 로그인 계정. 카드 전체가 프로필 편집 진입점이다. */
 export function ProfileCard({ nickname, providerLabel, provider, imageUrl, onPress }: ProfileCardProps) {
+  const c = useTheme();
+  const styles = useStyles();
   return (
     <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel="프로필 편집" style={styles.card}>
       <Avatar size={60} imageUrl={imageUrl} />
@@ -32,20 +35,20 @@ export function ProfileCard({ nickname, providerLabel, provider, imageUrl, onPre
         </View>
       </View>
       <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-        <Path d="M9 5l7 7-7 7" stroke="#C4C4C7" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
+        <Path d="M9 5l7 7-7 7" stroke={c.line} strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
       </Svg>
     </Pressable>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.card,
     borderWidth: 2,
-    borderColor: Brand.border,
+    borderColor: c.cardEdge,
     borderBottomWidth: 4,
     borderRadius: 20,
     paddingVertical: 14,
@@ -59,7 +62,7 @@ const styles = StyleSheet.create({
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 20,
     letterSpacing: -0.3,
-    color: Brand.ink,
+    color: c.text,
   },
   providerRow: {
     flexDirection: 'row',
@@ -70,6 +73,6 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     fontFamily: BrandFonts.gothicMedium,
     fontSize: 14,
-    color: Brand.muted,
+    color: c.textSub,
   },
-});
+}));

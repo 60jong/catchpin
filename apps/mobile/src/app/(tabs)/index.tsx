@@ -3,8 +3,8 @@ import * as Location from 'expo-location';
 import { getNetworkStateAsync, useNetworkState } from 'expo-network';
 import * as Notifications from 'expo-notifications';
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { Alert, AppState, LayoutChangeEvent, Linking, StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Alert, AppState, LayoutChangeEvent, Linking, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BottomSheet } from '@/components/home/BottomSheet';
@@ -16,7 +16,6 @@ import { PinButton } from '@/components/home/PinButton';
 import { Radar } from '@/components/home/Radar';
 import type { ToastItem } from '@/components/home/ResultToast';
 import { TopBar } from '@/components/home/TopBar';
-import { Brand } from '@/constants/theme';
 import {
   applyServerState,
   recordClaim,
@@ -25,12 +24,15 @@ import {
   useGameState,
 } from '@/data/gameState';
 import { fetchMe } from '@/data/member';
+import { usePinPlacements } from '@/hooks/use-pin-placements';
 import { randomGoldenPin, randomPin, type Pin } from '@/data/pins';
-import { BackdropMap, useMapCenter } from '@/map';
+import { BackdropMap, useMapCenter, useMapData } from '@/map';
+import { makeWaterTest } from '@/map/skia/projection';
 import { pickCloseCallMarginSeconds } from '@/utils/closeCall';
-import { getMarkerPlacement, getPinPlacement, getRadarVisualSize } from '@/utils/radarLayout';
+import { getMarkerPlacement, getRadarVisualSize } from '@/utils/radarLayout';
 import { playSound } from '@/utils/sounds';
 import { buildToastCopy, pickTapMarginSeconds } from '@/utils/toast';
+import { makeStyles } from '@/hooks/use-theme';
 
 const MARKER_SIZE = 56;
 const MAX_VISIBLE_TOASTS = 3;
@@ -54,6 +56,7 @@ function buildNotificationBody(won: boolean, points: number, marginSeconds: stri
 
 /** 홈(지도) 화면 — 레이더에 뜬 핀을 탭해서 포인트를 선점하는 핵심 화면. */
 export default function HomeScreen() {
+  const styles = useStyles();
   const game = useGameState();
   const [pins, setPins] = useState<Pin[]>([]);
   const [claimingId, setClaimingId] = useState<string | null>(null);
@@ -99,6 +102,7 @@ export default function HomeScreen() {
 
   // 배경 지도의 가운데가 될 내 위치 (모르면 지도를 그리지 않는다)
   const mapCenter = useMapCenter(locationGranted === true);
+  const mapData = useMapData(mapCenter);
 
   // 핀 생성 — 홈이 화면에 보이고, 위치 권한이 있고, 온라인인 동안 5초마다 핀을 하나씩 띄운다. 서버에는 보내지 않는다.
   const spawnPin = useCallback(() => {
@@ -213,9 +217,16 @@ export default function HomeScreen() {
   const marker = getMarkerPlacement(radarArea, MARKER_SIZE);
 
   // 위치 권한이 없으면 "주변 핀"이라는 개념이 성립하지 않아 핀을 아예 안 보여준다.
-  const visiblePins = locationGranted === false ? [] : pins;
+  const visiblePins = useMemo(() => (locationGranted === false ? [] : pins), [locationGranted, pins]);
   const radarState = locationGranted === false ? 'hidden' : isOffline ? 'paused' : 'active';
   const markerVariant = locationGranted === false ? 'noLocation' : 'normal';
+
+  // 핀 자리: 물 위와 다른 핀 72px 안쪽은 피한다.
+  const isWater = useMemo(
+    () => (mapData && mapCenter && hasMeasuredArea ? makeWaterTest(mapData, mapCenter, radarArea) : undefined),
+    [mapData, mapCenter, hasMeasuredArea, radarArea],
+  );
+  const pinPlacements = usePinPlacements(visiblePins, { area: radarArea, bottomSheetHeight, isBlocked: isWater });
 
   // 바텀 패널 분기 — 오프라인(연결 자체가 문제)이 가장 우선, 그다음 위치 꺼짐, 그다음 핀 없음.
   const panelVariant = isOffline
@@ -241,7 +252,7 @@ export default function HomeScreen() {
       {/* 마커·핀은 이 View 기준 좌표(radarLayout.ts와 동일한 좌표계)를 그대로 쓴다.
           레이더 시각(링·스윕)만 따로 더 큰 정사각형에 그려서 가운데 겹쳐 보이게 한다. */}
       <View style={styles.radarArea} onLayout={onRadarLayout}>
-        {locationGranted !== false && <BackdropMap center={mapCenter} />}
+        {locationGranted !== false && <BackdropMap center={mapCenter} data={mapData} offline={isOffline} />}
         {hasMeasuredArea && (
           <>
             <View style={{ width: visualSize, height: visualSize }}>
@@ -253,12 +264,8 @@ export default function HomeScreen() {
             </View>
 
             {visiblePins.map((pin) => {
-              const placement = getPinPlacement({
-                angleDeg: pin.angle,
-                distanceFraction: pin.distance,
-                area: radarArea,
-                bottomSheetHeight,
-              });
+              const placement = pinPlacements[pin.id];
+              if (!placement) return null;
               return (
                 <View key={pin.id} style={[styles.absolute, { left: placement.x, top: placement.y }]}>
                   <PinButton
@@ -301,10 +308,10 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   container: {
     flex: 1,
-    backgroundColor: Brand.ground,
+    backgroundColor: c.bg,
   },
   radarArea: {
     flex: 1,
@@ -315,4 +322,4 @@ const styles = StyleSheet.create({
   absolute: {
     position: 'absolute',
   },
-});
+}));

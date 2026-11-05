@@ -1,6 +1,6 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Alert, ScrollView, Share, StyleSheet, Text } from 'react-native';
+import { Alert, ScrollView, Share, Text } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ProviderIcon, providerLabel } from '@/components/profile/ProviderIcon';
@@ -9,12 +9,15 @@ import { IconBadge } from '@/components/ui/IconBadge';
 import { ListRow } from '@/components/ui/ListRow';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { StatusBadge } from '@/components/ui/StatusBadge';
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
 import { deleteMyLocation, exportMyData } from '@/data/account';
 import { fetchMe, type Me } from '@/data/member';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
 
 /** 계정 관리 — 로그인 정보, 내 데이터(내려받기/위치 기록 삭제), 회원 탈퇴로 가는 길. */
 export default function AccountScreen() {
+  const c = useTheme();
+  const styles = useStyles();
   const [me, setMe] = useState<Me | null>(null);
 
   useFocusEffect(
@@ -67,14 +70,14 @@ export default function AccountScreen() {
           ))}
           {me?.email ? (
             <ListRow
-              leading={<IconBadge icon="mail" color="#8C93A8" />}
+              leading={<IconBadge icon="mail" color={c.textMute} />}
               title="이메일"
               trailing={<Text style={styles.value}>{me.email}</Text>}
               bordered
             />
           ) : null}
           <ListRow
-            leading={<IconBadge icon="phone" color="#8C93A8" />}
+            leading={<IconBadge icon="phone" color={c.textMute} />}
             title="휴대폰 번호"
             trailing={<StatusBadge label={phoneVerified ? '인증 완료' : '미인증'} tone={phoneVerified ? 'success' : 'danger'} />}
             chevron
@@ -91,7 +94,7 @@ export default function AccountScreen() {
 
         <SettingsSection title="내 데이터">
           <ListRow
-            leading={<IconBadge icon="download" color={Brand.primary} />}
+            leading={<IconBadge icon="download" color={c.primary} />}
             title="내 데이터 내려받기"
             subtitle="포인트·기록 내역을 파일로 받아요"
             chevron
@@ -99,7 +102,7 @@ export default function AccountScreen() {
             onPress={handleExport}
           />
           <ListRow
-            leading={<IconBadge icon="pin" color="#8C93A8" />}
+            leading={<IconBadge icon="pin" color={c.textMute} />}
             title="위치 기록 삭제"
             subtitle="저장된 위치 기록을 지워요"
             chevron
@@ -108,17 +111,17 @@ export default function AccountScreen() {
         </SettingsSection>
 
         <SettingsSection>
-          <ListRow title="회원 탈퇴" titleColor="#C73A31" chevron onPress={() => router.push('/withdraw')} />
+          <ListRow title="회원 탈퇴" titleColor={c.dangerText} chevron onPress={() => router.push('/withdraw')} />
         </SettingsSection>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.bg,
   },
   content: {
     paddingHorizontal: 20,
@@ -130,7 +133,7 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     fontFamily: BrandFonts.gothicBold,
     fontSize: 14,
-    color: Brand.muted,
+    color: c.textSub,
   },
   note: {
     marginTop: -8,
@@ -138,10 +141,10 @@ const styles = StyleSheet.create({
     fontFamily: BrandFonts.gothicBold,
     fontSize: 13,
     lineHeight: 19,
-    color: Brand.muted,
+    color: c.textSub,
   },
   noteLink: {
     fontFamily: BrandFonts.gothicBlack,
-    color: Brand.primaryDark,
+    color: c.primaryText,
   },
-});
+}));

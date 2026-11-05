@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ProgressBar } from '@/components/onboarding/ProgressBar';
@@ -9,13 +9,16 @@ import { PhoneVerifyForm } from '@/components/phone/PhoneVerifyForm';
 import { ActionButton } from '@/components/ui/ActionButton';
 import { Icon } from '@/components/ui/Icon';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
 
 /**
  * 가입 마지막 단계(5/5) — 휴대폰 인증. 건너뛸 수 있고, 그때는 상품권 교환 전에 인증해야 한다고 안내한다.
  * 닉네임 화면에서 이미 계정이 만들어진 뒤라서(인증 API는 로그인이 필요) 뒤로가기는 두지 않는다.
  */
 export default function SignupPhoneScreen() {
+  const c = useTheme();
+  const styles = useStyles();
   const [verifiedMasked, setVerifiedMasked] = useState<string | null>(null);
   const [skipOpen, setSkipOpen] = useState(false);
 
@@ -49,7 +52,7 @@ export default function SignupPhoneScreen() {
             <View style={styles.handle} />
             <View style={styles.sheetBody}>
               <View style={styles.sheetIcon}>
-                <Icon name="gift" size={26} color="#3A2A00" />
+                <Icon name="gift" size={26} color={c.onGold} />
               </View>
               <Text style={styles.sheetTitle}>나중에 인증할까요?</Text>
               <Text style={styles.sheetText}>
@@ -71,10 +74,10 @@ export default function SignupPhoneScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.bg,
     paddingHorizontal: 20,
     paddingTop: 12,
     paddingBottom: 12,
@@ -88,7 +91,7 @@ const styles = StyleSheet.create({
   skipText: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 15,
-    color: Brand.muted,
+    color: c.textSub,
   },
   overlay: {
     position: 'absolute',
@@ -96,14 +99,14 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(15,22,48,0.5)',
+    backgroundColor: c.scrim,
   },
   sheet: {
     position: 'absolute',
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.card,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     paddingTop: 12,
@@ -116,7 +119,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 5,
     borderRadius: 3,
-    backgroundColor: '#D6DBE5',
+    backgroundColor: c.line,
   },
   sheetBody: {
     gap: 10,
@@ -126,10 +129,10 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 16,
-    backgroundColor: Brand.gold,
+    backgroundColor: c.gold,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: Brand.goldDark,
+    shadowColor: c.goldEdge,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 1,
     shadowRadius: 0,
@@ -139,22 +142,22 @@ const styles = StyleSheet.create({
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 22,
     letterSpacing: -0.6,
-    color: Brand.ink,
+    color: c.text,
   },
   sheetText: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 15,
     lineHeight: 24,
-    color: Brand.muted,
+    color: c.textSub,
   },
   sheetStrong: {
     fontFamily: BrandFonts.gothicBlack,
-    color: Brand.ink,
+    color: c.text,
   },
   sheetHint: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 13,
-    color: '#8A8FA3',
+    color: c.textMute,
   },
   sheetButtons: {
     gap: 8,
@@ -167,6 +170,6 @@ const styles = StyleSheet.create({
   laterText: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 16,
-    color: Brand.primaryDark,
+    color: c.primaryText,
   },
-});
+}));

@@ -1,13 +1,14 @@
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
 import type { NotificationRecord } from '@/data/gameState';
 import { formatRelativeTime } from '@/utils/formatRelativeTime';
 
 import { NotificationIcon } from './NotificationIcon';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
 
 type NotificationRowProps = {
   item: NotificationRecord;
@@ -22,6 +23,7 @@ const FLY_OUT_DISTANCE = 600;
 
 /** 알림 1건. 눌러서 읽음 처리하거나, 좌우로 스와이프해서 삭제할 수 있다. */
 export function NotificationRow({ item, now, onPress, onDelete }: NotificationRowProps) {
+  const styles = useStyles();
   const unread = !item.read;
   const translateX = useSharedValue(0);
 
@@ -90,11 +92,12 @@ export function NotificationRow({ item, now, onPress, onDelete }: NotificationRo
 }
 
 function DeleteIcon() {
+  const c = useTheme();
   return (
     <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
       <Path
         d="M4 7h16M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3m2 0-1 13a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 7h14z"
-        stroke="#FFFFFF"
+        stroke={c.white}
         strokeWidth={2}
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -103,7 +106,7 @@ function DeleteIcon() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   wrap: {
     position: 'relative',
     overflow: 'hidden',
@@ -114,7 +117,7 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     bottom: 0,
-    backgroundColor: '#E8534A',
+    backgroundColor: c.danger,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 24,
@@ -131,10 +134,10 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingVertical: 12,
     paddingHorizontal: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.card,
   },
   rowUnread: {
-    backgroundColor: '#F2F6FF',
+    backgroundColor: c.primarySoft,
   },
   textWrap: {
     flex: 1,
@@ -149,17 +152,17 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 15,
-    color: Brand.ink,
+    color: c.text,
   },
   time: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 12,
-    color: Brand.muted,
+    color: c.textSub,
   },
   body: {
     fontFamily: BrandFonts.gothicMedium,
     fontSize: 13,
-    color: '#3E4255',
+    color: c.text,
     lineHeight: 19,
   },
   unreadDot: {
@@ -169,6 +172,6 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 3.5,
-    backgroundColor: Brand.primary,
+    backgroundColor: c.primary,
   },
-});
+}));

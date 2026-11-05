@@ -1,11 +1,14 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
 
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
 import { startEmailOnboarding } from '@/data/onboarding';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
 
 export default function SignupScreen() {
+  const c = useTheme();
+  const styles = useStyles();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -36,7 +39,7 @@ export default function SignupScreen() {
               value={email}
               onChangeText={setEmail}
               placeholder="name@example.com"
-              placeholderTextColor="#8A8FA3"
+              placeholderTextColor={c.textMute}
               autoCapitalize="none"
               keyboardType="email-address"
               style={styles.input}
@@ -51,7 +54,7 @@ export default function SignupScreen() {
               value={password}
               onChangeText={setPassword}
               placeholder="8자 이상"
-              placeholderTextColor="#8A8FA3"
+              placeholderTextColor={c.textMute}
               secureTextEntry
               style={styles.input}
             />
@@ -72,10 +75,10 @@ export default function SignupScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.bg,
     paddingTop: 20,
     paddingHorizontal: 24,
     paddingBottom: 28,
@@ -90,7 +93,7 @@ const styles = StyleSheet.create({
   },
   backArrow: {
     fontSize: 28,
-    color: '#AEB4C6',
+    color: c.textFaint,
     fontWeight: '700',
   },
   headerText: {
@@ -99,13 +102,13 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 28,
-    color: Brand.ink,
+    color: c.text,
     letterSpacing: -1,
   },
   subtitle: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 15,
-    color: Brand.muted,
+    color: c.textSub,
   },
   fields: {
     gap: 18,
@@ -116,15 +119,15 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 14,
-    color: Brand.ink,
+    color: c.text,
   },
   inputBox: {
     flexDirection: 'row',
     alignItems: 'center',
     minHeight: 54,
-    backgroundColor: Brand.surface,
+    backgroundColor: c.sunken,
     borderWidth: 2,
-    borderColor: Brand.border,
+    borderColor: c.cardEdge,
     borderRadius: 14,
     paddingHorizontal: 14,
   },
@@ -132,7 +135,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: BrandFonts.gothicBold,
     fontSize: 16,
-    color: Brand.ink,
+    color: c.text,
     padding: 0,
   },
   footer: {
@@ -141,9 +144,9 @@ const styles = StyleSheet.create({
   submitButton: {
     minHeight: 54,
     borderRadius: 16,
-    backgroundColor: Brand.primary,
+    backgroundColor: c.primary,
     borderBottomWidth: 4,
-    borderBottomColor: Brand.primaryDark,
+    borderBottomColor: c.primaryEdge,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -153,6 +156,6 @@ const styles = StyleSheet.create({
   submitButtonText: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 16,
-    color: '#FFFFFF',
+    color: c.white,
   },
-});
+}));

@@ -24,10 +24,10 @@ function makeToast(overrides: Partial<ToastItem> = {}): ToastItem {
     title: '+30P 획득!',
     subtitle: '0.4초 먼저 잡았어요',
     chipLabel: '+30P',
-    chipBg: '#FFFFFF',
-    chipColor: '#2E9E55',
-    background: '#3FBF6B',
-    edgeColor: '#2E9E55',
+    chipBg: 'card',
+    chipColor: 'successEdge',
+    background: 'success',
+    edgeColor: 'successEdge',
     ...overrides,
   };
 }

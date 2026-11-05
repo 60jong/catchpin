@@ -1,9 +1,10 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
 
 import { SettingsIcon, type SettingsIconVariant } from './SettingsIcon';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
 
 type SettingsRowProps = {
   icon: SettingsIconVariant;
@@ -24,11 +25,15 @@ export function SettingsRow({
   label,
   value,
   badge,
-  badgeColor = Brand.goldText,
-  badgeBg = '#FFF8E1',
+  badgeColor: badgeColorProp,
+  badgeBg: badgeBgProp,
   bordered,
   onPress,
 }: SettingsRowProps) {
+  const c = useTheme();
+  const styles = useStyles();
+  const badgeColor = badgeColorProp ?? c.goldText;
+  const badgeBg = badgeBgProp ?? c.goldSoft;
   return (
     <Pressable onPress={onPress} style={[styles.row, bordered && styles.rowBordered]}>
       <SettingsIcon variant={icon} />
@@ -40,13 +45,13 @@ export function SettingsRow({
         </View>
       )}
       <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-        <Path d="M9 5l7 7-7 7" stroke="#AEB4C6" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+        <Path d="M9 5l7 7-7 7" stroke={c.textFaint} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
       </Svg>
     </Pressable>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -56,18 +61,18 @@ const styles = StyleSheet.create({
   },
   rowBordered: {
     borderBottomWidth: 2,
-    borderBottomColor: Brand.border,
+    borderBottomColor: c.cardEdge,
   },
   label: {
     flex: 1,
     fontFamily: BrandFonts.gothicBold,
     fontSize: 15,
-    color: Brand.ink,
+    color: c.text,
   },
   value: {
     fontFamily: BrandFonts.gothicMedium,
     fontSize: 16,
-    color: Brand.muted,
+    color: c.textSub,
   },
   badge: {
     borderRadius: 999,
@@ -78,4 +83,4 @@ const styles = StyleSheet.create({
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 12,
   },
-});
+}));

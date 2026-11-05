@@ -1,9 +1,10 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import type { ReactNode } from 'react';
 
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
 
 import { Icon } from './Icon';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
 
 type ScreenHeaderProps = {
   title?: string;
@@ -14,12 +15,14 @@ type ScreenHeaderProps = {
 
 /** 설정/인증 화면 맨 위 줄 — 뒤로가기(‹), 가운데 제목, 오른쪽 자리(건너뛰기 등). */
 export function ScreenHeader({ title, onBack, right }: ScreenHeaderProps) {
+  const c = useTheme();
+  const styles = useStyles();
   return (
     <View style={styles.row}>
       <View style={styles.side}>
         {onBack && (
           <Pressable onPress={onBack} accessibilityRole="button" accessibilityLabel="뒤로" style={styles.back} hitSlop={8}>
-            <Icon name="chevronLeft" size={24} color="#AEB4C6" strokeWidth={3.5} />
+            <Icon name="chevronLeft" size={24} color={c.textFaint} strokeWidth={3.5} />
           </Pressable>
         )}
       </View>
@@ -29,7 +32,7 @@ export function ScreenHeader({ title, onBack, right }: ScreenHeaderProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -54,6 +57,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 17,
-    color: Brand.ink,
+    color: c.text,
   },
-});
+}));

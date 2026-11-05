@@ -1,6 +1,6 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ProviderIcon, providerLabel } from '@/components/profile/ProviderIcon';
@@ -11,12 +11,16 @@ import { IconBadge } from '@/components/ui/IconBadge';
 import { ListRow } from '@/components/ui/ListRow';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { StatusBadge } from '@/components/ui/StatusBadge';
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
 import { fetchMe, type Me } from '@/data/member';
 import { formatDotDate } from '@/utils/formatDate';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
+import { withAlpha } from '@/utils/color';
 
 /** 인증 관리 — 휴대폰 인증 여부와 연결된 계정을 한눈에 보여주고, 인증이 필요한 기능을 안내한다. */
 export default function VerifyCenterScreen() {
+  const c = useTheme();
+  const styles = useStyles();
   const [me, setMe] = useState<Me | null>(null);
 
   // 휴대폰 인증을 마치고 돌아왔을 때 바뀐 상태가 보이도록, 화면이 보일 때마다 다시 가져온다.
@@ -40,7 +44,7 @@ export default function VerifyCenterScreen() {
         {phoneVerified ? (
           <View style={styles.doneCard}>
             <View style={styles.doneIcon}>
-              <Icon name="shield" size={28} color="#FFFFFF" />
+              <Icon name="shield" size={28} color={c.white} />
             </View>
             <View style={styles.cardText}>
               <Text style={styles.doneTitle}>모든 인증을 마쳤어요</Text>
@@ -51,7 +55,7 @@ export default function VerifyCenterScreen() {
           <View style={styles.todoCard}>
             <View style={styles.todoRow}>
               <View style={styles.todoIcon}>
-                <Icon name="phone" size={26} color="#3A2A00" />
+                <Icon name="phone" size={26} color={c.onGold} />
               </View>
               <View style={styles.cardText}>
                 <Text style={styles.todoTitle}>인증이 {total - done}개 남았어요</Text>
@@ -71,21 +75,21 @@ export default function VerifyCenterScreen() {
           {phoneVerified ? (
             <>
               <ListRow
-                leading={<IconBadge icon="phone" color={Brand.primary} />}
+                leading={<IconBadge icon="phone" color={c.primary} />}
                 title="휴대폰 번호"
                 subtitle={`${me?.phoneMasked ?? ''} · ${formatDotDate(me?.phoneVerifiedAt)} 인증`}
                 trailing={<StatusBadge label="인증 완료" tone="success" />}
                 bordered
               />
-              <ListRow title="번호 변경하기" titleColor={Brand.primaryDark} chevron bordered onPress={() => router.push('/phone-verify')} />
+              <ListRow title="번호 변경하기" titleColor={c.primaryText} chevron bordered onPress={() => router.push('/phone-verify')} />
             </>
           ) : (
             <>
               <ListRow
-                leading={<IconBadge icon="phone" color="#8C93A8" />}
+                leading={<IconBadge icon="phone" color={c.textMute} />}
                 title="휴대폰 번호"
                 subtitle="아직 인증하지 않았어요"
-                subtitleColor="#C73A31"
+                subtitleColor={c.dangerText}
                 trailing={<StatusBadge label="미인증" tone="danger" />}
               />
               <View style={styles.verifyAction}>
@@ -105,7 +109,7 @@ export default function VerifyCenterScreen() {
           ))}
           {me?.email ? (
             <ListRow
-              leading={<IconBadge icon="mail" color="#8C93A8" />}
+              leading={<IconBadge icon="mail" color={c.textMute} />}
               title="이메일"
               subtitle={me.email}
               trailing={<StatusBadge label="완료" tone="success" />}
@@ -115,13 +119,13 @@ export default function VerifyCenterScreen() {
 
         <SettingsSection title="인증이 필요한 기능">
           <ListRow
-            leading={<Icon name="gift" size={20} color="#C2410C" />}
+            leading={<Icon name="gift" size={20} color={c.goldText} />}
             title="포인트 → 상품권 교환"
             trailing={<StatusBadge label={phoneVerified ? '사용 가능' : '인증 필요'} tone={phoneVerified ? 'success' : 'danger'} />}
             bordered
           />
           <ListRow
-            leading={<Icon name="pin" size={20} color={Brand.primary} />}
+            leading={<Icon name="pin" size={20} color={c.primary} />}
             title="핀 잡기 · 기록 보기"
             trailing={<StatusBadge label="인증 없이 가능" tone="neutral" />}
           />
@@ -133,10 +137,10 @@ export default function VerifyCenterScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.bg,
   },
   content: {
     paddingHorizontal: 20,
@@ -151,9 +155,9 @@ const styles = StyleSheet.create({
   todoCard: {
     gap: 14,
     padding: 18,
-    backgroundColor: '#FFF8E1',
+    backgroundColor: c.goldSoft,
     borderWidth: 2,
-    borderColor: '#FFE08A',
+    borderColor: c.goldBorder,
     borderBottomWidth: 5,
     borderRadius: 24,
   },
@@ -166,10 +170,10 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 16,
-    backgroundColor: Brand.gold,
+    backgroundColor: c.gold,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: Brand.goldDark,
+    shadowColor: c.goldEdge,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 1,
     shadowRadius: 0,
@@ -177,39 +181,39 @@ const styles = StyleSheet.create({
   todoTitle: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 18,
-    color: Brand.onGold,
+    color: c.goldText,
   },
   todoBody: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 13,
     lineHeight: 19,
-    color: '#7A5600',
+    color: c.goldText,
   },
   track: {
     height: 10,
     borderRadius: 5,
-    backgroundColor: '#FFE9A8',
+    backgroundColor: c.goldBorder,
     overflow: 'hidden',
   },
   trackFill: {
     height: '100%',
     borderRadius: 5,
-    backgroundColor: Brand.goldDark,
+    backgroundColor: c.goldEdge,
   },
   trackLabel: {
     marginTop: -6,
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 12,
-    color: '#7A5600',
+    color: c.goldText,
   },
   doneCard: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 14,
     padding: 20,
-    backgroundColor: Brand.green,
+    backgroundColor: c.success,
     borderRadius: 24,
-    shadowColor: Brand.greenDark,
+    shadowColor: c.successEdge,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 1,
     shadowRadius: 0,
@@ -218,31 +222,31 @@ const styles = StyleSheet.create({
     width: 52,
     height: 52,
     borderRadius: 26,
-    backgroundColor: 'rgba(255,255,255,0.22)',
+    backgroundColor: withAlpha(c.white, 0.22),
     alignItems: 'center',
     justifyContent: 'center',
   },
   doneTitle: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 19,
-    color: '#FFFFFF',
+    color: c.white,
   },
   doneBody: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 13,
-    color: 'rgba(255,255,255,0.92)',
+    color: withAlpha(c.white, 0.92),
   },
   verifyAction: {
     paddingHorizontal: 14,
     paddingBottom: 14,
     borderBottomWidth: 2,
-    borderBottomColor: Brand.border,
+    borderBottomColor: c.cardEdge,
   },
   footnote: {
     paddingHorizontal: 4,
     fontFamily: BrandFonts.gothicBold,
     fontSize: 12,
     lineHeight: 19,
-    color: '#8A8FA3',
+    color: c.textMute,
   },
-});
+}));

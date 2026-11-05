@@ -1,15 +1,18 @@
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, SectionList, StyleSheet, Text, View } from 'react-native';
+import { Pressable, SectionList, Text, View } from 'react-native';
 
 import { FilterTabs } from '@/components/notifications/FilterTabs';
 import { NotificationRow } from '@/components/notifications/NotificationRow';
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
 import { deleteNotification, markAllNotificationsRead, markNotificationRead, useGameState } from '@/data/gameState';
 import { countUnread, groupNotifications, type NotificationFilter } from '@/utils/notifications';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
 
 /** 알림센터 화면 — gameState의 실시간 알림 목록을 날짜별로 묶어서 보여주고, 필터/읽음/삭제를 처리한다. */
 export default function NotificationsScreen() {
+  const c = useTheme();
+  const styles = useStyles();
   const game = useGameState();
   const [filter, setFilter] = useState<NotificationFilter>('all');
   const [now, setNow] = useState(() => Date.now());
@@ -34,7 +37,7 @@ export default function NotificationsScreen() {
             <Text style={styles.backArrow}>‹</Text>
           </Pressable>
           <Pressable onPress={() => markAllNotificationsRead()} hitSlop={8} style={styles.markAllButton}>
-            <Text style={[styles.markAllText, { color: unreadCount > 0 ? Brand.primaryDark : '#AEB4C6' }]}>
+            <Text style={[styles.markAllText, { color: unreadCount > 0 ? c.primaryText : c.textFaint }]}>
               모두 읽음
             </Text>
           </Pressable>
@@ -70,10 +73,10 @@ export default function NotificationsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.bg,
   },
   header: {
     paddingTop: 20,
@@ -81,7 +84,7 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
     gap: 14,
     borderBottomWidth: 2,
-    borderBottomColor: Brand.border,
+    borderBottomColor: c.cardEdge,
   },
   headerTopRow: {
     flexDirection: 'row',
@@ -97,7 +100,7 @@ const styles = StyleSheet.create({
   },
   backArrow: {
     fontSize: 28,
-    color: '#AEB4C6',
+    color: c.textFaint,
     fontWeight: '700',
   },
   markAllButton: {
@@ -117,11 +120,11 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 28,
-    color: Brand.ink,
+    color: c.text,
     letterSpacing: -1,
   },
   unreadBadge: {
-    backgroundColor: '#E8534A',
+    backgroundColor: c.danger,
     borderRadius: 999,
     paddingHorizontal: 8,
     paddingVertical: 2,
@@ -129,7 +132,7 @@ const styles = StyleSheet.create({
   unreadBadgeText: {
     fontFamily: BrandFonts.soraExtraBold,
     fontSize: 13,
-    color: '#FFFFFF',
+    color: c.white,
   },
   sectionHeader: {
     paddingTop: 16,
@@ -137,8 +140,8 @@ const styles = StyleSheet.create({
     paddingBottom: 6,
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 13,
-    color: Brand.muted,
-    backgroundColor: '#FFFFFF',
+    color: c.textSub,
+    backgroundColor: c.card,
   },
   emptyText: {
     paddingVertical: 80,
@@ -146,6 +149,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: BrandFonts.gothicBold,
     fontSize: 15,
-    color: Brand.muted,
+    color: c.textSub,
   },
-});
+}));

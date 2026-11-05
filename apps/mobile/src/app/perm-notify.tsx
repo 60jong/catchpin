@@ -5,9 +5,12 @@ import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 
 import { Logo } from '@/components/brand/Logo';
 import { ProgressBar } from '@/components/onboarding/ProgressBar';
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
+import { withAlpha } from '@/utils/color';
 
 function NotificationPreview({ title, time, body, dimmed }: { title: string; time: string; body: string; dimmed?: boolean }) {
+  const styles = useStyles();
   return (
     <View style={[styles.previewCard, dimmed && styles.previewCardDimmed]}>
       <Logo size={38} />
@@ -23,6 +26,8 @@ function NotificationPreview({ title, time, body, dimmed }: { title: string; tim
 }
 
 export default function PermNotifyScreen() {
+  const c = useTheme();
+  const styles = useStyles();
   const goNext = () => router.push('/nickname');
 
   const handleAllow = async () => {
@@ -42,9 +47,9 @@ export default function PermNotifyScreen() {
         <Svg style={StyleSheet.absoluteFill} viewBox="0 0 100 100" preserveAspectRatio="none">
           <Defs>
             <LinearGradient id="bg" x1="0" y1="0" x2="0.35" y2="1">
-              <Stop offset="0" stopColor="#DCE8FF" />
-              <Stop offset="0.6" stopColor="#EEF2FA" />
-              <Stop offset="1" stopColor="#F7F1E3" />
+              <Stop offset="0" stopColor={c.primarySoft} />
+              <Stop offset="0.6" stopColor={c.sunken} />
+              <Stop offset="1" stopColor={c.goldSoft} />
             </LinearGradient>
           </Defs>
           <Rect x={0} y={0} width={100} height={100} fill="url(#bg)" />
@@ -74,10 +79,10 @@ export default function PermNotifyScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.bg,
     paddingTop: 18,
     paddingHorizontal: 20,
     paddingBottom: 28,
@@ -93,7 +98,7 @@ const styles = StyleSheet.create({
   },
   backArrow: {
     fontSize: 28,
-    color: '#AEB4C6',
+    color: c.textFaint,
     fontWeight: '700',
   },
   mockup: {
@@ -108,7 +113,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.85)',
+    backgroundColor: withAlpha(c.white, 0.85),
     borderRadius: 22,
     padding: 12,
   },
@@ -126,17 +131,17 @@ const styles = StyleSheet.create({
   previewTitle: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 15,
-    color: Brand.ink,
+    color: c.text,
   },
   previewTime: {
     fontFamily: BrandFonts.gothicMedium,
     fontSize: 13,
-    color: Brand.muted,
+    color: c.textSub,
   },
   previewBody: {
     fontFamily: BrandFonts.gothicMedium,
     fontSize: 14,
-    color: '#3A3A3C',
+    color: c.text,
     lineHeight: 19,
   },
   headerText: {
@@ -145,14 +150,14 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 28,
-    color: Brand.ink,
+    color: c.text,
     letterSpacing: -1,
     lineHeight: 36,
   },
   subtitle: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 15,
-    color: Brand.muted,
+    color: c.textSub,
     lineHeight: 22,
   },
   footer: {
@@ -162,16 +167,16 @@ const styles = StyleSheet.create({
   allowButton: {
     minHeight: 54,
     borderRadius: 16,
-    backgroundColor: Brand.primary,
+    backgroundColor: c.primary,
     borderBottomWidth: 4,
-    borderBottomColor: Brand.primaryDark,
+    borderBottomColor: c.primaryEdge,
     alignItems: 'center',
     justifyContent: 'center',
   },
   allowText: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 16,
-    color: '#FFFFFF',
+    color: c.white,
   },
   laterButton: {
     minHeight: 54,
@@ -181,6 +186,6 @@ const styles = StyleSheet.create({
   laterText: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 16,
-    color: Brand.primaryDark,
+    color: c.primaryText,
   },
-});
+}));

@@ -1,22 +1,25 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts, type ThemeColors } from '@/constants/theme';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
 
 export type ActionButtonVariant = 'primary' | 'danger' | 'secondary';
 
 const FACE_HEIGHT = 50;
 const THICKNESS = 4;
 
-const COLORS: Record<ActionButtonVariant, { face: string; edge: string; text: string; border?: string }> = {
-  primary: { face: Brand.primary, edge: Brand.primaryDark, text: '#FFFFFF' },
-  danger: { face: '#E8534A', edge: '#B33B33', text: '#FFFFFF' },
-  secondary: { face: '#FFFFFF', edge: Brand.border, text: Brand.primaryDark, border: Brand.border },
-};
-const DISABLED: { face: string; edge: string; text: string; border?: string } = {
-  face: Brand.border,
-  edge: '#CBD1DF',
-  text: '#8A8FA3',
-};
+type ButtonColors = { face: string; edge: string; text: string; border?: string };
+
+function variantColors(c: ThemeColors): Record<ActionButtonVariant, ButtonColors> {
+  return {
+    primary: { face: c.primary, edge: c.primaryEdge, text: c.white },
+    danger: { face: c.danger, edge: c.dangerEdge, text: c.white },
+    secondary: { face: c.card, edge: c.cardEdge, text: c.primaryText, border: c.cardEdge },
+  };
+}
+function disabledColors(c: ThemeColors): ButtonColors {
+  return { face: c.cardEdge, edge: c.line, text: c.textMute };
+}
 
 type ActionButtonProps = {
   label: string;
@@ -31,8 +34,10 @@ type ActionButtonProps = {
  * 차지하는 공간은 눌려도 그대로라서 아래 요소들이 밀리지 않는다.
  */
 export function ActionButton({ label, onPress, variant = 'primary', disabled, loading }: ActionButtonProps) {
+  const c = useTheme();
+  const styles = useStyles();
   const inactive = disabled || loading;
-  const colors = inactive && !loading ? DISABLED : COLORS[variant];
+  const colors = inactive && !loading ? disabledColors(c) : variantColors(c)[variant];
   return (
     <Pressable
       onPress={onPress}
@@ -65,7 +70,7 @@ export function ActionButton({ label, onPress, variant = 'primary', disabled, lo
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   wrap: {
     height: FACE_HEIGHT + THICKNESS,
   },
@@ -87,4 +92,4 @@ const styles = StyleSheet.create({
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 16,
   },
-});
+}));

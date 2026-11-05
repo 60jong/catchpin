@@ -1,7 +1,8 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
 import type { NotificationFilter } from '@/utils/notifications';
+import { makeStyles } from '@/hooks/use-theme';
 
 const FILTERS: { value: NotificationFilter; label: string }[] = [
   { value: 'all', label: '전체' },
@@ -17,6 +18,7 @@ type FilterTabsProps = {
 
 /** 알림센터 상단의 전체/획득/놓침/혜택 필터 탭 — 선택된 값은 상위(화면)가 들고 있고 이 컴포넌트는 그리기만 한다. */
 export function FilterTabs({ value, onChange }: FilterTabsProps) {
+  const styles = useStyles();
   return (
     <View style={styles.row}>
       {FILTERS.map((filter) => {
@@ -35,7 +37,7 @@ export function FilterTabs({ value, onChange }: FilterTabsProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   row: {
     flexDirection: 'row',
     gap: 8,
@@ -49,21 +51,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   tabActive: {
-    backgroundColor: Brand.ink,
-    borderColor: Brand.ink,
+    backgroundColor: c.inverse,
+    borderColor: c.inverse,
   },
   tabInactive: {
-    backgroundColor: '#FFFFFF',
-    borderColor: Brand.border,
+    backgroundColor: c.card,
+    borderColor: c.cardEdge,
   },
   labelActive: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 14,
-    color: '#FFFFFF',
+    color: c.white,
   },
   labelInactive: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 14,
-    color: Brand.ink,
+    color: c.text,
   },
-});
+}));

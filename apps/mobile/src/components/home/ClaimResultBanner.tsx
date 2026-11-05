@@ -1,7 +1,8 @@
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ResultToast, type ToastItem } from '@/components/home/ResultToast';
+import { makeStyles } from '@/hooks/use-theme';
 
 export type { ToastItem };
 
@@ -13,6 +14,7 @@ type ClaimResultBannerProps = {
 
 /** 핀 탭 결과를 화면 상단에 앱 푸시처럼 쌓아서 보여주는 배너 스택 (최대 3개, 최신이 맨 위). */
 export function ClaimResultBanner({ toasts, onDismiss }: ClaimResultBannerProps) {
+  const styles = useStyles();
   const insets = useSafeAreaInsets();
 
   if (toasts.length === 0) return null;
@@ -26,7 +28,7 @@ export function ClaimResultBanner({ toasts, onDismiss }: ClaimResultBannerProps)
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   wrap: {
     position: 'absolute',
     left: 14,
@@ -34,4 +36,4 @@ const styles = StyleSheet.create({
     zIndex: 10,
     gap: 8,
   },
-});
+}));

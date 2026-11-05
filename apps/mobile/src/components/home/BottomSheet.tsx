@@ -1,7 +1,8 @@
 import type { LayoutChangeEvent } from 'react-native';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
+import { makeStyles } from '@/hooks/use-theme';
 
 type BottomSheetProps = {
   nearbyPinCount: number;
@@ -11,6 +12,7 @@ type BottomSheetProps = {
 };
 
 export function BottomSheet({ nearbyPinCount, todayEarnedCount, feedText, onLayout }: BottomSheetProps) {
+  const styles = useStyles();
   return (
     <View style={styles.container} onLayout={onLayout}>
       <View style={styles.headerRow}>
@@ -32,15 +34,15 @@ export function BottomSheet({ nearbyPinCount, todayEarnedCount, feedText, onLayo
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   container: {
     position: 'absolute',
     left: 12,
     right: 12,
     bottom: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.card,
     borderWidth: 2,
-    borderColor: Brand.border,
+    borderColor: c.cardEdge,
     borderBottomWidth: 4,
     borderRadius: 24,
     padding: 16,
@@ -58,39 +60,39 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 21,
-    color: Brand.ink,
+    color: c.text,
     letterSpacing: -0.5,
   },
   subtitle: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 13,
-    color: Brand.muted,
+    color: c.textSub,
   },
   badge: {
     borderWidth: 2,
-    borderColor: Brand.gold,
+    borderColor: c.gold,
     borderBottomWidth: 4,
     borderRadius: 14,
     paddingHorizontal: 12,
     paddingVertical: 4,
     alignItems: 'center',
-    backgroundColor: '#FFF8E1',
+    backgroundColor: c.goldSoft,
   },
   badgeValue: {
     fontFamily: BrandFonts.soraExtraBold,
     fontSize: 18,
-    color: Brand.goldText,
+    color: c.goldText,
   },
   badgeLabel: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 11,
-    color: Brand.goldText,
+    color: c.goldText,
   },
   feed: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    backgroundColor: Brand.surface,
+    backgroundColor: c.sunken,
     borderRadius: 14,
     paddingHorizontal: 12,
     paddingVertical: 10,
@@ -99,12 +101,12 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: Brand.gold,
+    backgroundColor: c.gold,
   },
   feedText: {
     flex: 1,
     fontFamily: BrandFonts.gothicBold,
     fontSize: 13,
-    color: Brand.ink,
+    color: c.text,
   },
-});
+}));

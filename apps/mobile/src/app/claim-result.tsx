@@ -1,106 +1,68 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
-import Animated, { FadeInUp } from 'react-native-reanimated';
-import Svg, { Path } from 'react-native-svg';
+import { useEffect, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { Easing, cancelAnimation, useSharedValue, withTiming } from 'react-native-reanimated';
 
-import { CloseCallOverlay } from '@/components/claim-result/CloseCallOverlay';
-import { LostResultCard } from '@/components/claim-result/LostResultCard';
-import { WonResultCard } from '@/components/claim-result/WonResultCard';
+import { JudgeResult } from '@/components/judge/JudgeResult';
+import { JudgeScene } from '@/components/judge/JudgeScene';
 import { setSimpleNotificationsOnly, useGameState } from '@/data/gameState';
+import { useTheme } from '@/hooks/use-theme';
+import { JUDGE_TOTAL_S, RESULT_AT_MS, formatMargin } from '@/utils/judgeScene';
 import { playSound } from '@/utils/sounds';
 
 /**
  * 판정 소리를 화면이 열린 뒤 몇 ms 만에 재생할지. 0이면 연출이 시작되는 순간 같이 울린다.
- * (예전에는 연출이 끝나는 약 2.6초 시점에 재생해서 소리가 늦었다. 아직 어긋나면 이 값으로 앞뒤를 맞춘다.)
+ * (아직 어긋나면 이 값으로 앞뒤를 맞춘다.)
  */
 const JUDGE_SOUND_DELAY_MS = 0;
 
 /**
- * 전체화면 "초접전 연출" 결과 화면. 홈에서 핀을 탭했을 때(간단 알림 모드가 꺼져있으면) 여기로 넘어온다.
- * CloseCallOverlay가 먼저 연출을 재생하고, 끝나거나 건너뛰면 승/패 카드가 그 자리에서 드러난다.
+ * 판정 대결 화면. 홈에서 핀을 거의 동시에 눌렀을 때(그리고 간단 알림 모드가 꺼져 있을 때)만 여기로 온다.
+ * 판정은 서버가 이미 끝냈고, 이 화면은 받은 결과(outcome/points/margin)를 3초짜리 연출로 보여주기만 한다.
  */
 export default function ClaimResultScreen() {
-  // 홈 화면이 router.push로 넘겨준 판정 결과를 파라미터로 받는다 (outcome/points/margin 전부 서버 판정 흉내)
   const params = useLocalSearchParams<{ outcome: string; points: string; margin: string }>();
   const game = useGameState();
+  const c = useTheme();
 
   const outcome: 'won' | 'lost' = params.outcome === 'won' ? 'won' : 'lost';
   const points = Number(params.points) || 0;
-  const marginSeconds = params.margin ?? '0.01';
+  const margin = formatMargin(params.margin);
 
-  const [revealed, setRevealed] = useState(false);
-  // 연출을 끝까지 본 건지(fast:false) 건너뛴 건지(fast:true) — 결과 카드가 등장하는 애니메이션 길이가 달라진다.
-  const [fast, setFast] = useState(false);
+  // 장면 전체를 하나의 시계로 돌린다. 요소마다 이 값에서 자기 구간을 꺼내 쓰므로 연출 중에는 React가 다시 그려지지 않는다.
+  const t = useSharedValue(0);
+  const [interactive, setInteractive] = useState(false);
 
-  // 판정 소리는 연출이 끝난 뒤가 아니라 화면이 열리는 순간부터 재생한다. 먼저 닫으면 예약한 소리를 취소한다.
   useEffect(() => {
-    const timer = setTimeout(() => playSound(outcome === 'won' ? 'judgeWin' : 'judgeLose'), JUDGE_SOUND_DELAY_MS);
-    return () => clearTimeout(timer);
-  }, [outcome]);
-
-  // CloseCallOverlay가 연출을 끝내거나 "건너뛰기"를 누르면 호출된다 — 그 순간 결과 카드를 보여주기 시작한다.
-  const handleReveal = useCallback(({ fast: wasFast }: { fast: boolean }) => {
-    setFast(wasFast);
-    setRevealed(true);
-  }, []);
-
-  const close = () => router.back();
+    t.value = withTiming(JUDGE_TOTAL_S, { duration: JUDGE_TOTAL_S * 1000, easing: Easing.linear });
+    const sound = setTimeout(() => playSound(outcome === 'won' ? 'judgeWin' : 'judgeLose'), JUDGE_SOUND_DELAY_MS);
+    // 결과가 나타나기 시작하면 그때부터 버튼을 누를 수 있다.
+    const ready = setTimeout(() => setInteractive(true), RESULT_AT_MS);
+    return () => {
+      cancelAnimation(t);
+      clearTimeout(sound);
+      clearTimeout(ready);
+    };
+  }, [outcome, t]);
 
   return (
     <View style={styles.container}>
-      <Pressable onPress={close} accessibilityLabel="닫기" style={styles.closeButton} hitSlop={8}>
-        <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-          <Path d="M6 6l12 12M18 6L6 18" stroke="#AEB4C6" strokeWidth={3.5} strokeLinecap="round" />
-        </Svg>
-      </Pressable>
-
-      {revealed && (
-        <Animated.View style={styles.resultWrap} entering={FadeInUp.duration(fast ? 300 : 450)}>
-          {outcome === 'won' ? (
-            <WonResultCard
-              points={points}
-              marginSeconds={marginSeconds}
-              simpleNotificationsOnly={game.simpleNotificationsOnly}
-              onToggleSimpleNotifications={() => setSimpleNotificationsOnly(!game.simpleNotificationsOnly)}
-              onContinue={close}
-            />
-          ) : (
-            <LostResultCard
-              points={points}
-              marginSeconds={marginSeconds}
-              tickets={game.tickets}
-              maxTickets={game.maxTickets}
-              simpleNotificationsOnly={game.simpleNotificationsOnly}
-              onToggleSimpleNotifications={() => setSimpleNotificationsOnly(!game.simpleNotificationsOnly)}
-              onContinue={close}
-            />
-          )}
-        </Animated.View>
-      )}
-
-      <CloseCallOverlay pinPoints={points} onReveal={handleReveal} />
+      <JudgeScene t={t} outcome={outcome} points={points} margin={margin} tint={outcome === 'won' ? c.successScreen : c.loseScreen} />
+      <JudgeResult
+        t={t}
+        outcome={outcome}
+        points={points}
+        margin={margin}
+        todayCount={game.todayEarned}
+        simpleNotificationsOnly={game.simpleNotificationsOnly}
+        onToggleSimpleNotifications={() => setSimpleNotificationsOnly(!game.simpleNotificationsOnly)}
+        onDone={() => router.back()}
+        interactive={interactive}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    paddingTop: 20,
-    paddingHorizontal: 24,
-    paddingBottom: 32,
-  },
-  closeButton: {
-    alignSelf: 'flex-end',
-    width: 44,
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  resultWrap: {
-    flex: 1,
-    gap: 20,
-  },
+  container: { flex: 1 },
 });

@@ -1,16 +1,19 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 
 import { TicketIllustration } from '@/components/refill/TicketIllustration';
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
 import { adMobAdsRepository, usesTestAds } from '@/data/adMobAds';
 import { applyServerState, useGameState } from '@/data/gameState';
 import { fetchMe } from '@/data/member';
 import { requestTapTicketReward, waitForAdReward } from '@/data/tickets';
 import { formatCountdown } from '@/utils/formatCountdown';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
 
 export default function RefillScreen() {
+  const c = useTheme();
+  const styles = useStyles();
   const game = useGameState();
   const [watching, setWatching] = useState<'single' | 'triple' | null>(null);
   const [now, setNow] = useState(() => Date.now());
@@ -103,7 +106,7 @@ export default function RefillScreen() {
           disabled={isFull || !!watching}>
           <View style={styles.playIconWrap}>
             {watching === 'single' ? (
-              <ActivityIndicator color={Brand.primary} size="small" />
+              <ActivityIndicator color={c.primary} size="small" />
             ) : (
               <View style={styles.playTriangle} />
             )}
@@ -124,7 +127,7 @@ export default function RefillScreen() {
           </View>
           <View style={styles.fastForwardIconWrap}>
             {watching === 'triple' ? (
-              <ActivityIndicator color={Brand.onGold} size="small" />
+              <ActivityIndicator color={c.onGold} size="small" />
             ) : (
               <View style={styles.fastForwardTriangles}>
                 <View style={styles.playTriangleDark} />
@@ -147,10 +150,10 @@ export default function RefillScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.bg,
     paddingTop: 20,
     paddingHorizontal: 24,
     paddingBottom: 32,
@@ -165,7 +168,7 @@ const styles = StyleSheet.create({
   },
   backArrow: {
     fontSize: 28,
-    color: '#AEB4C6',
+    color: c.textFaint,
     fontWeight: '700',
   },
   hero: {
@@ -175,19 +178,19 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 28,
-    color: Brand.ink,
+    color: c.text,
     letterSpacing: -1,
   },
   subtitle: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 15,
-    color: Brand.muted,
+    color: c.textSub,
     textAlign: 'center',
   },
   card: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.card,
     borderWidth: 2,
-    borderColor: Brand.border,
+    borderColor: c.cardEdge,
     borderBottomWidth: 4,
     borderRadius: 20,
     padding: 16,
@@ -201,17 +204,17 @@ const styles = StyleSheet.create({
   cardLabel: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 14,
-    color: Brand.muted,
+    color: c.textSub,
   },
   cardValue: {
     fontFamily: BrandFonts.soraExtraBold,
     fontSize: 20,
-    color: Brand.ink,
+    color: c.text,
   },
   cardValueMax: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 14,
-    color: Brand.muted,
+    color: c.textSub,
   },
   slotRow: {
     flexDirection: 'row',
@@ -221,24 +224,24 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 32,
     borderRadius: 10,
-    backgroundColor: Brand.surface,
+    backgroundColor: c.sunken,
     borderWidth: 2,
-    borderColor: '#D6DDEA',
+    borderColor: c.line,
     borderStyle: 'dashed',
   },
   slotFilled: {
-    backgroundColor: Brand.primary,
-    borderColor: Brand.primaryDark,
+    backgroundColor: c.primary,
+    borderColor: c.primaryEdge,
     borderStyle: 'solid',
   },
   timerText: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 13,
-    color: Brand.muted,
+    color: c.textSub,
   },
   timerValue: {
     fontFamily: BrandFonts.soraExtraBold,
-    color: Brand.primaryDark,
+    color: c.primaryText,
   },
   buttons: {
     gap: 14,
@@ -253,15 +256,15 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: Brand.primary,
+    backgroundColor: c.primary,
     borderBottomWidth: 4,
-    borderBottomColor: Brand.primaryDark,
+    borderBottomColor: c.primaryEdge,
   },
   playIconWrap: {
     width: 42,
     height: 42,
     borderRadius: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.white,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -274,7 +277,7 @@ const styles = StyleSheet.create({
     borderLeftWidth: 12,
     borderTopColor: 'transparent',
     borderBottomColor: 'transparent',
-    borderLeftColor: Brand.primary,
+    borderLeftColor: c.primary,
   },
   buttonTextWrap: {
     flex: 1,
@@ -283,17 +286,17 @@ const styles = StyleSheet.create({
   primaryButtonTitle: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 16,
-    color: '#FFFFFF',
+    color: c.white,
   },
   primaryButtonSubtitle: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 12,
-    color: '#E3ECFF',
+    color: c.onPrimaryMuted,
   },
   primaryButtonValue: {
     fontFamily: BrandFonts.soraExtraBold,
     fontSize: 20,
-    color: '#FFFFFF',
+    color: c.white,
   },
   secondaryButton: {
     flexDirection: 'row',
@@ -302,9 +305,9 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.card,
     borderWidth: 2,
-    borderColor: Brand.border,
+    borderColor: c.cardEdge,
     borderBottomWidth: 4,
     position: 'relative',
   },
@@ -312,7 +315,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -12,
     right: 14,
-    backgroundColor: Brand.gold,
+    backgroundColor: c.gold,
     borderRadius: 999,
     paddingHorizontal: 10,
     paddingVertical: 3,
@@ -320,15 +323,15 @@ const styles = StyleSheet.create({
   bonusBadgeText: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 11,
-    color: Brand.onGold,
+    color: c.onGold,
   },
   fastForwardIconWrap: {
     width: 42,
     height: 42,
     borderRadius: 12,
-    backgroundColor: Brand.gold,
+    backgroundColor: c.gold,
     borderBottomWidth: 3,
-    borderBottomColor: Brand.goldDark,
+    borderBottomColor: c.goldEdge,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -344,27 +347,27 @@ const styles = StyleSheet.create({
     borderLeftWidth: 10,
     borderTopColor: 'transparent',
     borderBottomColor: 'transparent',
-    borderLeftColor: Brand.onGold,
+    borderLeftColor: c.onGold,
   },
   secondaryButtonTitle: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 16,
-    color: Brand.ink,
+    color: c.text,
   },
   secondaryButtonSubtitle: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 12,
-    color: Brand.muted,
+    color: c.textSub,
   },
   secondaryButtonValue: {
     fontFamily: BrandFonts.soraExtraBold,
     fontSize: 20,
-    color: Brand.ink,
+    color: c.text,
   },
   notice: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 13,
-    color: '#D14343',
+    color: c.dangerText,
     textAlign: 'center',
   },
   footer: {
@@ -372,6 +375,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: BrandFonts.gothicBold,
     fontSize: 13,
-    color: Brand.muted,
+    color: c.textSub,
   },
-});
+}));

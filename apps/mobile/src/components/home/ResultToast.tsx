@@ -1,10 +1,12 @@
 import { useEffect } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import Animated, { Easing, FadeInUp, FadeOut, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 
 import { BrandFonts } from '@/constants/theme';
 import type { ToastCopy, ToastOutcome } from '@/utils/toast';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
+import { withAlpha } from '@/utils/color';
 
 export type ToastItem = ToastCopy & {
   id: string;
@@ -21,6 +23,8 @@ type ResultToastProps = {
 
 /** 핀 탭 결과 1건. 일정 시간 뒤 스스로 사라지고(하단 잔여시간 바), 눌러서 바로 닫을 수도 있다. */
 export function ResultToast({ toast, onDismiss }: ResultToastProps) {
+  const c = useTheme();
+  const styles = useStyles();
   // 마운트되자마자 자동 소멸 타이머를 건다 — 언마운트(탭해서 바로 닫는 경우 포함)되면 타이머도 같이 정리.
   useEffect(() => {
     const id = setTimeout(onDismiss, TOAST_DURATION_MS);
@@ -40,15 +44,15 @@ export function ResultToast({ toast, onDismiss }: ResultToastProps) {
     <Animated.View entering={FadeInUp.duration(220)} exiting={FadeOut.duration(200)}>
       <Pressable
         onPress={onDismiss}
-        style={[styles.toast, { backgroundColor: toast.background, borderBottomColor: toast.edgeColor }]}>
+        style={[styles.toast, { backgroundColor: c[toast.background], borderBottomColor: c[toast.edgeColor] }]}>
         <View style={styles.iconCircle}>
           {isSuccess ? (
             <Svg width={16} height={16} viewBox="0 0 24 24" fill="none">
-              <Path d="M5 12.5l4.5 4.5L19 7.5" stroke="#FFFFFF" strokeWidth={4} strokeLinecap="round" strokeLinejoin="round" />
+              <Path d="M5 12.5l4.5 4.5L19 7.5" stroke={c.white} strokeWidth={4} strokeLinecap="round" strokeLinejoin="round" />
             </Svg>
           ) : (
             <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-              <Path d="M6 6l12 12M18 6L6 18" stroke="#FFFFFF" strokeWidth={4} strokeLinecap="round" />
+              <Path d="M6 6l12 12M18 6L6 18" stroke={c.white} strokeWidth={4} strokeLinecap="round" />
             </Svg>
           )}
         </View>
@@ -58,7 +62,7 @@ export function ResultToast({ toast, onDismiss }: ResultToastProps) {
           <Text style={styles.subtitle}>{toast.subtitle}</Text>
         </View>
 
-        <Text style={[styles.chip, { backgroundColor: toast.chipBg, color: toast.chipColor }]}>{toast.chipLabel}</Text>
+        <Text style={[styles.chip, { backgroundColor: toast.chipBg ? c[toast.chipBg] : withAlpha(c.white, 0.22), color: c[toast.chipColor] }]}>{toast.chipLabel}</Text>
 
         <Animated.View style={[styles.progressBar, progressStyle]} />
       </Pressable>
@@ -66,7 +70,7 @@ export function ResultToast({ toast, onDismiss }: ResultToastProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   toast: {
     position: 'relative',
     overflow: 'hidden',
@@ -84,7 +88,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: 'rgba(255,255,255,0.25)',
+    backgroundColor: withAlpha(c.white, 0.25),
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
@@ -96,12 +100,12 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 15,
-    color: '#FFFFFF',
+    color: c.white,
   },
   subtitle: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 12,
-    color: '#FFFFFF',
+    color: c.white,
     opacity: 0.9,
   },
   chip: {
@@ -118,6 +122,6 @@ const styles = StyleSheet.create({
     left: 0,
     bottom: 0,
     height: 3,
-    backgroundColor: 'rgba(255,255,255,0.55)',
+    backgroundColor: withAlpha(c.white, 0.55),
   },
-});
+}));

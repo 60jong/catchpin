@@ -6,23 +6,16 @@ import { login } from '@react-native-seoul/kakao-login';
 import Constants from 'expo-constants';
 import { router } from 'expo-router';
 import { useEffect, useState, type ReactNode } from 'react';
-import {
-  ActivityIndicator,
-  Image,
-  Linking,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Image, Linking, Platform, Pressable, Text, View } from 'react-native';
 
 import { GoogleLogo } from '@/components/brand/GoogleLogo';
 import { Logo } from '@/components/brand/Logo';
 import { Wordmark } from '@/components/brand/Wordmark';
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
 import { autoLogin, loginWithGoogle, loginWithKakao, type AuthOutcome } from '@/data/auth';
 import { startSocialOnboarding } from '@/data/onboarding';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
+import { withAlpha } from '@/utils/color';
 
 const { googleWebClientId, googleIosClientId } = Constants.expoConfig?.extra ?? {};
 
@@ -65,6 +58,7 @@ function SocialButton({
   disabled,
   loading,
 }: SocialButtonProps) {
+  const styles = useStyles();
   // 버튼이 차지하는 공간(FACE_HEIGHT + THICKNESS)은 눌려도 그대로고, 위쪽 면만 두께만큼 내려간다 —
   // 레이아웃을 바꾸면(margin/border) 아래 요소들이 같이 밀려서 화면이 들썩인다.
   return (
@@ -92,6 +86,8 @@ function SocialButton({
 }
 
 export default function LoginScreen() {
+  const c = useTheme();
+  const styles = useStyles();
   const [loading, setLoading] = useState<'google' | 'kakao' | null>(null);
   const [error, setError] = useState<string | null>(null);
   // 저장된 로그인으로 들어가는 중에는 버튼 대신 스피너를 보여준다 (눌러도 소용없고 깜빡이지도 않게).
@@ -194,16 +190,16 @@ export default function LoginScreen() {
 
       {autoLoggingIn ? (
         <View style={styles.buttons}>
-          <ActivityIndicator color={Brand.primary} />
+          <ActivityIndicator color={c.primary} />
         </View>
       ) : (
       <View style={styles.buttons}>
         <SocialButton
           label="카카오로 시작하기"
           icon={<Image source={KAKAO_SYMBOL} style={styles.kakaoSymbol} />}
-          backgroundColor="#FEE500"
-          thicknessColor="#D9C200"
-          textColor="rgba(0,0,0,0.85)"
+          backgroundColor={c.kakao}
+          thicknessColor={c.kakaoEdge}
+          textColor={withAlpha(c.shadow, 0.85)}
           onPress={handleKakaoSignIn}
           disabled={loading !== null}
           loading={loading === 'kakao'}
@@ -211,10 +207,10 @@ export default function LoginScreen() {
         <SocialButton
           label="Google로 계속하기"
           icon={<GoogleLogo size={22} />}
-          backgroundColor="#FFFFFF"
-          thicknessColor={Brand.border}
-          textColor={Brand.ink}
-          borderColor={Brand.border}
+          backgroundColor={c.card}
+          thicknessColor={c.cardEdge}
+          textColor={c.text}
+          borderColor={c.cardEdge}
           onPress={handleGoogleSignIn}
           disabled={loading !== null}
           loading={loading === 'google'}
@@ -260,10 +256,10 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.bg,
     paddingTop: 56,
     paddingHorizontal: 24,
     paddingBottom: 28,
@@ -278,7 +274,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 16,
-    color: Brand.muted,
+    color: c.textSub,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -333,7 +329,7 @@ const styles = StyleSheet.create({
   error: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 13,
-    color: '#D14343',
+    color: c.dangerText,
     textAlign: 'center',
   },
   divider: {
@@ -345,12 +341,12 @@ const styles = StyleSheet.create({
   dividerLine: {
     flexGrow: 1,
     height: 1,
-    backgroundColor: Brand.border,
+    backgroundColor: c.cardEdge,
   },
   dividerText: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 13,
-    color: Brand.muted,
+    color: c.textSub,
   },
   emailLink: {
     minHeight: 48,
@@ -360,16 +356,16 @@ const styles = StyleSheet.create({
   emailLinkText: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 15,
-    color: Brand.primaryDark,
+    color: c.primaryText,
   },
   terms: {
     fontFamily: BrandFonts.gothicMedium,
     fontSize: 12,
-    color: Brand.muted,
+    color: c.textSub,
     textAlign: 'center',
     lineHeight: 19,
   },
   termsLink: {
     textDecorationLine: 'underline',
   },
-});
+}));

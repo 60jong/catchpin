@@ -1,24 +1,20 @@
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native';
 
 import { ProgressBar } from '@/components/onboarding/ProgressBar';
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
 import { completeProfile, signup } from '@/data/auth';
 import { getPendingOnboarding, resetOnboarding } from '@/data/onboarding';
 import { persistSession } from '@/data/session';
 import { validateNickname } from '@/utils/nickname';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
 
 const SUGGESTIONS = ['빠른손가락', '번개탭', '핀사냥꾼'];
 
 export default function NicknameScreen() {
+  const c = useTheme();
+  const styles = useStyles();
   const [nick, setNick] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -73,12 +69,12 @@ export default function NicknameScreen() {
           onChangeText={setNick}
           maxLength={12}
           placeholder="닉네임"
-          placeholderTextColor="#8A8FA3"
+          placeholderTextColor={c.textMute}
           style={styles.input}
         />
         <Text style={styles.count}>{Array.from(nick).length}/12</Text>
       </View>
-      <Text style={[styles.help, { color: helpColor }]}>{help}</Text>
+      <Text style={[styles.help, { color: c[helpColor] }]}>{help}</Text>
 
       <View style={styles.suggestions}>
         <Text style={styles.suggestionsLabel}>이런 이름은 어때요?</Text>
@@ -99,7 +95,7 @@ export default function NicknameScreen() {
           onPress={handleStart}
           disabled={!ok || loading}>
           {loading ? (
-            <ActivityIndicator color="#FFFFFF" />
+            <ActivityIndicator color={c.white} />
           ) : (
             <Text style={[styles.startText, !ok && styles.startTextDisabled]}>시작하기</Text>
           )}
@@ -109,10 +105,10 @@ export default function NicknameScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.bg,
     paddingTop: 18,
     paddingHorizontal: 20,
     paddingBottom: 28,
@@ -128,7 +124,7 @@ const styles = StyleSheet.create({
   },
   backArrow: {
     fontSize: 28,
-    color: '#AEB4C6',
+    color: c.textFaint,
     fontWeight: '700',
   },
   headerText: {
@@ -137,13 +133,13 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 28,
-    color: Brand.ink,
+    color: c.text,
     letterSpacing: -1,
   },
   subtitle: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 15,
-    color: Brand.muted,
+    color: c.textSub,
   },
   inputBox: {
     flexDirection: 'row',
@@ -151,29 +147,29 @@ const styles = StyleSheet.create({
     gap: 10,
     minHeight: 54,
     paddingHorizontal: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.card,
     borderWidth: 2,
-    borderColor: Brand.border,
+    borderColor: c.cardEdge,
     borderBottomWidth: 4,
     borderRadius: 20,
   },
   inputBoxOk: {
-    borderColor: Brand.green,
+    borderColor: c.success,
   },
   inputBoxBad: {
-    borderColor: '#E8534A',
+    borderColor: c.danger,
   },
   input: {
     flex: 1,
     fontFamily: BrandFonts.gothicMedium,
     fontSize: 17,
-    color: Brand.ink,
+    color: c.text,
     padding: 0,
   },
   count: {
     fontFamily: BrandFonts.gothicMedium,
     fontSize: 15,
-    color: '#8A8FA3',
+    color: c.textMute,
   },
   help: {
     fontFamily: BrandFonts.gothicMedium,
@@ -187,7 +183,7 @@ const styles = StyleSheet.create({
   suggestionsLabel: {
     fontFamily: BrandFonts.gothicMedium,
     fontSize: 13,
-    color: Brand.muted,
+    color: c.textSub,
     paddingHorizontal: 16,
   },
   chipRow: {
@@ -200,19 +196,19 @@ const styles = StyleSheet.create({
     minHeight: 36,
     paddingHorizontal: 14,
     borderRadius: 999,
-    backgroundColor: Brand.surface,
+    backgroundColor: c.sunken,
     alignItems: 'center',
     justifyContent: 'center',
   },
   chipText: {
     fontFamily: BrandFonts.gothicMedium,
     fontSize: 15,
-    color: Brand.ink,
+    color: c.text,
   },
   error: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 13,
-    color: '#D14343',
+    color: c.dangerText,
   },
   footer: {
     marginTop: 'auto',
@@ -220,22 +216,22 @@ const styles = StyleSheet.create({
   startButton: {
     minHeight: 54,
     borderRadius: 16,
-    backgroundColor: Brand.primary,
+    backgroundColor: c.primary,
     borderBottomWidth: 4,
-    borderBottomColor: Brand.primaryDark,
+    borderBottomColor: c.primaryEdge,
     alignItems: 'center',
     justifyContent: 'center',
   },
   startButtonDisabled: {
-    backgroundColor: Brand.border,
-    borderBottomColor: '#CBD1DF',
+    backgroundColor: c.cardEdge,
+    borderBottomColor: c.line,
   },
   startText: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 16,
-    color: '#FFFFFF',
+    color: c.white,
   },
   startTextDisabled: {
-    color: '#8A8FA3',
+    color: c.textMute,
   },
-});
+}));

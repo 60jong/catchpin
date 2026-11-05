@@ -1,6 +1,8 @@
 import { Image } from 'expo-image';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
+import { withAlpha } from '@/utils/color';
 
 const SIZE = 56;
 
@@ -12,6 +14,8 @@ type MyMarkerProps = {
 };
 
 export function MyMarker({ variant = 'normal', imageUrl }: MyMarkerProps) {
+  const c = useTheme();
+  const styles = useStyles();
   if (variant === 'noLocation') {
     return (
       <View style={styles.wrap} pointerEvents="none">
@@ -21,7 +25,7 @@ export function MyMarker({ variant = 'normal', imageUrl }: MyMarkerProps) {
             <Path
               d="M12 21.5s-7-6-7-11.5a7 7 0 0 1 10.5-6"
               fill="none"
-              stroke="#8C93A8"
+              stroke={c.textMute}
               strokeWidth={2.6}
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -29,12 +33,12 @@ export function MyMarker({ variant = 'normal', imageUrl }: MyMarkerProps) {
             <Path
               d="M18.6 8a7 7 0 0 1 .4 2c0 5.5-7 11.5-7 11.5"
               fill="none"
-              stroke="#8C93A8"
+              stroke={c.textMute}
               strokeWidth={2.6}
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-            <Path d="M3 3l18 18" fill="none" stroke="#8C93A8" strokeWidth={2.6} strokeLinecap="round" />
+            <Path d="M3 3l18 18" fill="none" stroke={c.textMute} strokeWidth={2.6} strokeLinecap="round" />
           </Svg>
         </View>
       </View>
@@ -50,9 +54,9 @@ export function MyMarker({ variant = 'normal', imageUrl }: MyMarkerProps) {
             <Image source={{ uri: imageUrl }} style={styles.image} contentFit="cover" />
           ) : (
             <Svg width="100%" height="100%" viewBox="0 0 48 48">
-              <Rect width={48} height={48} fill="#D7E6FA" />
-              <Circle cx={24} cy={19} r={9} fill="#8FA9CF" />
-              <Path d="M6 48c1-10 8-16 18-16s17 6 18 16z" fill="#8FA9CF" />
+              <Rect width={48} height={48} fill={c.placeholderBg} />
+              <Circle cx={24} cy={19} r={9} fill={c.placeholderFg} />
+              <Path d="M6 48c1-10 8-16 18-16s17 6 18 16z" fill={c.placeholderFg} />
             </Svg>
           )}
         </View>
@@ -61,7 +65,7 @@ export function MyMarker({ variant = 'normal', imageUrl }: MyMarkerProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   wrap: {
     width: SIZE,
     height: SIZE + 12,
@@ -73,26 +77,26 @@ const styles = StyleSheet.create({
     width: 48,
     height: 10,
     borderRadius: 24,
-    backgroundColor: 'rgba(31,34,51,0.14)',
+    backgroundColor: withAlpha(c.shadow, 0.14),
   },
   container: {
     width: SIZE,
     height: SIZE,
     borderRadius: SIZE / 2,
     borderWidth: 4,
-    borderColor: '#1F2233',
-    backgroundColor: '#FFFFFF',
+    borderColor: c.text,
+    backgroundColor: c.bg,
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000000',
+    shadowColor: c.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 1,
     shadowRadius: 0,
   },
   containerOff: {
-    borderColor: '#AEB4C6',
-    shadowColor: '#8C93A8',
+    borderColor: c.textFaint,
+    shadowColor: c.textMute,
   },
   image: {
     width: '100%',
@@ -104,7 +108,7 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     borderRadius: SIZE / 2,
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: c.card,
     overflow: 'hidden',
   },
-});
+}));

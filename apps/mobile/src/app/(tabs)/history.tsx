@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ClaimHistoryRow } from '@/components/history/ClaimHistoryRow';
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
 import { useGameState } from '@/data/gameState';
+import { makeStyles } from '@/hooks/use-theme';
 
 export default function HistoryScreen() {
+  const styles = useStyles();
   const game = useGameState();
   const [now, setNow] = useState(() => Date.now());
 
@@ -38,10 +40,10 @@ export default function HistoryScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.bg,
   },
   safeArea: {
     flex: 1,
@@ -49,7 +51,7 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 21,
-    color: Brand.ink,
+    color: c.text,
     paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 8,
@@ -63,11 +65,11 @@ const styles = StyleSheet.create({
   emptyText: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 16,
-    color: Brand.ink,
+    color: c.text,
   },
   emptySubtext: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 13,
-    color: Brand.muted,
+    color: c.textSub,
   },
-});
+}));

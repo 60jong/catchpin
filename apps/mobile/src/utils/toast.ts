@@ -1,4 +1,4 @@
-import { Brand } from '@/constants/theme';
+import type { ThemeColor } from '@/constants/theme';
 
 export type ToastOutcome = 'success' | 'failure';
 
@@ -6,10 +6,11 @@ export type ToastCopy = {
   title: string;
   subtitle: string;
   chipLabel: string;
-  chipBg: string;
-  chipColor: string;
-  background: string;
-  edgeColor: string;
+  /** 색은 토큰 이름으로 돌려준다 — 화면이 현재 모드의 값으로 바꿔 쓴다. chipBg가 null이면 반투명 흰색. */
+  chipBg: ThemeColor | null;
+  chipColor: ThemeColor;
+  background: ThemeColor;
+  edgeColor: ThemeColor;
 };
 
 const TAP_MARGIN_POOL_SECONDS = ['0.2', '0.3', '0.4', '0.6'];
@@ -26,10 +27,10 @@ export function buildToastCopy(outcome: ToastOutcome, points: number, marginSeco
       title: `+${points}P 획득!`,
       subtitle: `${marginSeconds}초 먼저 잡았어요`,
       chipLabel: `+${points}P`,
-      chipBg: '#FFFFFF',
-      chipColor: Brand.greenDark,
-      background: Brand.green,
-      edgeColor: Brand.greenDark,
+      chipBg: 'card',
+      chipColor: 'successEdge',
+      background: 'success',
+      edgeColor: 'successEdge',
     };
   }
 
@@ -37,9 +38,9 @@ export function buildToastCopy(outcome: ToastOutcome, points: number, marginSeco
     title: '앗, 한 발 늦었어요',
     subtitle: `${marginSeconds}초 차이 · 탭권은 돌려드렸어요`,
     chipLabel: '+0P',
-    chipBg: 'rgba(255,255,255,0.22)',
-    chipColor: '#FFFFFF',
-    background: '#E8534A',
-    edgeColor: '#B33B33',
+    chipBg: null,
+    chipColor: 'white',
+    background: 'danger',
+    edgeColor: 'dangerEdge',
   };
 }

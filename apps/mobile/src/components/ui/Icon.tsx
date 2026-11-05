@@ -1,4 +1,5 @@
 import Svg, { Path, Rect } from 'react-native-svg';
+import { useTheme } from '@/hooks/use-theme';
 
 export type IconName =
   | 'chevronLeft'
@@ -27,7 +28,9 @@ type IconProps = {
 };
 
 /** 설정/인증 화면들이 쓰는 선(outline) 아이콘 모음 — 24×24 격자에 둥근 끝, 색과 굵기만 바꿔 쓴다. */
-export function Icon({ name, size = 20, color = '#FFFFFF', strokeWidth = 2.4 }: IconProps) {
+export function Icon({ name, size = 20, color: colorProp, strokeWidth = 2.4 }: IconProps) {
+  const c = useTheme();
+  const color = colorProp ?? c.white;
   const stroke: Stroke = { stroke: color, strokeWidth, strokeLinecap: 'round', strokeLinejoin: 'round', fill: 'none' };
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">

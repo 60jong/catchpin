@@ -1,20 +1,23 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ActionButton } from '@/components/ui/ActionButton';
 import { Icon, type IconName } from '@/components/ui/Icon';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
 import { withdrawAccount } from '@/data/account';
 import { useGameState } from '@/data/gameState';
 import { clearSession } from '@/data/session';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
 
 const REASONS = ['자주 쓰지 않아요', '핀이 잘 안 나타나요', '포인트 모으기가 어려워요', '기타'];
 
 /** 회원 탈퇴 — 사라지는 것들을 보여주고, 이유(선택)와 동의를 받은 뒤 탈퇴한다. 탈퇴하면 데이터가 즉시 모두 지워진다. */
 export default function WithdrawScreen() {
+  const c = useTheme();
+  const styles = useStyles();
   const game = useGameState();
   const [reason, setReason] = useState<number | null>(null);
   const [agreed, setAgreed] = useState(false);
@@ -44,15 +47,15 @@ export default function WithdrawScreen() {
         </View>
 
         <View style={styles.lossCard}>
-          <LossRow icon="gift" bg="#FFF3CC" iconColor="#8A6200" label="보유 포인트" value={`${game.points.toLocaleString()}P`} />
-          <LossRow icon="ticket" bg="#E6EEFF" iconColor={Brand.primaryDark} label="사용 가능한 쿠폰" value="0장" />
-          <LossRow icon="shield" bg="#ECEEF3" iconColor={Brand.muted} label="획득 기록과 통계" value="전부" />
+          <LossRow icon="gift" bg={c.goldSoft} iconColor={c.goldText} label="보유 포인트" value={`${game.points.toLocaleString()}P`} />
+          <LossRow icon="ticket" bg={c.primarySoft} iconColor={c.primaryText} label="사용 가능한 쿠폰" value="0장" />
+          <LossRow icon="shield" bg={c.neutralSoft} iconColor={c.textSub} label="획득 기록과 통계" value="전부" />
         </View>
 
         <Pressable onPress={() => router.push('/wallet')} style={styles.walletLink}>
-          <Icon name="gift" size={18} color={Brand.primaryDark} />
+          <Icon name="gift" size={18} color={c.primaryText} />
           <Text style={styles.walletLinkText}>떠나기 전에 포인트를 상품권으로 바꿔보세요</Text>
-          <Icon name="chevronRight" size={16} color="#AEB4C6" strokeWidth={3} />
+          <Icon name="chevronRight" size={16} color={c.textFaint} strokeWidth={3} />
         </Pressable>
 
         <Text style={styles.sectionTitle}>떠나는 이유를 알려주세요 (선택)</Text>
@@ -64,8 +67,8 @@ export default function WithdrawScreen() {
               accessibilityRole="radio"
               accessibilityState={{ selected: reason === index }}
               style={[styles.reasonRow, index < REASONS.length - 1 && styles.reasonDivider]}>
-              <View style={[styles.radio, { borderColor: reason === index ? Brand.primary : '#C9CFDC' }]}>
-                <View style={[styles.radioDot, { backgroundColor: reason === index ? Brand.primary : 'transparent' }]} />
+              <View style={[styles.radio, { borderColor: reason === index ? c.primary : c.line }]}>
+                <View style={[styles.radioDot, { backgroundColor: reason === index ? c.primary : 'transparent' }]} />
               </View>
               <Text style={styles.reasonText}>{label}</Text>
             </Pressable>
@@ -79,8 +82,8 @@ export default function WithdrawScreen() {
           accessibilityRole="checkbox"
           accessibilityState={{ checked: agreed }}
           style={styles.agreeRow}>
-          <View style={[styles.checkbox, { borderColor: agreed ? '#E8534A' : '#C9CFDC', backgroundColor: agreed ? '#E8534A' : '#FFFFFF' }]}>
-            {agreed && <Icon name="check" size={16} color="#FFFFFF" strokeWidth={3.4} />}
+          <View style={[styles.checkbox, { borderColor: agreed ? c.danger : c.line, backgroundColor: agreed ? c.danger : c.card }]}>
+            {agreed && <Icon name="check" size={16} color={c.white} strokeWidth={3.4} />}
           </View>
           <Text style={styles.agreeText}>위 내용을 확인했고, 탈퇴에 동의해요</Text>
         </Pressable>
@@ -98,6 +101,7 @@ export default function WithdrawScreen() {
 }
 
 function LossRow({ icon, bg, iconColor, label, value }: { icon: IconName; bg: string; iconColor: string; label: string; value: string }) {
+  const styles = useStyles();
   return (
     <View style={styles.lossRow}>
       <View style={[styles.lossIcon, { backgroundColor: bg }]}>
@@ -109,10 +113,10 @@ function LossRow({ icon, bg, iconColor, label, value }: { icon: IconName; bg: st
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.bg,
   },
   content: {
     paddingHorizontal: 20,
@@ -128,20 +132,20 @@ const styles = StyleSheet.create({
     fontSize: 28,
     lineHeight: 36,
     letterSpacing: -1,
-    color: Brand.ink,
+    color: c.text,
   },
   subtitle: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 15,
     lineHeight: 22,
-    color: Brand.muted,
+    color: c.textSub,
   },
   lossCard: {
     gap: 14,
     padding: 16,
-    backgroundColor: '#FFF4F2',
+    backgroundColor: c.dangerSoft,
     borderWidth: 2,
-    borderColor: '#FFD6D0',
+    borderColor: c.dangerBorder,
     borderBottomWidth: 4,
     borderRadius: 20,
   },
@@ -161,12 +165,12 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: BrandFonts.gothicBold,
     fontSize: 15,
-    color: Brand.ink,
+    color: c.text,
   },
   lossValue: {
     fontFamily: BrandFonts.soraExtraBold,
     fontSize: 15,
-    color: '#C73A31',
+    color: c.dangerText,
   },
   walletLink: {
     flexDirection: 'row',
@@ -174,26 +178,26 @@ const styles = StyleSheet.create({
     gap: 10,
     paddingVertical: 12,
     paddingHorizontal: 14,
-    backgroundColor: Brand.surface,
+    backgroundColor: c.sunken,
     borderRadius: 14,
   },
   walletLinkText: {
     flex: 1,
     fontFamily: BrandFonts.gothicBold,
     fontSize: 14,
-    color: '#3E4255',
+    color: c.text,
   },
   sectionTitle: {
     marginBottom: -10,
     paddingHorizontal: 4,
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 13,
-    color: Brand.muted,
+    color: c.textSub,
   },
   reasonCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.card,
     borderWidth: 2,
-    borderColor: Brand.border,
+    borderColor: c.cardEdge,
     borderBottomWidth: 4,
     borderRadius: 20,
     overflow: 'hidden',
@@ -207,7 +211,7 @@ const styles = StyleSheet.create({
   },
   reasonDivider: {
     borderBottomWidth: 2,
-    borderBottomColor: Brand.border,
+    borderBottomColor: c.cardEdge,
   },
   radio: {
     width: 22,
@@ -225,7 +229,7 @@ const styles = StyleSheet.create({
   reasonText: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 15,
-    color: Brand.ink,
+    color: c.text,
   },
   bottomBar: {
     gap: 10,
@@ -233,7 +237,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 12,
     borderTopWidth: 2,
-    borderTopColor: Brand.border,
+    borderTopColor: c.cardEdge,
   },
   agreeRow: {
     flexDirection: 'row',
@@ -252,7 +256,7 @@ const styles = StyleSheet.create({
   agreeText: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 14,
-    color: Brand.ink,
+    color: c.text,
   },
   buttons: {
     flexDirection: 'row',
@@ -261,4 +265,4 @@ const styles = StyleSheet.create({
   buttonCell: {
     flex: 1,
   },
-});
+}));

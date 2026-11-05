@@ -1,13 +1,14 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ActionButton } from '@/components/ui/ActionButton';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
 import { clearLocationOverride, loadLocationOverride, saveLocationOverride } from '@/data/locationOverride';
 import { formatCoordinates, parseCoordinates } from '@/utils/coordinates';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
 
 // 지형별로 지도가 어떻게 나오는지 보려는 대략적인 위치 (정확한 지점은 아니다)
 const PRESETS = [
@@ -24,6 +25,8 @@ const PRESETS = [
  * 내 정보 화면의 버전 글자를 7번 누르면 열린다.
  */
 export default function DevLocationScreen() {
+  const c = useTheme();
+  const styles = useStyles();
   const [text, setText] = useState('');
   const [active, setActive] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -68,7 +71,7 @@ export default function DevLocationScreen() {
             setError(null);
           }}
           placeholder="37.5665, 126.9780"
-          placeholderTextColor="#AEB4C6"
+          placeholderTextColor={c.textFaint}
           autoCapitalize="none"
           autoCorrect={false}
           accessibilityLabel="좌표"
@@ -100,31 +103,31 @@ export default function DevLocationScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#FFFFFF', paddingHorizontal: 20, paddingTop: 12 },
+const useStyles = makeStyles((c) => ({
+  container: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 20, paddingTop: 12 },
   content: { gap: 16, paddingBottom: 24 },
-  help: { fontFamily: BrandFonts.gothicBold, fontSize: 14, lineHeight: 21, color: Brand.muted },
-  status: { fontFamily: BrandFonts.gothicBlack, fontSize: 14, color: Brand.primaryDark },
+  help: { fontFamily: BrandFonts.gothicBold, fontSize: 14, lineHeight: 21, color: c.textSub },
+  status: { fontFamily: BrandFonts.gothicBlack, fontSize: 14, color: c.primaryText },
   input: {
     minHeight: 56,
     paddingHorizontal: 16,
     borderWidth: 2,
     borderBottomWidth: 4,
-    borderColor: Brand.border,
+    borderColor: c.cardEdge,
     borderRadius: 18,
     fontFamily: BrandFonts.soraExtraBold,
     fontSize: 18,
-    color: Brand.ink,
+    color: c.text,
   },
-  error: { fontFamily: BrandFonts.gothicBold, fontSize: 13, color: '#C73A31' },
+  error: { fontFamily: BrandFonts.gothicBold, fontSize: 13, color: c.dangerText },
   presets: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   preset: {
     minHeight: 40,
     paddingHorizontal: 14,
     justifyContent: 'center',
-    backgroundColor: Brand.surface,
+    backgroundColor: c.sunken,
     borderRadius: 14,
   },
-  presetText: { fontFamily: BrandFonts.gothicBlack, fontSize: 13, color: Brand.ink },
+  presetText: { fontFamily: BrandFonts.gothicBlack, fontSize: 13, color: c.text },
   buttons: { gap: 10, marginTop: 8 },
-});
+}));

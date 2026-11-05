@@ -1,20 +1,23 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, Share, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/profile/Avatar';
 import { ActionButton } from '@/components/ui/ActionButton';
 import { Icon } from '@/components/ui/Icon';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
 import { fetchInvite, type InviteInfo } from '@/data/invite';
 import { fetchMe } from '@/data/member';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
 
 const STEPS = ['초대 코드나 링크를 친구에게 보내요', '친구가 가입할 때 코드를 입력해요', '친구가 첫 핀을 잡으면 둘 다 보상!'];
 
 /** 친구 초대 — 내 초대 코드(복사), 공유, 초대한 친구 수와 받은 보상을 보여준다. */
 export default function InviteScreen() {
+  const c = useTheme();
+  const styles = useStyles();
   const [invite, setInvite] = useState<InviteInfo | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -56,10 +59,10 @@ export default function InviteScreen() {
               <Avatar size={84} imageUrl={imageUrl} />
             </View>
             <View style={styles.rightCircle}>
-              <Icon name="gift" size={34} color="#8A6200" />
+              <Icon name="gift" size={34} color={c.goldText} />
             </View>
             <View style={styles.tag}>
-              <Icon name="ticket" size={28} color="#FFFFFF" />
+              <Icon name="ticket" size={28} color={c.white} />
             </View>
           </View>
           <Text style={styles.heroTitle}>
@@ -112,10 +115,10 @@ export default function InviteScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.bg,
   },
   content: {
     paddingHorizontal: 20,
@@ -144,11 +147,11 @@ const styles = StyleSheet.create({
     height: 84,
     borderRadius: 42,
     borderWidth: 4,
-    borderColor: Brand.ink,
-    backgroundColor: '#FFF3CC',
+    borderColor: c.text,
+    backgroundColor: c.goldSoft,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000000',
+    shadowColor: c.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 1,
     shadowRadius: 0,
@@ -160,11 +163,11 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 18,
-    backgroundColor: '#E8534A',
+    backgroundColor: c.danger,
     transform: [{ rotate: '-8deg' }],
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#B33B33',
+    shadowColor: c.dangerEdge,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 1,
     shadowRadius: 0,
@@ -175,15 +178,15 @@ const styles = StyleSheet.create({
     fontSize: 26,
     lineHeight: 34,
     letterSpacing: -0.8,
-    color: Brand.ink,
+    color: c.text,
   },
   heroAccent: {
-    color: Brand.primaryDark,
+    color: c.primaryText,
   },
   heroSub: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 14,
-    color: Brand.muted,
+    color: c.textSub,
   },
   codeCard: {
     flexDirection: 'row',
@@ -191,9 +194,9 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingVertical: 14,
     paddingHorizontal: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.card,
     borderWidth: 2,
-    borderColor: Brand.border,
+    borderColor: c.cardEdge,
     borderBottomWidth: 4,
     borderRadius: 20,
   },
@@ -204,13 +207,13 @@ const styles = StyleSheet.create({
   codeLabel: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 12,
-    color: Brand.muted,
+    color: c.textSub,
   },
   code: {
     fontFamily: BrandFonts.soraExtraBold,
     fontSize: 24,
     letterSpacing: 2,
-    color: Brand.ink,
+    color: c.text,
   },
   copyButton: {
     width: 96,
@@ -220,9 +223,9 @@ const styles = StyleSheet.create({
   },
   statsCard: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.card,
     borderWidth: 2,
-    borderColor: Brand.border,
+    borderColor: c.cardEdge,
     borderBottomWidth: 4,
     borderRadius: 20,
   },
@@ -234,20 +237,20 @@ const styles = StyleSheet.create({
   },
   statDivider: {
     borderLeftWidth: 2,
-    borderLeftColor: Brand.border,
+    borderLeftColor: c.cardEdge,
   },
   statValue: {
     fontFamily: BrandFonts.soraExtraBold,
     fontSize: 22,
-    color: Brand.ink,
+    color: c.text,
   },
   statGold: {
-    color: Brand.goldText,
+    color: c.goldText,
   },
   statLabel: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 12,
-    color: Brand.muted,
+    color: c.textSub,
   },
   steps: {
     gap: 14,
@@ -256,7 +259,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 13,
-    color: Brand.muted,
+    color: c.textSub,
   },
   stepRow: {
     flexDirection: 'row',
@@ -267,20 +270,20 @@ const styles = StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: 13,
-    backgroundColor: Brand.primarySoft,
+    backgroundColor: c.primarySoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
   stepNumberText: {
     fontFamily: BrandFonts.soraExtraBold,
     fontSize: 13,
-    color: Brand.primaryDark,
+    color: c.primaryText,
   },
   stepText: {
     flex: 1,
     fontFamily: BrandFonts.gothicBold,
     fontSize: 14,
-    color: '#3E4255',
+    color: c.text,
   },
   limit: {
     marginTop: -8,
@@ -288,6 +291,6 @@ const styles = StyleSheet.create({
     fontFamily: BrandFonts.gothicBold,
     fontSize: 13,
     lineHeight: 19,
-    color: Brand.muted,
+    color: c.textSub,
   },
-});
+}));

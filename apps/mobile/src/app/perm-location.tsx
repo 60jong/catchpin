@@ -1,6 +1,6 @@
 import * as Location from 'expo-location';
 import { router } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import Svg, {
   Circle,
   Defs,
@@ -11,47 +11,51 @@ import Svg, {
 } from 'react-native-svg';
 
 import { ProgressBar } from '@/components/onboarding/ProgressBar';
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
+import { withAlpha } from '@/utils/color';
 
 function LocationIllustration() {
+  const c = useTheme();
   return (
     <Svg width={240} height={240} viewBox="0 0 240 240">
       <Defs>
         <RadialGradient id="lg" cx="50%" cy="50%" r="50%">
-          <Stop offset="0" stopColor="#2F6FE8" stopOpacity={0.18} />
-          <Stop offset="1" stopColor="#2F6FE8" stopOpacity={0} />
+          <Stop offset="0" stopColor={c.primary} stopOpacity={0.18} />
+          <Stop offset="1" stopColor={c.primary} stopOpacity={0} />
         </RadialGradient>
         <LinearGradient id="pb" x1="0" y1="0" x2="0" y2="1">
-          <Stop offset="0" stopColor="#5C95F7" />
-          <Stop offset="1" stopColor="#2F6FE8" />
+          <Stop offset="0" stopColor={c.primary} />
+          <Stop offset="1" stopColor={c.primary} />
         </LinearGradient>
         <LinearGradient id="pg" x1="0" y1="0" x2="0" y2="1">
-          <Stop offset="0" stopColor="#FFE066" />
-          <Stop offset="1" stopColor="#F5B400" />
+          <Stop offset="0" stopColor={c.gold} />
+          <Stop offset="1" stopColor={c.goldEdge} />
         </LinearGradient>
       </Defs>
       <Circle cx={120} cy={120} r={118} fill="url(#lg)" />
-      <Circle cx={120} cy={120} r={40} fill="none" stroke="#2F6FE8" strokeOpacity={0.25} strokeWidth={1} />
-      <Circle cx={120} cy={120} r={72} fill="none" stroke="#2F6FE8" strokeOpacity={0.16} strokeWidth={1} />
-      <Circle cx={120} cy={120} r={104} fill="none" stroke="#2F6FE8" strokeOpacity={0.09} strokeWidth={1} />
-      <Path d="M120 120 L224 120 A104 104 0 0 0 194 47 Z" fill="#2F6FE8" fillOpacity={0.08} />
+      <Circle cx={120} cy={120} r={40} fill="none" stroke={c.primary} strokeOpacity={0.25} strokeWidth={1} />
+      <Circle cx={120} cy={120} r={72} fill="none" stroke={c.primary} strokeOpacity={0.16} strokeWidth={1} />
+      <Circle cx={120} cy={120} r={104} fill="none" stroke={c.primary} strokeOpacity={0.09} strokeWidth={1} />
+      <Path d="M120 120 L224 120 A104 104 0 0 0 194 47 Z" fill={c.primary} fillOpacity={0.08} />
 
-      <Circle cx={58} cy={82} r={15} fill="#FFFFFF" />
+      <Circle cx={58} cy={82} r={15} fill={c.white} />
       <Circle cx={58} cy={82} r={12} fill="url(#pb)" />
-      <Circle cx={182} cy={150} r={15} fill="#FFFFFF" />
+      <Circle cx={182} cy={150} r={15} fill={c.white} />
       <Circle cx={182} cy={150} r={12} fill="url(#pb)" />
-      <Circle cx={160} cy={62} r={17} fill="#FFFFFF" />
+      <Circle cx={160} cy={62} r={17} fill={c.white} />
       <Circle cx={160} cy={62} r={14} fill="url(#pg)" />
-      <Circle cx={120} cy={120} r={26} fill="#FFFFFF" />
-      <Circle cx={120} cy={120} r={22} fill="#DCE3EE" />
+      <Circle cx={120} cy={120} r={26} fill={c.white} />
+      <Circle cx={120} cy={120} r={22} fill={c.placeholderBg} />
 
-      <Circle cx={120} cy={115} r={7} fill="#A7B3C6" />
-      <Path d="M106 136c1-7 6-11 14-11s13 4 14 11z" fill="#A7B3C6" />
+      <Circle cx={120} cy={115} r={7} fill={c.placeholderFg} />
+      <Path d="M106 136c1-7 6-11 14-11s13 4 14 11z" fill={c.placeholderFg} />
     </Svg>
   );
 }
 
 function BulletRow({ icon, title, body }: { icon: React.ReactNode; title: string; body: string }) {
+  const styles = useStyles();
   return (
     <View style={styles.bulletRow}>
       <View style={styles.bulletIcon}>{icon}</View>
@@ -64,6 +68,8 @@ function BulletRow({ icon, title, body }: { icon: React.ReactNode; title: string
 }
 
 export default function PermLocationScreen() {
+  const c = useTheme();
+  const styles = useStyles();
   const handleContinue = async () => {
     // 결과(허용/거부)와 무관하게 다음 단계로 진행한다 — 거부해도 홈 화면에서 다시 유도할 수 있어서
     // 여기서 가입을 막을 필요는 없다.
@@ -92,7 +98,7 @@ export default function PermLocationScreen() {
               <Path
                 d="M3 11l18-8-8 18-2-8z"
                 fill="none"
-                stroke="#2F6FE8"
+                stroke={c.primary}
                 strokeWidth={2.4}
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -108,7 +114,7 @@ export default function PermLocationScreen() {
               <Path
                 d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"
                 fill="none"
-                stroke="#2F6FE8"
+                stroke={c.primary}
                 strokeWidth={2.4}
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -116,7 +122,7 @@ export default function PermLocationScreen() {
               <Path
                 d="M9 12l2 2 4-4"
                 fill="none"
-                stroke="#2F6FE8"
+                stroke={c.primary}
                 strokeWidth={2.4}
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -137,10 +143,10 @@ export default function PermLocationScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.bg,
     paddingTop: 18,
     paddingHorizontal: 20,
     paddingBottom: 28,
@@ -156,7 +162,7 @@ const styles = StyleSheet.create({
   },
   backArrow: {
     fontSize: 28,
-    color: '#AEB4C6',
+    color: c.textFaint,
     fontWeight: '700',
   },
   illustrationBox: {
@@ -166,7 +172,7 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 28,
-    color: Brand.ink,
+    color: c.text,
     letterSpacing: -1,
     lineHeight: 36,
   },
@@ -183,7 +189,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: 'rgba(47,111,232,0.12)',
+    backgroundColor: withAlpha(c.primary, 0.12),
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
@@ -196,12 +202,12 @@ const styles = StyleSheet.create({
   bulletTitle: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 16,
-    color: Brand.ink,
+    color: c.text,
   },
   bulletBody: {
     fontFamily: BrandFonts.gothicMedium,
     fontSize: 14,
-    color: Brand.muted,
+    color: c.textSub,
     lineHeight: 20,
   },
   footer: {
@@ -210,15 +216,15 @@ const styles = StyleSheet.create({
   continueButton: {
     minHeight: 54,
     borderRadius: 16,
-    backgroundColor: Brand.primary,
+    backgroundColor: c.primary,
     borderBottomWidth: 4,
-    borderBottomColor: Brand.primaryDark,
+    borderBottomColor: c.primaryEdge,
     alignItems: 'center',
     justifyContent: 'center',
   },
   continueText: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 16,
-    color: '#FFFFFF',
+    color: c.white,
   },
-});
+}));

@@ -1,9 +1,10 @@
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
 
 import { Icon } from './Icon';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
 
 type ListRowProps = {
   /** 왼쪽 아이콘 배지 (IconBadge) */
@@ -26,13 +27,17 @@ export function ListRow({
   leading,
   title,
   subtitle,
-  subtitleColor = Brand.muted,
-  titleColor = Brand.ink,
+  subtitleColor: subtitleColorProp,
+  titleColor: titleColorProp,
   trailing,
   chevron,
   bordered,
   onPress,
 }: ListRowProps) {
+  const c = useTheme();
+  const styles = useStyles();
+  const subtitleColor = subtitleColorProp ?? c.textSub;
+  const titleColor = titleColorProp ?? c.text;
   const content = (
     <>
       {leading}
@@ -41,7 +46,7 @@ export function ListRow({
         {subtitle ? <Text style={[styles.subtitle, { color: subtitleColor }]}>{subtitle}</Text> : null}
       </View>
       {trailing}
-      {chevron && <Icon name="chevronRight" size={18} color="#AEB4C6" strokeWidth={3} />}
+      {chevron && <Icon name="chevronRight" size={18} color={c.textFaint} strokeWidth={3} />}
     </>
   );
   const style = [styles.row, bordered && styles.bordered];
@@ -54,7 +59,7 @@ export function ListRow({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -65,7 +70,7 @@ const styles = StyleSheet.create({
   },
   bordered: {
     borderBottomWidth: 2,
-    borderBottomColor: Brand.border,
+    borderBottomColor: c.cardEdge,
   },
   text: {
     flex: 1,
@@ -80,4 +85,4 @@ const styles = StyleSheet.create({
     fontFamily: BrandFonts.gothicBold,
     fontSize: 12,
   },
-});
+}));

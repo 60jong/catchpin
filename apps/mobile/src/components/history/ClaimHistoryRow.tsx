@@ -1,8 +1,9 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
 import type { ClaimHistoryEntry } from '@/data/gameState';
 import { formatRelativeTime } from '@/utils/formatRelativeTime';
+import { makeStyles } from '@/hooks/use-theme';
 
 type ClaimHistoryRowProps = {
   entry: ClaimHistoryEntry;
@@ -10,6 +11,7 @@ type ClaimHistoryRowProps = {
 };
 
 export function ClaimHistoryRow({ entry, now }: ClaimHistoryRowProps) {
+  const styles = useStyles();
   const isSuccess = entry.type === 'success';
 
   return (
@@ -26,7 +28,7 @@ export function ClaimHistoryRow({ entry, now }: ClaimHistoryRowProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -34,7 +36,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: Brand.border,
+    borderBottomColor: c.cardEdge,
   },
   iconCircle: {
     width: 32,
@@ -44,13 +46,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   iconSuccess: {
-    backgroundColor: Brand.green,
+    backgroundColor: c.success,
   },
   iconFailure: {
-    backgroundColor: '#E8534A',
+    backgroundColor: c.danger,
   },
   iconText: {
-    color: '#FFFFFF',
+    color: c.white,
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 13,
   },
@@ -61,16 +63,16 @@ const styles = StyleSheet.create({
   message: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 15,
-    color: Brand.ink,
+    color: c.text,
   },
   time: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 12,
-    color: Brand.muted,
+    color: c.textSub,
   },
   points: {
     fontFamily: BrandFonts.soraExtraBold,
     fontSize: 15,
-    color: Brand.primaryDark,
+    color: c.primaryText,
   },
-});
+}));

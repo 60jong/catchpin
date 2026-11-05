@@ -1,6 +1,6 @@
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
+import { makeStyles } from '@/hooks/use-theme';
 
-import { Brand } from '@/constants/theme';
 
 type ProgressBarProps = {
   step: number;
@@ -9,6 +9,7 @@ type ProgressBarProps = {
 
 /** 온보딩 4단계 상단에 쓰는 진행 표시 — step번째 칸까지 채워진 막대를 그린다. */
 export function ProgressBar({ step, total }: ProgressBarProps) {
+  const styles = useStyles();
   return (
     <View style={styles.row} aria-label={`${total}단계 중 ${step}단계`}>
       {Array.from({ length: total }, (_, i) => (
@@ -18,7 +19,7 @@ export function ProgressBar({ step, total }: ProgressBarProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   row: {
     flexDirection: 'row',
     gap: 6,
@@ -27,9 +28,9 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 8,
     borderRadius: 4,
-    backgroundColor: Brand.border,
+    backgroundColor: c.cardEdge,
   },
   segmentFilled: {
-    backgroundColor: Brand.primary,
+    backgroundColor: c.primary,
   },
-});
+}));

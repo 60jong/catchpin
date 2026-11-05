@@ -1,8 +1,9 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
 
 import { SettingsIcon } from './SettingsIcon';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
 
 type CloseCallToggleRowProps = {
   /** true면 초접전 연출이 켜져있다 (핀 탭 시 전체화면 연출을 보여준다) */
@@ -12,6 +13,8 @@ type CloseCallToggleRowProps = {
 
 /** 홈에서 핀을 눌렀을 때 판정 연출(초접전)을 보여줄지, 상단 푸시 알림만 보여줄지 켜고 끈다. */
 export function CloseCallToggleRow({ enabled, onToggle }: CloseCallToggleRowProps) {
+  const c = useTheme();
+  const styles = useStyles();
   return (
     <Pressable
       onPress={onToggle}
@@ -25,14 +28,14 @@ export function CloseCallToggleRow({ enabled, onToggle }: CloseCallToggleRowProp
           {enabled ? '거의 동시에 눌렀을 때 연출을 보여줘요' : '간단한 알림으로만 알려줘요'}
         </Text>
       </View>
-      <View style={[styles.track, { backgroundColor: enabled ? Brand.green : '#D6DBE5' }]}>
+      <View style={[styles.track, { backgroundColor: enabled ? c.success : c.line }]}>
         <View style={[styles.knob, { left: enabled ? 23 : 3 }]} />
       </View>
     </Pressable>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -42,7 +45,7 @@ const styles = StyleSheet.create({
   },
   rowBordered: {
     borderBottomWidth: 2,
-    borderBottomColor: Brand.border,
+    borderBottomColor: c.cardEdge,
   },
   textWrap: {
     flex: 1,
@@ -51,12 +54,12 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: BrandFonts.gothicMedium,
     fontSize: 16,
-    color: Brand.ink,
+    color: c.text,
   },
   sub: {
     fontFamily: BrandFonts.gothicMedium,
     fontSize: 13,
-    color: Brand.muted,
+    color: c.textSub,
   },
   track: {
     width: 50,
@@ -70,11 +73,11 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000000',
+    backgroundColor: c.white,
+    shadowColor: c.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 2,
   },
-});
+}));

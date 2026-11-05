@@ -1,10 +1,12 @@
 import * as Haptics from 'expo-haptics';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
 import type { Pin } from '@/data/pins';
 import { playSound } from '@/utils/sounds';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
+import { withAlpha } from '@/utils/color';
 
 type PinButtonProps = {
   pin: Pin;
@@ -16,11 +18,13 @@ const PRESS_SPRING = { damping: 11, stiffness: 260, mass: 0.5 };
 const RELEASE_SPRING = { damping: 7, stiffness: 260, mass: 0.5 };
 
 export function PinButton({ pin, onPress, disabled }: PinButtonProps) {
+  const c = useTheme();
+  const styles = useStyles();
   const press = useSharedValue(0);
 
-  const top = pin.isGolden ? Brand.gold : Brand.primary;
-  const bottom = pin.isGolden ? Brand.goldDark : Brand.primaryDark;
-  const textColor = pin.isGolden ? Brand.onGold : '#FFFFFF';
+  const top = pin.isGolden ? c.gold : c.primary;
+  const bottom = pin.isGolden ? c.goldEdge : c.primaryEdge;
+  const textColor = pin.isGolden ? c.onGold : c.white;
   const label = `+${pin.points}`;
 
   const topStyle = useAnimatedStyle(() => ({
@@ -58,7 +62,7 @@ export function PinButton({ pin, onPress, disabled }: PinButtonProps) {
 
 const SIZE = 52;
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   wrap: {
     width: 64,
     height: 70,
@@ -73,7 +77,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 9,
     borderRadius: 20,
-    backgroundColor: 'rgba(31,34,51,0.12)',
+    backgroundColor: withAlpha(c.shadow, 0.12),
   },
   thickness: {
     position: 'absolute',
@@ -100,10 +104,10 @@ const styles = StyleSheet.create({
     width: 12,
     height: 6,
     borderRadius: 3,
-    backgroundColor: 'rgba(255,255,255,0.4)',
+    backgroundColor: withAlpha(c.white, 0.4),
     transform: [{ rotate: '-35deg' }],
   },
   label: {
     fontFamily: BrandFonts.soraExtraBold,
   },
-});
+}));

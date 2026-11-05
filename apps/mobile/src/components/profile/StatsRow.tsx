@@ -1,6 +1,7 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
+import { makeStyles } from '@/hooks/use-theme';
 
 type StatsRowProps = {
   points: number;
@@ -10,6 +11,7 @@ type StatsRowProps = {
 
 /** 보유 포인트/이번 달 획득/성공률을 3칸으로 보여준다 — 값 계산은 상위(profileStats.ts)에서 끝내고 온다. */
 export function StatsRow({ points, monthlyEarned, winRatePercent }: StatsRowProps) {
+  const styles = useStyles();
   return (
     <View style={styles.card}>
       <View style={styles.cell}>
@@ -28,12 +30,12 @@ export function StatsRow({ points, monthlyEarned, winRatePercent }: StatsRowProp
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   card: {
     flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.card,
     borderWidth: 2,
-    borderColor: Brand.border,
+    borderColor: c.cardEdge,
     borderBottomWidth: 4,
     borderRadius: 20,
   },
@@ -47,29 +49,29 @@ const styles = StyleSheet.create({
   cellBordered: {
     borderLeftWidth: 2,
     borderRightWidth: 2,
-    borderColor: Brand.border,
+    borderColor: c.cardEdge,
   },
   valueGold: {
     fontFamily: BrandFonts.soraExtraBold,
     fontSize: 20,
     letterSpacing: -0.3,
-    color: Brand.goldText,
+    color: c.goldText,
   },
   valueBlue: {
     fontFamily: BrandFonts.soraExtraBold,
     fontSize: 20,
     letterSpacing: -0.3,
-    color: Brand.primaryDark,
+    color: c.primaryText,
   },
   valueInk: {
     fontFamily: BrandFonts.soraExtraBold,
     fontSize: 20,
     letterSpacing: -0.3,
-    color: Brand.ink,
+    color: c.text,
   },
   label: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 12,
-    color: Brand.muted,
+    color: c.textSub,
   },
-});
+}));

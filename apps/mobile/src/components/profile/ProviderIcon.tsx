@@ -1,8 +1,8 @@
-import { Image, StyleSheet, View } from 'react-native';
+import { Image, View } from 'react-native';
 import Svg, { Path, Rect } from 'react-native-svg';
 
 import { GoogleLogo } from '@/components/brand/GoogleLogo';
-import { Brand } from '@/constants/theme';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
 
 /** 서버가 알려주는 로그인 방식 (AuthProviderType). 아직 아이콘이 없는 방식은 이메일과 같은 중립 아이콘으로 보인다. */
 export type LoginProvider = 'GOOGLE' | 'KAKAO' | 'EMAIL' | (string & {});
@@ -30,6 +30,8 @@ type ProviderIconProps = {
  * (구글 로고는 색/비율을 바꾸면 안 되고 흰색 계열 배경 위에 둬야 한다.)
  */
 export function ProviderIcon({ provider, size }: ProviderIconProps) {
+  const c = useTheme();
+  const styles = useStyles();
   const radius = size * 0.27;
   const inner = Math.round(size * 0.62);
 
@@ -51,27 +53,27 @@ export function ProviderIcon({ provider, size }: ProviderIconProps) {
   }
 
   return (
-    <View style={[styles.box, { width: size, height: size, borderRadius: radius, backgroundColor: Brand.primarySoft }]}>
+    <View style={[styles.box, { width: size, height: size, borderRadius: radius, backgroundColor: c.primarySoft }]}>
       <Svg width={inner} height={inner} viewBox="0 0 24 24" fill="none">
-        <Rect x={3} y={5} width={18} height={14} rx={3} stroke={Brand.primary} strokeWidth={2.2} />
-        <Path d="M3.5 7.5l8.5 6 8.5-6" stroke={Brand.primary} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
+        <Rect x={3} y={5} width={18} height={14} rx={3} stroke={c.primary} strokeWidth={2.2} />
+        <Path d="M3.5 7.5l8.5 6 8.5-6" stroke={c.primary} strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" />
       </Svg>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   box: {
     alignItems: 'center',
     justifyContent: 'center',
   },
   kakaoBox: {
-    backgroundColor: '#FEE500',
+    backgroundColor: c.kakao,
     overflow: 'hidden',
   },
   googleBox: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.card,
     borderWidth: 1.5,
-    borderColor: Brand.border,
+    borderColor: c.cardEdge,
   },
-});
+}));

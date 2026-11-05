@@ -1,15 +1,16 @@
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/profile/Avatar';
 import { ProviderIcon, providerLabel } from '@/components/profile/ProviderIcon';
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
 import { fetchMe, updateMe, type Me } from '@/data/member';
 import { uploadProfileImage } from '@/data/profileImage';
 import { validateNickname } from '@/utils/nickname';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
 
 const PICKER_OPTIONS: ImagePicker.ImagePickerOptions = {
   mediaTypes: ['images'],
@@ -19,6 +20,8 @@ const PICKER_OPTIONS: ImagePicker.ImagePickerOptions = {
 
 /** 프로필 편집 — 사진(시트에서 고르기)과 닉네임을 바꾼다. 사진은 고르는 즉시 저장되고, 닉네임은 "완료"를 눌러야 저장된다. */
 export default function ProfileEditScreen() {
+  const c = useTheme();
+  const styles = useStyles();
   const [me, setMe] = useState<Me | null>(null);
   // null = 아직 안 건드림(서버에서 받은 닉네임을 그대로 보여준다)
   const [nick, setNick] = useState<string | null>(null);
@@ -105,7 +108,7 @@ export default function ProfileEditScreen() {
         accessibilityLabel="프로필 사진 변경"
         style={styles.avatarArea}>
         <Avatar size={104} imageUrl={me?.profileImageUrl} />
-        {busy ? <ActivityIndicator color={Brand.primary} /> : <Text style={styles.avatarEdit}>사진 편집</Text>}
+        {busy ? <ActivityIndicator color={c.primary} /> : <Text style={styles.avatarEdit}>사진 편집</Text>}
       </Pressable>
 
       <View style={styles.group}>
@@ -120,12 +123,12 @@ export default function ProfileEditScreen() {
             onChangeText={setNick}
             maxLength={12}
             placeholder="닉네임"
-            placeholderTextColor="#8A8FA3"
+            placeholderTextColor={c.textMute}
             style={styles.input}
           />
           <Text style={styles.count}>{Array.from(value).length}/12</Text>
         </View>
-        <Text style={[styles.help, { color: showCheck && changed ? check.helpColor : Brand.muted }]}>
+        <Text style={[styles.help, { color: showCheck && changed ? c[check.helpColor] : c.textSub }]}>
           {showCheck && changed ? check.help : '한글, 영문, 숫자로 2~12자'}
         </Text>
       </View>
@@ -152,10 +155,10 @@ export default function ProfileEditScreen() {
               <Text style={[styles.sheetTitle, styles.sheetDivider]}>프로필 사진</Text>
               <SheetAction label="사진 찍기" onPress={() => handlePick('camera')} />
               <SheetAction label="앨범에서 선택" onPress={() => handlePick('library')} />
-              <SheetAction label="기본 이미지로 변경" color="#C73A31" onPress={handleReset} last />
+              <SheetAction label="기본 이미지로 변경" color={c.dangerText} onPress={handleReset} last />
             </View>
             <View style={styles.sheetCard}>
-              <SheetAction label="취소" color={Brand.muted} onPress={() => setSheetOpen(false)} last />
+              <SheetAction label="취소" color={c.textSub} onPress={() => setSheetOpen(false)} last />
             </View>
           </View>
         </>
@@ -167,7 +170,7 @@ export default function ProfileEditScreen() {
 function SheetAction({
   label,
   onPress,
-  color = Brand.primaryDark,
+  color: colorProp,
   last,
 }: {
   label: string;
@@ -175,6 +178,9 @@ function SheetAction({
   color?: string;
   last?: boolean;
 }) {
+  const c = useTheme();
+  const styles = useStyles();
+  const color = colorProp ?? c.primaryText;
   return (
     <Pressable onPress={onPress} style={[styles.sheetAction, !last && styles.sheetDivider]}>
       <Text style={[styles.sheetActionText, { color }]}>{label}</Text>
@@ -182,10 +188,10 @@ function SheetAction({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.bg,
     paddingHorizontal: 16,
     paddingTop: 10,
     gap: 20,
@@ -204,19 +210,19 @@ const styles = StyleSheet.create({
   headerAction: {
     fontFamily: BrandFonts.gothicMedium,
     fontSize: 17,
-    color: Brand.primary,
+    color: c.primary,
   },
   headerDone: {
     textAlign: 'right',
     fontFamily: BrandFonts.gothicBold,
   },
   headerDisabled: {
-    color: '#C7C7CC',
+    color: c.switchOff,
   },
   headerTitle: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 17,
-    color: Brand.ink,
+    color: c.text,
   },
   avatarArea: {
     alignItems: 'center',
@@ -226,7 +232,7 @@ const styles = StyleSheet.create({
   avatarEdit: {
     fontFamily: BrandFonts.gothicMedium,
     fontSize: 16,
-    color: Brand.primary,
+    color: c.primary,
   },
   group: {
     gap: 8,
@@ -235,7 +241,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     fontFamily: BrandFonts.gothicMedium,
     fontSize: 13,
-    color: Brand.muted,
+    color: c.textSub,
   },
   inputBox: {
     flexDirection: 'row',
@@ -243,29 +249,29 @@ const styles = StyleSheet.create({
     gap: 10,
     minHeight: 52,
     paddingHorizontal: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.card,
     borderWidth: 2,
-    borderColor: Brand.border,
+    borderColor: c.cardEdge,
     borderBottomWidth: 4,
     borderRadius: 20,
   },
   inputBoxOk: {
-    borderColor: '#34C759',
+    borderColor: c.success,
   },
   inputBoxBad: {
-    borderColor: '#FF3B30',
+    borderColor: c.danger,
   },
   input: {
     flex: 1,
     minWidth: 0,
     fontFamily: BrandFonts.gothicMedium,
     fontSize: 17,
-    color: Brand.ink,
+    color: c.text,
   },
   count: {
     fontFamily: BrandFonts.soraSemiBold,
     fontSize: 15,
-    color: '#8A8FA3',
+    color: c.textMute,
   },
   help: {
     paddingHorizontal: 16,
@@ -278,9 +284,9 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.card,
     borderWidth: 2,
-    borderColor: Brand.border,
+    borderColor: c.cardEdge,
     borderBottomWidth: 4,
     borderRadius: 20,
   },
@@ -291,17 +297,17 @@ const styles = StyleSheet.create({
   accountName: {
     fontFamily: BrandFonts.gothicMedium,
     fontSize: 16,
-    color: Brand.ink,
+    color: c.text,
   },
   accountEmail: {
     fontFamily: BrandFonts.gothicMedium,
     fontSize: 13,
-    color: Brand.muted,
+    color: c.textSub,
   },
   accountStatus: {
     fontFamily: BrandFonts.gothicMedium,
     fontSize: 15,
-    color: Brand.muted,
+    color: c.textSub,
   },
   overlay: {
     position: 'absolute',
@@ -309,7 +315,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(15,22,48,0.5)',
+    backgroundColor: c.scrim,
   },
   sheet: {
     position: 'absolute',
@@ -319,9 +325,9 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   sheetCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.card,
     borderWidth: 2,
-    borderColor: Brand.border,
+    borderColor: c.cardEdge,
     borderBottomWidth: 4,
     borderRadius: 20,
     overflow: 'hidden',
@@ -331,11 +337,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: BrandFonts.gothicBold,
     fontSize: 13,
-    color: Brand.muted,
+    color: c.textSub,
   },
   sheetDivider: {
     borderBottomWidth: 2,
-    borderBottomColor: Brand.border,
+    borderBottomColor: c.cardEdge,
   },
   sheetAction: {
     minHeight: 56,
@@ -346,4 +352,4 @@ const styles = StyleSheet.create({
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 16,
   },
-});
+}));

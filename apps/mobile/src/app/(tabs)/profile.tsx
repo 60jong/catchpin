@@ -1,6 +1,6 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { CloseCallToggleRow } from '@/components/profile/CloseCallToggleRow';
 import { ProfileCard } from '@/components/profile/ProfileCard';
@@ -8,15 +8,20 @@ import { SettingsRow } from '@/components/profile/SettingsRow';
 import { SettingsSection } from '@/components/profile/SettingsSection';
 import { StatsRow } from '@/components/profile/StatsRow';
 import { Icon } from '@/components/ui/Icon';
-import { Brand, BrandFonts } from '@/constants/theme';
+import { BrandFonts } from '@/constants/theme';
 import { applyServerState, setSimpleNotificationsOnly, useGameState } from '@/data/gameState';
 import { fetchMe, type Me } from '@/data/member';
+import { DISPLAY_MODE_LABEL, useDisplayMode } from '@/data/displayMode';
 import { clearSession } from '@/data/session';
 import { computeWinRatePercent, countClaimsThisMonth } from '@/utils/profileStats';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
 
 /** "내 정보" 탭 화면 — 프로필/통계/설정(판정 연출 토글 포함)을 한 화면에 모은다. */
 export default function ProfileScreen() {
+  const c = useTheme();
+  const styles = useStyles();
   const game = useGameState();
+  const displayMode = useDisplayMode();
   // "이번 달 획득" 계산 기준 시각 — 화면이 떠있는 동안 바뀔 필요 없어서 마운트 시점에 한 번만 고정.
   const [now] = useState(() => Date.now());
   const [me, setMe] = useState<Me | null>(null);
@@ -58,7 +63,7 @@ export default function ProfileScreen() {
       {me && !me.phoneVerified && (
         <Pressable onPress={() => router.push('/verify-center')} accessibilityRole="button" style={styles.verifyBanner}>
           <View style={styles.verifyIcon}>
-            <Icon name="phone" size={22} color={Brand.onGold} />
+            <Icon name="phone" size={22} color={c.onGold} />
           </View>
           <View style={styles.verifyText}>
             <Text style={styles.verifyTitle}>휴대폰 인증이 필요해요</Text>
@@ -85,8 +90,8 @@ export default function ProfileScreen() {
           icon="verify"
           label="인증 관리"
           badge={me?.phoneVerified ? '인증 완료' : '휴대폰 미인증'}
-          badgeColor={me?.phoneVerified ? '#1F7A3F' : '#C73A31'}
-          badgeBg={me?.phoneVerified ? '#E7F7EC' : '#FFE8E5'}
+          badgeColor={me?.phoneVerified ? c.successText : c.dangerText}
+          badgeBg={me?.phoneVerified ? c.successSoft : c.dangerSoft}
           bordered
           onPress={() => router.push('/verify-center')}
         />
@@ -94,6 +99,13 @@ export default function ProfileScreen() {
         <CloseCallToggleRow
           enabled={!game.simpleNotificationsOnly}
           onToggle={() => setSimpleNotificationsOnly(!game.simpleNotificationsOnly)}
+        />
+        <SettingsRow
+          icon="display"
+          label="화면 모드"
+          value={DISPLAY_MODE_LABEL[displayMode]}
+          bordered
+          onPress={() => router.push('/display-mode')}
         />
         <SettingsRow icon="location" label="위치 권한" value="앱 사용 중" bordered />
         <SettingsRow icon="account" label="계정 관리" onPress={() => router.push('/account')} />
@@ -123,10 +135,10 @@ export default function ProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.bg,
   },
   content: {
     paddingHorizontal: 16,
@@ -140,7 +152,7 @@ const styles = StyleSheet.create({
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 28,
     letterSpacing: -1,
-    color: Brand.ink,
+    color: c.text,
   },
   verifyBanner: {
     flexDirection: 'row',
@@ -148,9 +160,9 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingVertical: 12,
     paddingHorizontal: 14,
-    backgroundColor: '#FFF8E1',
+    backgroundColor: c.goldSoft,
     borderWidth: 2,
-    borderColor: '#FFE08A',
+    borderColor: c.goldBorder,
     borderBottomWidth: 4,
     borderRadius: 20,
   },
@@ -158,10 +170,10 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: Brand.gold,
+    backgroundColor: c.gold,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: Brand.goldDark,
+    shadowColor: c.goldEdge,
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 1,
     shadowRadius: 0,
@@ -173,23 +185,23 @@ const styles = StyleSheet.create({
   verifyTitle: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 15,
-    color: Brand.onGold,
+    color: c.goldText,
   },
   verifyBody: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 12,
-    color: '#7A5600',
+    color: c.goldText,
   },
   verifyPill: {
     paddingVertical: 6,
     paddingHorizontal: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: c.card,
     borderRadius: 999,
   },
   verifyPillText: {
     fontFamily: BrandFonts.gothicBlack,
     fontSize: 13,
-    color: '#6B4A00',
+    color: c.goldText,
   },
   logoutButton: {
     minHeight: 52,
@@ -199,12 +211,12 @@ const styles = StyleSheet.create({
   logoutText: {
     fontFamily: BrandFonts.gothicBold,
     fontSize: 16,
-    color: Brand.muted,
+    color: c.textSub,
   },
   versionText: {
     textAlign: 'center',
     fontFamily: BrandFonts.gothicMedium,
     fontSize: 13,
-    color: '#8A8FA3',
+    color: c.textMute,
   },
-});
+}));

@@ -9,8 +9,9 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
+import { makeStyles, useTheme } from '@/hooks/use-theme';
+import { withAlpha } from '@/utils/color';
 
-import { Brand } from '@/constants/theme';
 
 const RING_RATIOS = [0.25, 0.5, 0.75, 1];
 
@@ -23,6 +24,8 @@ type RadarProps = {
 };
 
 export function Radar({ size, state = 'active' }: RadarProps) {
+  const c = useTheme();
+  const styles = useStyles();
   const center = size / 2;
   const rotation = useSharedValue(0);
   const glow = useSharedValue(0.85);
@@ -77,13 +80,13 @@ export function Radar({ size, state = 'active' }: RadarProps) {
                   <SweepGradient
                     c={vec(center, center)}
                     colors={[
-                      'rgba(47,111,232,0)',
-                      'rgba(47,111,232,0)',
-                      'rgba(47,111,232,0.03)',
-                      'rgba(47,111,232,0.08)',
-                      'rgba(47,111,232,0.16)',
-                      'rgba(47,111,232,0.22)',
-                      'rgba(47,111,232,0)',
+                      withAlpha(c.primary, 0),
+                      withAlpha(c.primary, 0),
+                      withAlpha(c.primary, 0.03),
+                      withAlpha(c.primary, 0.08),
+                      withAlpha(c.primary, 0.16),
+                      withAlpha(c.primary, 0.22),
+                      withAlpha(c.primary, 0),
                     ]}
                     positions={[0, 0.78, 0.86, 0.93, 0.97, 0.995, 1]}
                   />
@@ -111,7 +114,7 @@ export function Radar({ size, state = 'active' }: RadarProps) {
                   <RadialGradient
                     c={vec((size * 0.35) / 2, (size * 0.35) / 2)}
                     r={(size * 0.35) / 2}
-                    colors={['rgba(47,111,232,0.2)', 'rgba(47,111,232,0.06)', 'rgba(47,111,232,0)']}
+                    colors={[withAlpha(c.primary, 0.2), withAlpha(c.primary, 0.06), withAlpha(c.primary, 0)]}
                     positions={[0, 0.45, 1]}
                   />
                 </Rect>
@@ -124,16 +127,16 @@ export function Radar({ size, state = 'active' }: RadarProps) {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   container: {
     position: 'absolute',
   },
   ring: {
     position: 'absolute',
     borderWidth: 1,
-    borderColor: Brand.ink,
+    borderColor: c.text,
   },
   glow: {
     position: 'absolute',
   },
-});
+}));
