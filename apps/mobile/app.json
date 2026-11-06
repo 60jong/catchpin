@@ -69,7 +69,8 @@
         {
           "androidAppId": "ca-app-pub-2628381420614049~8716988959"
         }
-      ]
+      ],
+      "@maplibre/maplibre-react-native"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -8,6 +8,7 @@ const SRC = path.resolve(__dirname, '..');
 const ALLOWED = [
   'constants/theme.ts',
   'map/skia/mapTheme.ts',
+  'map/maplibre/palette.ts',
   'components/brand/Logo.tsx',
   'components/brand/GoogleLogo.tsx',
   'components/animated-icon.tsx',

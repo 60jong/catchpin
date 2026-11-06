@@ -7,6 +7,7 @@
     "@expo-google-fonts/gothic-a1": "^0.4.1",
     "@expo-google-fonts/sora": "^0.4.2",
     "@expo/ui": "~57.0.20",
+    "@maplibre/maplibre-react-native": "^11.5.1",
     "@react-native-google-signin/google-signin": "^16.1.5",
     "@react-native-seoul/kakao-login": "^6.0.4",
     "@shopify/react-native-skia": "2.6.2",
@@ -49,6 +50,7 @@
   },
   "devDependencies": {
     "@testing-library/react-native": "^14.0.1",
+    "@types/geojson": "^7946.0.16",
     "@types/jest": "29.5.14",
     "@types/react": "~19.2.2",
     "eslint": "^9.0.0",
