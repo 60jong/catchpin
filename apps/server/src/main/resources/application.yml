@@ -20,3 +20,9 @@ jwt:
   secret: ${JWT_SECRET:dev-only-secret-change-me-please-0123456789}
   access-token-ttl-minutes: 60
   refresh-token-ttl-days: 30
+
+push:
+  expo:
+    url: https://exp.host/--/api/v2/push/send
+    # Expo 대시보드에서 Enhanced push security를 켰을 때만 설정
+    access-token: ${EXPO_ACCESS_TOKEN:}

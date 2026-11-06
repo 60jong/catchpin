@@ -6,6 +6,8 @@ import {
   isSuccessResponse,
 } from '@react-native-google-signin/google-signin';
 
+import { registerPushToken } from '@/lib/notifications';
+
 const { apiBaseUrl, googleWebClientId, googleIosClientId } = Constants.expoConfig?.extra ?? {};
 
 GoogleSignin.configure({
@@ -43,6 +45,14 @@ export default function LoginScreen() {
 
       const body = await apiResponse.json();
       setResult(`[${apiResponse.status}] ${JSON.stringify(body, null, 2)}`);
+
+      const accessToken: string | undefined = body?.data?.accessToken;
+      if (apiResponse.ok && accessToken) {
+        // 푸시 등록 실패가 로그인 실패는 아니므로 결과만 덧붙인다.
+        registerPushToken(accessToken)
+          .then((token) => setResult((prev) => `${prev}\n\npush token: ${token ?? '권한 없음/시뮬레이터'}`))
+          .catch((e) => setResult((prev) => `${prev}\n\npush 등록 실패: ${e?.message ?? e}`));
+      }
     } catch (error: any) {
       const code = error?.code;
       setResult(code ? `구글 로그인 에러 (${code})` : String(error?.message ?? error));

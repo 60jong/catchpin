@@ -1,6 +1,7 @@
 package com.pincatch.server.member.service;
 
 import com.pincatch.server.member.domain.entity.Member;
+import com.pincatch.server.member.exception.MemberNotFoundException;
 import com.pincatch.server.member.repository.MemberRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,5 +18,10 @@ public class MemberService {
 	@Transactional
 	public Member findOrCreateByEmail(String email) {
 		return memberRepository.findByEmail(email).orElseGet(() -> memberRepository.save(new Member(email)));
+	}
+
+	@Transactional(readOnly = true)
+	public Member getById(Long memberId) {
+		return memberRepository.findById(memberId).orElseThrow(() -> new MemberNotFoundException(memberId));
 	}
 }
